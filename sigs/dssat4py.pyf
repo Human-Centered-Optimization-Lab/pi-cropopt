@@ -1,0 +1,13 @@
+!    -*- f90 -*-
+! Note: the context of this file is case sensitive.
+
+python module dssat4py ! in 
+    interface  ! in :dssat4py
+        subroutine readfilex ! in :dssat4py:src/dssat4py.for
+            use moduledefs
+        end subroutine readfilex
+    end interface 
+end python module dssat4py
+
+! This file was auto-generated with f2py (version:2).
+! See http://cens.ioc.ee/projects/f2py2e/
