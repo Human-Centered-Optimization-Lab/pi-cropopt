@@ -1,4 +1,4 @@
 import dssat4py
 
-dssat4py.readfilex()
+dssat4py.readfilex("Short")
 
