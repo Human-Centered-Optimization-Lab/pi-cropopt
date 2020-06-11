@@ -114,8 +114,6 @@ ENDIF(WIN32)
 set(
     source_list
       "src/dssat4py.for"
-      "src/mylib.for"
-      "src/fart.for"
     	"${OSDefinitions}"
         "/Users/iankropp/Projects/dssat-csm-os/Utilities/CSMVersion.for"
         "/Users/iankropp/Projects/dssat-csm-os/Utilities/ModuleDefs.for"
@@ -598,7 +596,6 @@ set(
         "/Users/iankropp/Projects/dssat-csm-os/Weather/WGEN.for"
         "/Users/iankropp/Projects/dssat-csm-os/Weather/WTHMOD.for"
 )
-ADD_EXECUTABLE(${EXECUTABLE_NAME} ${source_list})
 
 foreach(source IN LISTS source_list)
     get_filename_component(source_path "${source}" PATH)
@@ -607,12 +604,6 @@ foreach(source IN LISTS source_list)
 endforeach()
 
 ADD_LIBRARY(dssat4py SHARED ${source_list})
-#install(TARGETS ${EXECUTABLE_NAME} DESTINATION
-#  RUNTIME DESTINATION .)
-
-install(FILES Utilities/run_dssat DESTINATION .
-	PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
-	)
 
 install(DIRECTORY Data/ DESTINATION .
 	PATTERN "*.in" EXCLUDE)
