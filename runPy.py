@@ -1,4 +1,12 @@
 import dssat4py
+import os
 
-dssat4py.readfilex("Short")
+
+path = "/Users/iankropp/Projects/tryImportingDSSAT/rundir/"
+filex = "UFGA8201.MZX"
+
+os.chdir(path)
+
+# 
+dssat4py.readfilex(path, filex, 1)
 

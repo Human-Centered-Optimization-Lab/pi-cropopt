@@ -17,13 +17,15 @@ C
 
       SUBROUTINE READFILEX(
      &    PATHEX, FILEX, 
-     &    TRTNUM, ISWITCH)
+     &    TRTNUM)
 
       USE ModuleData
       USE ModuleDefs
 
       IMPLICIT NONE
 
+C      INCLUDE '/Users/iankropp/Projects/dssat-csm-os/InputModule/COMSWI.blk'
+      INCLUDE 'COMSWI.blk'
 
 
       CHARACTER*  1 WMODI, RNMODE
@@ -46,21 +48,25 @@ C     found a d declaration in a different file for 10 char
 
       LOGICAL UseSimCtr
 
-      REAL          PLTFOR
+      REAL PLTFOR
 
       TYPE (ControlType) CONTROL
       TYPE (SwitchType)  ISWITCH
 
-      RUN = 1
-      RNMODE = 'A'   ! TODO figure out if this is right
-      ROTNUM = 0
-      REPNO = 1
+      RUN     = 1
+      RNMODE  = 'A'
+      ROTNUM  = 0
+      REPNO   = 1
+      MEWTH   = 'M'
+
+      FILEX_P = TRIM(PATHEX)//FILEX
+      CALL Join_Trim(PATHEX, FILEX, FILEX_P)
+
+      DSSATP = TRIM(PATHEX)//'DSSATPRO.L47'
 
       CONTROL % REPNO = REPNO
       CONTROL % RUN = RUN
       CONTROL % YRDOY = 0
-  
-C     TODO Determine if I need FILEIO and DSSATP in here too
       CONTROL % FILEX   = FILEX
       CONTROL % RNMODE  = RNMODE
       CONTROL % ROTNUM  = ROTNUM
