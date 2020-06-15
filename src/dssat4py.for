@@ -46,6 +46,8 @@ C     found a d declaration in a different file for 10 char
       CHARACTER* 92 FILEX_P
       CHARACTER*120 FILECTL
 
+      CHARACTER*9 WSTAT
+
       INTEGER RUN,NYRS,FROP,TRTN,EXPP,EXPN,TRTALL,FTYPEN,NFORC,NDOF,PMTYPE
       INTEGER LNSIM,LNCU,LNHAR,LNTIL,LNCHE,LNFLD,LNIC,LNPLT,LNIR
       INTEGER LNFER,LNRES,ROTNUM,TRTNUM,LNENV,LNSA,REPNO
@@ -59,7 +61,7 @@ C     found a d declaration in a different file for 10 char
       TYPE (SwitchType)  ISWITCH
 
       RUN     = 1
-      RNMODE  = 'A'
+      RNMODE  = 'B'
       ROTNUM  = 0
       REPNO   = 1
       MEWTH   = 'M'
@@ -90,7 +92,9 @@ C     found a d declaration in a different file for 10 char
      &     CONTROL, ISWITCH, UseSimCtr, MODELARG)
 
 
-      PRINT *, HDATE
+      print *, '---'
+      print *, WSTA
+      print *, '---'
 
       IVARVALS(1) = RUN
       IVARVALS(2) = NYRS
@@ -151,4 +155,20 @@ C     found a d declaration in a different file for 10 char
 
       END SUBROUTINE
 
+      SUBROUTINE PRINTTEST()
+
+      USE ModuleData
+      USE ModuleDefs
+
+      IMPLICIT NONE
+
+      INCLUDE 'COMSWI.blk'
+      INCLUDE 'COMIBS.blk'
+
+      print *, '***'
+      print *, WSTA
+      print *, '***'
+
+
+      END SUBROUTINE
 

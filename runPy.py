@@ -8,7 +8,7 @@ filex = "UFGA8201.MZX"
 os.chdir(path)
 
 # 
-rawout = dssat4py.readfilex(path, filex, 4)
+rawout = dssat4py.readfilex(path, filex, 2)
 
 int_vals = rawout[0]
 int_names_raw = rawout[1]
@@ -27,5 +27,5 @@ for ivar in range(len(int_vals)):
     
 print(exp_vars)
 
-
+dssat4py.printtest()
 

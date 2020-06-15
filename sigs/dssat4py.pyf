@@ -12,6 +12,10 @@ python module dssat4py ! in
             integer dimension(27), intent(out):: ivarvals
             character dimension(27,6), intent(out):: ivarnams
         end subroutine readfilex
+        subroutine printtest ! in :dssat4py:src/dssat4py.for
+            use moduledata
+            use moduledefs
+        end subroutine printtest
     end interface 
 end python module dssat4py
 
