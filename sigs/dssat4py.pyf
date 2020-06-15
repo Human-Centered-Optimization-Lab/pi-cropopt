@@ -16,7 +16,6 @@ python module dssat4py ! in
             use moduledata
             use moduledefs
         end subroutine printtest
-    end interface 
 end python module dssat4py
 
 ! This file was auto-generated with f2py (version:2).
