@@ -9,6 +9,7 @@ os.chdir(path)
 
 dssat4py.readfilex(path, filex, 4)
 
+dssat4py.setwsta("QQQQ")
 
 dssat4py.printtest()
 

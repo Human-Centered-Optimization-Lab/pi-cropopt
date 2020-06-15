@@ -63,6 +63,9 @@ C      DSSATP = TRIM(PATHEX)//'DSSATPRO.L47'
       CALL GETLUN('FILEIO', LUNIO)
       FILEIO = 'DSSAT47.INP'
 
+C     TODO in the future, split this into a read function and a
+C     write function 
+
         CALL INPUT_SUB(
      &    FILECTL, FILEIO, FILEX, MODELARG, PATHEX,       !Input
      &    RNMODE, ROTNUM, RUN, TRTNUM,                    !Input
@@ -89,3 +92,18 @@ C      DSSATP = TRIM(PATHEX)//'DSSATPRO.L47'
 
       END SUBROUTINE
 
+
+      SUBROUTINE SETWSTA(NWSTA)
+
+      USE ModuleData
+      USE ModuleDefs
+
+      IMPLICIT NONE
+
+      INCLUDE 'COMSWI.blk'
+      INCLUDE 'COMIBS.blk'
+      CHARACTER *4 NWSTA  
+
+      WSTA = NWSTA 
+
+      END SUBROUTINE

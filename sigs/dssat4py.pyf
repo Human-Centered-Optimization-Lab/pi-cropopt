@@ -16,6 +16,11 @@ python module dssat4py ! in
             use moduledata
             use moduledefs
         end subroutine printtest
+        subroutine setwsta(nwsta) ! in :dssat4py:src/dssat4py.for
+            character*8 intent(in):: nwsta
+            use moduledata
+            use moduledefs
+        end subroutine printtest
 end python module dssat4py
 
 ! This file was auto-generated with f2py (version:2).
