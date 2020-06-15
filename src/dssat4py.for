@@ -16,17 +16,22 @@ C               (SwitchType) is defined in ModuleDefs.for.
 C
 
       SUBROUTINE READFILEX(
-     &    PATHEX, FILEX, 
-     &    TRTNUM)
+     &    PATHEX, FILEX, TRTNUM, IVARVALS, IVARNAMS)
 
       USE ModuleData
       USE ModuleDefs
 
       IMPLICIT NONE
 
-C      INCLUDE '/Users/iankropp/Projects/dssat-csm-os/InputModule/COMSWI.blk'
       INCLUDE 'COMSWI.blk'
+      INCLUDE 'COMIBS.blk'
 
+C     Output variables
+
+      INTEGER,      dimension(27) :: IVARVALS
+      CHARACTER*6,  dimension(27) :: IVARNAMS
+
+C     Input variables
 
       CHARACTER*  1 WMODI, RNMODE
       CHARACTER*  2 CROP
@@ -85,6 +90,64 @@ C     found a d declaration in a different file for 10 char
      &     CONTROL, ISWITCH, UseSimCtr, MODELARG)
 
 
+      PRINT *, HDATE
+
+      IVARVALS(1) = RUN
+      IVARVALS(2) = NYRS
+      IVARVALS(3) = FROP
+      IVARVALS(4) = TRTN
+      IVARVALS(5) = EXPP
+      IVARVALS(6) = EXPN
+      IVARVALS(7) = TRTALL
+      IVARVALS(8) = FTYPEN
+      IVARVALS(9) = NFORC
+      IVARVALS(10) = NDOF
+      IVARVALS(11) = PMTYPE
+      IVARVALS(12) = LNSIM
+      IVARVALS(13) = LNCU
+      IVARVALS(14) = LNHAR
+      IVARVALS(15) = LNTIL
+      IVARVALS(16) = LNCHE
+      IVARVALS(17) = LNFLD
+      IVARVALS(18) = LNIC
+      IVARVALS(19) = LNPLT
+      IVARVALS(20) = LNIR
+      IVARVALS(21) = LNFER
+      IVARVALS(22) = LNRES
+      IVARVALS(23) = ROTNUM
+      IVARVALS(24) = TRTNUM
+      IVARVALS(25) = LNENV
+      IVARVALS(26) = LNSA
+      IVARVALS(27) = REPNO
+
+
+      IVARNAMS(1) = "RUN"
+      IVARNAMS(2) = "NYRS"
+      IVARNAMS(3) = "FROP"
+      IVARNAMS(4) = "TRTN"
+      IVARNAMS(5) = "EXPP"
+      IVARNAMS(6) = "EXPN"
+      IVARNAMS(7) = "TRTALL"
+      IVARNAMS(8) = "FTYPEN"
+      IVARNAMS(9) = "NFORC"
+      IVARNAMS(10) = "NDOF"
+      IVARNAMS(11) = "PMTYPE"
+      IVARNAMS(12) = "LNSIM"
+      IVARNAMS(13) = "LNCU"
+      IVARNAMS(14) = "LNHAR"
+      IVARNAMS(15) = "LNTIL"
+      IVARNAMS(16) = "LNCHE"
+      IVARNAMS(17) = "LNFLD"
+      IVARNAMS(18) = "LNIC"
+      IVARNAMS(19) = "LNPLT"
+      IVARNAMS(20) = "LNIR"
+      IVARNAMS(21) = "LNFER"
+      IVARNAMS(22) = "LNRES"
+      IVARNAMS(23) = "ROTNUM"
+      IVARNAMS(24) = "TRTNUM"
+      IVARNAMS(25) = "LNENV"
+      IVARNAMS(26) = "LNSA"
+      IVARNAMS(27) = "REPNO"
 
       END SUBROUTINE
 
