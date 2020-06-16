@@ -1,0 +1,10 @@
+
+ IPEXP   YEAR DOY =    0   0
+ Weather file not found.                                                       
+   Neither UFGA8201.WTH nor UFGA.WTH                                           
+   were found in weather or experiment directories.                            
+ Simulation will end.                                                          
+
+ IPSOIL  YEAR DOY =    0   0
+ Saturated hydraulic conductivity equal to zero for one or more soil layers.   
+ Data will be treated as missing.                                              
