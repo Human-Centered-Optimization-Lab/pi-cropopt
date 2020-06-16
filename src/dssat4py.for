@@ -19,7 +19,7 @@ C     --------------------------------
 C     READFILEX
 C     --------------------------------
 
-      MODULE MOD
+      MODULE DSSATWRAP
 
         USE ModuleData
         USE ModuleDefs
@@ -168,5 +168,5 @@ C       --------------------------------
 
         END SUBROUTINE
 
-      END MODULE mod
+      END MODULE DSSATWRAP
 

@@ -11,20 +11,16 @@ os.environ["DSSAT_HOME"] = path
 
 os.chdir(path)
 
-dssat4py.mod.PATHEX = pathfull
-dssat4py.mod.FILEX = filex
-dssat4py.mod.TRTNUM = 4
+dssat4py.dssatwrap.PATHEX = pathfull
+dssat4py.dssatwrap.FILEX = filex
+dssat4py.dssatwrap.TRTNUM = 4
 
-#dssat4py.mod.readfilex(path, filex, 4)
-dssat4py.mod.readfilex()
+dssat4py.dssatwrap.readfilex()
 
-dssat4py.mod.setirramt(3,66)
+dssat4py.dssatwrap.setirramt(3,66)
+
+dssat4py.dssatwrap.printtest()
+dssat4py.dssatwrap.writetempx()
 
 
-
-dssat4py.mod.printtest()
-dssat4py.mod.writetempx()
-
-# 
-#rawout = dssat4py.readfilex(path, filex, 2)
 
