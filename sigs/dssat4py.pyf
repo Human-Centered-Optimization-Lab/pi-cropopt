@@ -3,28 +3,30 @@
 
 python module dssat4py ! in 
     interface  ! in :dssat4py
-        subroutine readfilex(pathex,filex,trtnum,ivarvals,ivarnams) ! in :dssat4py:src/dssat4py.for
-            use moduledata
-            use moduledefs
-            character*80 intent(in):: pathex
-            character*12 intent(in):: filex
-            integer intent(in):: trtnum
-            integer dimension(27), intent(out):: ivarvals
-            character dimension(27,6), intent(out):: ivarnams
-        end subroutine readfilex
-        subroutine writetempx ! in :dssat4py:src/dssat4py.for
-            use moduledata
-            use moduledefs
-        end subroutine printtest
-        subroutine printtest ! in :dssat4py:src/dssat4py.for
-            use moduledata
-            use moduledefs
-        end subroutine printtest
-        subroutine setwsta(nwsta) ! in :dssat4py:src/dssat4py.for
-            character*8 intent(in):: nwsta
-            use moduledata
-            use moduledefs
-        end subroutine printtest
+        module mod          
+            subroutine readfilex(pathex,filex,trtnum) ! in :dssat4py:src/dssat4py.for
+                use moduledata
+                use moduledefs
+                character*80 intent(in):: pathex
+                character*12 intent(in):: filex
+                integer intent(in):: trtnum
+            end subroutine readfilex
+            subroutine writetempx ! in :dssat4py:src/dssat4py.for
+                use moduledata
+                use moduledefs
+            end subroutine writetempx
+            subroutine printtest ! in :dssat4py:src/dssat4py.for
+                use moduledata
+                use moduledefs
+            end subroutine printtest
+            subroutine setwsta(nwsta) ! in :dssat4py:src/dssat4py.for
+                character*8 intent(in):: nwsta
+                use moduledata
+                use moduledefs
+            end subroutine setwsta
+
+        end module mod          
+    end interface
 end python module dssat4py
 
 ! This file was auto-generated with f2py (version:2).
