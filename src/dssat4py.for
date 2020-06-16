@@ -15,8 +15,11 @@ C               execution for model.  The structure of the variable
 C               (SwitchType) is defined in ModuleDefs.for. 
 C
 
-      SUBROUTINE READFILEX(
-     &    PATHEX, FILEX, TRTNUM)
+C     --------------------------------
+C     READFILEX
+C     --------------------------------
+
+      SUBROUTINE READFILEX(PATHEX, FILEX, TRTNUM)
 
       USE ModuleData
       USE ModuleDefs
@@ -27,6 +30,26 @@ C
       INCLUDE 'COMIBS.blk'
 
 C     Input variables
+
+
+
+      INTEGER YRIC,EXPN,FROP,ISENS,LNCHE,LNCU,LNENV,LNSA,LNTIL
+      INTEGER LNFER,LNFLD,LNHAR,LNIC, LNIR,LNPLT,LNRES,LNSIM,NDOF
+      INTEGER NFORC,NYRS,PMTYPE,TRTN,TRTALL
+
+
+      CHARACTER*1000 atline
+      CHARACTER*42 CHEXTR(NAPPL)
+      CHARACTER*16 VRNAME
+      CHARACTER*8 MODEL
+      CHARACTER*6 ECONO, VARNO
+      CHARACTER*2 CROP,PRCROP
+
+      REAL EFINOC, EFNFIX,PLTFOR,WRESND,WRESR
+      REAL INO3(NL),INH4(NL)
+      REAL SWINIT(NL)
+
+
 
       CHARACTER*1   RNMODE
       CHARACTER*8   MODELARG
@@ -63,6 +86,8 @@ C      DSSATP = TRIM(PATHEX)//'DSSATPRO.L47'
       CALL GETLUN('FILEIO', LUNIO)
       FILEIO = 'DSSAT47.INP'
 
+  
+
 C     TODO in the future, split this into a read function and a
 C     write function 
 
@@ -75,6 +100,9 @@ C     write function
 
       END SUBROUTINE
 
+C     --------------------------------
+C     PRINTTEST
+C     --------------------------------
       SUBROUTINE PRINTTEST()
 
       USE ModuleData
@@ -92,7 +120,9 @@ C     write function
 
       END SUBROUTINE
 
-
+C     --------------------------------
+C     SETWSTA
+C     --------------------------------
       SUBROUTINE SETWSTA(NWSTA)
 
       USE ModuleData
@@ -105,5 +135,69 @@ C     write function
       CHARACTER *4 NWSTA  
 
       WSTA = NWSTA 
+
+      END SUBROUTINE
+
+C     --------------------------------
+C     WRITETEMPX
+C     --------------------------------
+      SUBROUTINE WRITETEMPX()
+
+      USE ModuleData
+      USE ModuleDefs
+
+      IMPLICIT NONE
+
+      INCLUDE 'COMSWI.blk'
+      INCLUDE 'COMIBS.blk'
+
+
+
+      INTEGER YRIC,EXPN,FROP,ISENS,LNCHE,LNCU,LNENV,LNSA,LNTIL
+      INTEGER LNFER,LNFLD,LNHAR,LNIC, LNIR,LNPLT,LNRES,LNSIM,NDOF
+      INTEGER NFORC,NYRS,PMTYPE,RUN,TRTN,TRTALL
+
+
+      CHARACTER*1000 atline
+      CHARACTER* 80 PATHEX
+      CHARACTER*42 CHEXTR(NAPPL)
+      CHARACTER*30  FILEIO
+      CHARACTER*16 VRNAME
+      CHARACTER*12  FILEX   
+      CHARACTER*8 MODEL
+      CHARACTER*6 ECONO, VARNO
+      CHARACTER*2 CROP,PRCROP
+      CHARACTER*1 RNMODE
+
+      REAL EFINOC, EFNFIX,PLTFOR,WRESND,WRESR
+      REAL INO3(NL),INH4(NL)
+      REAL SWINIT(NL)
+      
+      PRINT *, '8888'
+      print *,  FILEIO
+      print *, VRNAME
+      print *,  FILEX   
+      print *, MODEL
+      print *, ECONO, VARNO
+      print *, CROP,PRCROP
+      print *, RNMODE
+      PRINT *, FILEIO
+      print *, WSTA
+      PRINT *, '8888'
+
+C        CALL OPTEMPY2K(RNMODE,FILEX,PATHEX,
+C     &            YRIC,PRCROP,WRESR,WRESND,EFINOC,EFNFIX,
+C     &            SWINIT,INH4,INO3,NYRS,VARNO,VRNAME,CROP,MODEL,
+C     &            RUN,FILEIO,EXPN,ECONO,FROP,TRTALL,TRTN,
+C     &            CHEXTR,NFORC,PLTFOR,NDOF,PMTYPE,ISENS)
+      
+        CALL OPTEMPXY2K (YRIC,PRCROP,WRESR,WRESND,EFINOC,EFNFIX,
+     &           SWINIT,INH4,INO3,NYRS,VARNO,VRNAME,CROP,
+     &           FILEIO,FROP,ECONO,ATLINE,
+     &           LNSIM,LNCU,LNHAR,LNENV,LNTIL,LNCHE,
+     &           LNFLD,LNSA,LNIC,LNPLT,LNIR,LNFER,LNRES,
+     &           NFORC,PLTFOR,PMTYPE,NDOF,CHEXTR, MODEL, PATHEX)
+
+
 
       END SUBROUTINE
