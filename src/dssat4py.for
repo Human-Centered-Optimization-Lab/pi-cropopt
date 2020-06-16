@@ -57,21 +57,20 @@ C     --------------------------------
 
       CONTAINS 
 
-        SUBROUTINE READFILEX(PATHEX, FILEX, TRTNUM)
+        SUBROUTINE READFILEX()
 
         USE ModuleData
         USE ModuleDefs
 
         IMPLICIT NONE
 
-        CHARACTER*80 PATHEX
-        CHARACTER*12  FILEX   
-        INTEGER TRTNUM
-
-
-        FILEX = FILEX
-
 C       Input variables
+
+        print *, '------'
+        print '(A12)', FILEX
+        print '(A80)', PATHEX
+        print '(I1)', TRTNUM
+        print *, '------'
 
 
         RUN     = 1

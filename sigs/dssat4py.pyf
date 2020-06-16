@@ -4,12 +4,12 @@
 python module dssat4py ! in 
     interface  ! in :dssat4py
         module mod          
-            subroutine readfilex(pathex,filex,trtnum) ! in :dssat4py:src/dssat4py.for
+            integer intent(inout) :: TRTNUM
+            character*12 intent(inout) :: FILEX
+            character*80 intent(inout) :: PATHEX
+            subroutine readfilex ! in :dssat4py:src/dssat4py.for
                 use moduledata
                 use moduledefs
-                character*80 intent(in):: pathex
-                character*12 intent(in):: filex
-                integer intent(in):: trtnum
             end subroutine readfilex
             subroutine writetempx ! in :dssat4py:src/dssat4py.for
                 use moduledata
