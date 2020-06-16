@@ -26,7 +26,6 @@ C     --------------------------------
        
         IMPLICIT NONE
 
-
         INCLUDE 'COMSWI.blk'
         INCLUDE 'COMIBS.blk'
 
@@ -100,12 +99,10 @@ C       write function
      &    RNMODE, ROTNUM, RUN, TRTNUM,                    !Input
      &    ISWITCH, CONTROL)                               !Output
 
-
-
         END SUBROUTINE
 
 C       --------------------------------
-C       PRINTTEST
+C       | PRINTTEST
 C       --------------------------------
         SUBROUTINE PRINTTEST()
 
@@ -114,8 +111,6 @@ C       --------------------------------
 
         IMPLICIT NONE
 
-        INCLUDE 'COMSWI.blk'
-        INCLUDE 'COMIBS.blk'
         INTEGER I
 
         print *, '***'
@@ -130,7 +125,7 @@ C       --------------------------------
         END SUBROUTINE
 
 C       --------------------------------
-C       SETIRRAMT
+C       | SETIRRAMT
 C       --------------------------------
         SUBROUTINE SETIRRAMT(DATE, AMOUNT)
 
@@ -138,10 +133,6 @@ C       --------------------------------
         USE ModuleDefs
 
         IMPLICIT NONE
-
-        INCLUDE 'COMSWI.blk'
-        INCLUDE 'COMIBS.blk'
-
         INTEGER DATE,AMOUNT
 
         
@@ -150,47 +141,8 @@ C       --------------------------------
         END SUBROUTINE
 
 
-
 C       --------------------------------
-C       SETLNCU
-C       --------------------------------
-        SUBROUTINE SETLNCU(NLNCU)
-
-        USE ModuleData
-        USE ModuleDefs
-
-        IMPLICIT NONE
-
-        INCLUDE 'COMSWI.blk'
-        INCLUDE 'COMIBS.blk'
-        INTEGER NLNCU
-
-
-        LNCU = NLNCU
-
-        END SUBROUTINE
-
-
-C       --------------------------------
-C       SETWSTA
-C       --------------------------------
-        SUBROUTINE SETWSTA(NWSTA)
-
-        USE ModuleData
-        USE ModuleDefs
-
-        IMPLICIT NONE
-
-        INCLUDE 'COMSWI.blk'
-        INCLUDE 'COMIBS.blk'
-        CHARACTER *4 NWSTA  
-
-        WSTA = NWSTA 
-
-        END SUBROUTINE
-
-C       --------------------------------
-C       WRITETEMPX
+C       | WRITETEMPX
 C       --------------------------------
         SUBROUTINE WRITETEMPX()
 
@@ -198,9 +150,6 @@ C       --------------------------------
         USE ModuleDefs
 
         IMPLICIT NONE
-
-        INCLUDE 'COMSWI.blk'
-        INCLUDE 'COMIBS.blk'
 
         CALL OPTEMPY2K(RNMODE,FILEX,PATHEX,
      &            YRIC,PRCROP,WRESR,WRESND,EFINOC,EFNFIX,

@@ -18,8 +18,6 @@ dssat4py.mod.TRTNUM = 4
 #dssat4py.mod.readfilex(path, filex, 4)
 dssat4py.mod.readfilex()
 
-dssat4py.mod.setwsta("WXYZ")
-dssat4py.mod.setlncu(77)
 dssat4py.mod.setirramt(3,66)
 
 

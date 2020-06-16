@@ -20,16 +20,6 @@ python module dssat4py ! in
                 use moduledata
                 use moduledefs
             end subroutine printtest
-            subroutine setwsta(nwsta) ! in :dssat4py:src/dssat4py.for
-                character*8 intent(in):: nwsta
-                use moduledata
-                use moduledefs
-            end subroutine setwsta
-            subroutine setlncu(nlncu) ! in :dssat4py:src/dssat4py.for
-                integer intent(in):: nlncu
-                use moduledata
-                use moduledefs
-            end subroutine setlncu
             subroutine setirramt(date, amount) ! in :dssat4py:src/dssat4py.for
                 integer intent(in):: date
                 integer intent(in):: amount
