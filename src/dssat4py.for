@@ -66,13 +66,6 @@ C     --------------------------------
 
 C       Input variables
 
-        print *, '------'
-        print '(A12)', FILEX
-        print '(A80)', PATHEX
-        print '(I1)', TRTNUM
-        print *, '------'
-
-
         RUN     = 1
         RNMODE  = 'B'
         ROTNUM  = 0
@@ -123,13 +116,60 @@ C       --------------------------------
 
         INCLUDE 'COMSWI.blk'
         INCLUDE 'COMIBS.blk'
+        INTEGER I
 
         print *, '***'
-        print *, WSTA
+        IF (NIRR .GT. 0) THEN
+           DO I = 1, NIRR
+              print *, IDLAPL(I),IRRCOD(I),AMT(I)!,
+           END DO
+        ENDIF
         print *, '***'
 
 
         END SUBROUTINE
+
+C       --------------------------------
+C       SETIRRAMT
+C       --------------------------------
+        SUBROUTINE SETIRRAMT(DATE, AMOUNT)
+
+        USE ModuleData
+        USE ModuleDefs
+
+        IMPLICIT NONE
+
+        INCLUDE 'COMSWI.blk'
+        INCLUDE 'COMIBS.blk'
+
+        INTEGER DATE,AMOUNT
+
+        
+        AMT(DATE) = AMOUNT
+
+        END SUBROUTINE
+
+
+
+C       --------------------------------
+C       SETLNCU
+C       --------------------------------
+        SUBROUTINE SETLNCU(NLNCU)
+
+        USE ModuleData
+        USE ModuleDefs
+
+        IMPLICIT NONE
+
+        INCLUDE 'COMSWI.blk'
+        INCLUDE 'COMIBS.blk'
+        INTEGER NLNCU
+
+
+        LNCU = NLNCU
+
+        END SUBROUTINE
+
 
 C       --------------------------------
 C       SETWSTA
@@ -161,19 +201,6 @@ C       --------------------------------
 
         INCLUDE 'COMSWI.blk'
         INCLUDE 'COMIBS.blk'
-
-        
-        PRINT *, '8888'
-        print *,  FILEIO
-        print *, VRNAME
-        print *, FILEX   
-        print *, MODEL
-        print *, ECONO, VARNO
-        print *, CROP,PRCROP
-        print *, RNMODE
-        PRINT *, FILEIO
-        print *, WSTA
-        PRINT *, '8888'
 
         CALL OPTEMPY2K(RNMODE,FILEX,PATHEX,
      &            YRIC,PRCROP,WRESR,WRESND,EFINOC,EFNFIX,

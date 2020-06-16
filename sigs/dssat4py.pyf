@@ -7,6 +7,7 @@ python module dssat4py ! in
             integer intent(inout) :: TRTNUM
             character*12 intent(inout) :: FILEX
             character*80 intent(inout) :: PATHEX
+            character*4 intent(inout) :: WSTA
             subroutine readfilex ! in :dssat4py:src/dssat4py.for
                 use moduledata
                 use moduledefs
@@ -24,6 +25,17 @@ python module dssat4py ! in
                 use moduledata
                 use moduledefs
             end subroutine setwsta
+            subroutine setlncu(nlncu) ! in :dssat4py:src/dssat4py.for
+                integer intent(in):: nlncu
+                use moduledata
+                use moduledefs
+            end subroutine setlncu
+            subroutine setirramt(date, amount) ! in :dssat4py:src/dssat4py.for
+                integer intent(in):: date
+                integer intent(in):: amount
+                use moduledata
+                use moduledefs
+            end subroutine setirramt
 
         end module mod          
     end interface

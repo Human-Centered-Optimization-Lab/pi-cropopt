@@ -11,9 +11,6 @@ os.environ["DSSAT_HOME"] = path
 
 os.chdir(path)
 
-print(dssat4py.mod.__doc__)
-print(dssat4py.mod.__dict__)
-
 dssat4py.mod.PATHEX = pathfull
 dssat4py.mod.FILEX = filex
 dssat4py.mod.TRTNUM = 4
@@ -22,6 +19,10 @@ dssat4py.mod.TRTNUM = 4
 dssat4py.mod.readfilex()
 
 dssat4py.mod.setwsta("WXYZ")
+dssat4py.mod.setlncu(77)
+dssat4py.mod.setirramt(3,66)
+
+
 
 dssat4py.mod.printtest()
 dssat4py.mod.writetempx()
