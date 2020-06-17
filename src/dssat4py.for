@@ -116,7 +116,7 @@ C       --------------------------------
         print *, '***'
         IF (NIRR .GT. 0) THEN
            DO I = 1, NIRR
-              print *, IDLAPL(I),IRRCOD(I),AMT(I)!,
+              print *, IDLAPL(I),IRRCOD(I),AMT(I)
            END DO
         ENDIF
         print *, '***'
@@ -125,7 +125,7 @@ C       --------------------------------
         END SUBROUTINE
 
 C       --------------------------------
-C       | SETIRRAMT
+C       | Set irrigation amount
 C       --------------------------------
         SUBROUTINE SETIRRAMT(DATE, AMOUNT)
 
@@ -133,12 +133,91 @@ C       --------------------------------
         USE ModuleDefs
 
         IMPLICIT NONE
-        INTEGER DATE,AMOUNT
-
+        INTEGER, intent(in) :: DATE
+        real, intent(in) :: AMOUNT
         
         AMT(DATE) = AMOUNT
 
         END SUBROUTINE
+
+C       --------------------------------
+C       | Set irrigation operation 
+C       --------------------------------
+        SUBROUTINE SETIRROP(DATE, NEWOP)
+
+        USE ModuleData
+        USE ModuleDefs
+
+        IMPLICIT NONE
+        INTEGER, intent(in) :: DATE
+        CHARACTER*5, intent(in) :: NEWOP
+
+        IRRCOD(DATE) = NEWOP
+        END SUBROUTINE
+
+C       --------------------------------
+C       | Set irrigation date 
+C       --------------------------------
+        SUBROUTINE SETIRRDATE(DATE, DATEVAL)
+
+        USE ModuleData
+        USE ModuleDefs
+
+        IMPLICIT NONE
+        INTEGER, intent(in) :: DATE,DATEVAL
+        
+        IDLAPL(DATE) = DATEVAL
+
+        END SUBROUTINE
+
+
+C       --------------------------------
+C       | Get irrigation amount
+C       --------------------------------
+        SUBROUTINE GETIRRAMT(DATE, AMOUNT)
+
+        USE ModuleData
+        USE ModuleDefs
+
+        IMPLICIT NONE
+        INTEGER, intent(in) :: DATE
+        REAL, intent(out) :: amount
+        
+        AMOUNT = AMT(DATE)
+
+        END SUBROUTINE
+
+C       --------------------------------
+C       | Get irrigation operation 
+C       --------------------------------
+        SUBROUTINE GETIRROP(DATE, NEWOP)
+
+        USE ModuleData
+        USE ModuleDefs
+
+        IMPLICIT NONE
+        INTEGER, intent(in) :: DATE
+        CHARACTER*5, intent(out) :: NEWOP
+
+        NEWOP = IRRCOD(DATE)
+        END SUBROUTINE
+
+C       --------------------------------
+C       | Get irrigation date 
+C       --------------------------------
+        SUBROUTINE GETIRRDATE(DATE, DATEVAL)
+
+        USE ModuleData
+        USE ModuleDefs
+
+        IMPLICIT NONE
+        INTEGER, intent(in) :: DATE
+        integer, intent(out) ::DATEVAL
+        
+        DATEVAL = IDLAPL(DATE) 
+
+        END SUBROUTINE
+
 
 
 C       --------------------------------

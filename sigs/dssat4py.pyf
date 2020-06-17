@@ -4,10 +4,10 @@
 python module dssat4py ! in 
     interface  ! in :dssat4py
         module dssatwrap
-            integer intent(inout) :: TRTNUM
-            character*12 intent(inout) :: FILEX
-            character*80 intent(inout) :: PATHEX
-            character*4 intent(inout) :: WSTA
+            integer       intent(inout) :: TRTNUM
+            character*12  intent(inout) :: FILEX
+            character*80  intent(inout) :: PATHEX
+            character*4   intent(inout) :: WSTA
             subroutine readfilex ! in :dssat4py:src/dssat4py.for
                 use moduledata
                 use moduledefs
@@ -22,10 +22,42 @@ python module dssat4py ! in
             end subroutine printtest
             subroutine setirramt(date, amount) ! in :dssat4py:src/dssat4py.for
                 integer intent(in):: date
-                integer intent(in):: amount
+                real intent(in):: amount
                 use moduledata
                 use moduledefs
-            end subroutine setirramt
+            end subroutine
+            subroutine setirrop(date, newop) ! in :dssat4py:src/dssat4py.for
+                integer intent(in):: date
+                character*5 intent(in):: newop
+                use moduledata
+                use moduledefs
+            end subroutine
+            subroutine setirrdate(date, dateval) ! in :dssat4py:src/dssat4py.for
+                integer intent(in):: date
+                integer intent(in):: dateval
+                use moduledata
+                use moduledefs
+            end subroutine 
+            subroutine getirramt(date, amount) ! in :dssat4py:src/dssat4py.for
+                integer intent(in):: date
+                real intent(out):: amount
+                use moduledata
+                use moduledefs
+            end subroutine
+            subroutine getirrop(date, newop) ! in :dssat4py:src/dssat4py.for
+                integer intent(in):: date
+                character*5 intent(out):: newop
+                use moduledata
+                use moduledefs
+            end subroutine
+            subroutine getirrdate(date, dateval) ! in :dssat4py:src/dssat4py.for
+                integer intent(in):: date
+                integer intent(out):: dateval
+                use moduledata
+                use moduledefs
+            end subroutine
+
+            
 
         end module dssatwrap          
     end interface

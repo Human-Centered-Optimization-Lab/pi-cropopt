@@ -1,4 +1,4 @@
-import dssat4py
+import dssat4py as d
 import os, numpy as np
 from functools import reduce
 
@@ -11,16 +11,16 @@ os.environ["DSSAT_HOME"] = path
 
 os.chdir(path)
 
-dssat4py.dssatwrap.PATHEX = pathfull
-dssat4py.dssatwrap.FILEX = filex
-dssat4py.dssatwrap.TRTNUM = 4
+d.dssatwrap.PATHEX = pathfull
+d.dssatwrap.FILEX = filex
+d.dssatwrap.TRTNUM = 4
 
-dssat4py.dssatwrap.readfilex()
+d.dssatwrap.readfilex()
 
-dssat4py.dssatwrap.setirramt(3,66)
+d.dssatwrap.setirramt(3,66.0)
 
-dssat4py.dssatwrap.printtest()
-dssat4py.dssatwrap.writetempx()
+d.dssatwrap.printtest()
+d.dssatwrap.writetempx()
 
 
 
