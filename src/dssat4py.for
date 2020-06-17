@@ -188,6 +188,37 @@ C       --------------------------------
         END SUBROUTINE
 
 C       --------------------------------
+C       | Set irrigation amount (whole array)
+C       --------------------------------
+        SUBROUTINE SETIRR(DATES, OPS, AMOUNTS, NAPPS)
+
+        USE ModuleData
+        USE ModuleDefs
+
+        IMPLICIT NONE
+
+        REAL, intent(in), dimension(NAPPS) :: AMOUNTS
+        CHARACTER*5, intent(in), dimension(NAPPS) :: OPS
+        INTEGER, intent(in), dimension(NAPPS) :: DATES
+        integer, intent(in) :: NAPPS 
+        integer :: I
+  
+        NIRR = NAPPS       
+        DO I = 1, NIRR
+           AMT(I) = AMOUNTS(I) 
+        END DO
+
+        DO I = 1, NIRR
+           IRRCOD(I) = OPS(I) 
+        END DO
+
+        DO I = 1, NIRR
+           IDLAPL(I) = DATES(I)
+        END DO
+
+        END SUBROUTINE
+
+C       --------------------------------
 C       | Get irrigation amount (whole array)
 C       --------------------------------
         SUBROUTINE GETIRRAMTS(AMOUNTS, NAPPS)

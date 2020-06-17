@@ -38,9 +38,11 @@ class Experiment:
                 lambda a : a.tostring().decode("ascii"), 1, 
                 self.irrigation_operations)
 
-        
+        d.dssatwrap.setirr([2020168, 2020169, 2020170], ["IR002", "IR002", "IR002"], [2.2, 3.4, 4.4], 3)        
 
+        d.dssatwrap.printtest()
 
+        d.dssatwrap.writetempx()
 
 
 path = "/Users/iankropp/Projects/tryImportingDSSAT/rundir/"
