@@ -29,22 +29,24 @@ class Experiment:
        
         self.irrigation_count = d.dssatwrap.getnirr()
 
-        self._irrigation_amounts = d.dssatwrap.getirramts(self.irrigation_count)
-        self._irrigation_dates = d.dssatwrap.getirrdates(self.irrigation_count)
-        self._irrigation_operations = d.dssatwrap.getirrops(self.irrigation_count)
+        self.irrigation_amounts = d.dssatwrap.getirramts(self.irrigation_count)
+        self.irrigation_dates = d.dssatwrap.getirrdates(self.irrigation_count)
+        self.irrigation_operations = d.dssatwrap.getirrops(self.irrigation_count)
 
         # Conver the byte strings to strings
-        self._irrigation_operations = np.apply_along_axis(
+        self.irrigation_operations = np.apply_along_axis(
                 lambda a : a.tostring().decode("ascii"), 1, 
-                self._irrigation_operations)
+                self.irrigation_operations)
 
-        print(self._irrigation_dates)
-        print(self._irrigation_amounts)
-        print(self._irrigation_operations)
+        
+
+
+
 
 path = "/Users/iankropp/Projects/tryImportingDSSAT/rundir/"
 filex = "UFGA8201.MZX"
 
 exp = Experiment(path, filex, 4)
 
+fa = 3
 
