@@ -56,9 +56,29 @@ python module dssat4py ! in
                 use moduledata
                 use moduledefs
             end subroutine
-
-            
-
+            subroutine getnirr(nirrout) ! in :dssat4py:src/dssat4py.for
+                integer intent(out) :: nirrout
+                use moduledata
+                use moduledefs
+            end subroutine
+            subroutine getirramts(amounts, n) ! in :dssat4py:src/dssat4py.for
+                integer intent(in) :: n
+                real intent(out),dimension(n) :: amounts
+                use moduledata
+                use moduledefs
+            end subroutine
+            subroutine getirrops(ops, n) ! in :dssat4py:src/dssat4py.for
+                integer intent(in) :: n
+                character*5 intent(out),dimension(n) :: ops
+                use moduledata
+                use moduledefs
+            end subroutine
+            subroutine getirrdates(dates, n) ! in :dssat4py:src/dssat4py.for
+                integer intent(in) :: n
+                integer intent(out),dimension(n) :: dates
+                use moduledata
+                use moduledefs
+            end subroutine
         end module dssatwrap          
     end interface
 end python module dssat4py

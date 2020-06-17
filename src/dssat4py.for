@@ -172,7 +172,7 @@ C       --------------------------------
 
 
 C       --------------------------------
-C       | Get irrigation amount
+C       | Get irrigation amount (indv)
 C       --------------------------------
         SUBROUTINE GETIRRAMT(DATE, AMOUNT)
 
@@ -186,6 +186,86 @@ C       --------------------------------
         AMOUNT = AMT(DATE)
 
         END SUBROUTINE
+
+C       --------------------------------
+C       | Get irrigation amount (whole array)
+C       --------------------------------
+        SUBROUTINE GETIRRAMTS(AMOUNTS, NAPPS)
+
+        USE ModuleData
+        USE ModuleDefs
+
+        IMPLICIT NONE
+
+        integer, intent(in) :: NAPPS 
+        REAL, intent(out), dimension(NAPPS) :: AMOUNTS
+        integer :: I
+
+C       TODO better way of doing this? 
+        DO I = 1, NIRR
+           AMOUNTS(I) = AMT(I)
+        END DO
+
+        END SUBROUTINE
+
+C       --------------------------------
+C       | Get irrigation operations (whole array)
+C       --------------------------------
+        SUBROUTINE GETIRROPS(OPS, NAPPS)
+
+        USE ModuleData
+        USE ModuleDefs
+
+        IMPLICIT NONE
+
+        integer, intent(in) :: NAPPS 
+        character*5, intent(out), dimension(NAPPS) :: OPS
+        integer :: I
+
+C       TODO better way of doing this? 
+        DO I = 1, NIRR
+            OPS(I) = IRRCOD(I)
+        END DO
+
+        END SUBROUTINE
+
+C       --------------------------------
+C       | Get irrigation date (whole array)
+C       --------------------------------
+        SUBROUTINE GETIRRDATES(DATES, NAPPS)
+
+        USE ModuleData
+        USE ModuleDefs
+
+        IMPLICIT NONE
+
+        integer, intent(in) :: NAPPS 
+        integer, intent(out), dimension(NAPPS) :: DATES
+        integer :: I
+
+C       TODO better way of doing this? 
+        DO I = 1, NIRR
+            DATES(I) = IDLAPL(I)
+        END DO
+
+        END SUBROUTINE
+
+C       --------------------------------
+C       | Get number of irrigation applications
+C       --------------------------------
+        SUBROUTINE GETNIRR(NIRROUT)
+
+        USE ModuleData
+        USE ModuleDefs
+
+        IMPLICIT NONE
+
+        INTEGER, INTENT(OUT) :: NIRROUT 
+    
+        NIRROUT = NIRR
+
+        END SUBROUTINE
+
 
 C       --------------------------------
 C       | Get irrigation operation 
