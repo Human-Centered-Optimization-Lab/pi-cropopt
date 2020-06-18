@@ -1,15 +1,362 @@
 
+C
+C     PATHEX  ?? path to experiment file
+C     FILEX   Experiment file, e.g., UFGA7801.SBX 
+C     RUN     Change in date between two observations for linear interpolation 
+C     RNMODE  Simulation run mode (I=Interactive, A=All treatments, 
+C               B=Batch mode, E=Sensitivity, D=Debug, N=Seasonal, Q=Sequence)
+C     TRTNUM  Treatment number being simulated (from FILEX) 
+C     ROTNUM  ?? rotation num? 
+C     CONTROL Composite variable containing variables related to control and/or 
+C               timing of simulation.  The structure of the variable 
+C               (ControlType) is defined in ModuleDefs.for. 
+C     ISWITCH Composite variable containing switches which control flow of 
+C               execution for model.  The structure of the variable 
+C               (SwitchType) is defined in ModuleDefs.for. 
+C
+
+C     --------------------------------
+C     READFILEX
+C     --------------------------------
+
+      MODULE DSSATWRAP
+
+        USE ModuleData
+        USE ModuleDefs
+       
+        IMPLICIT NONE
+
+        INCLUDE 'COMSWI.blk'
+        INCLUDE 'COMIBS.blk'
+
+        INTEGER YRIC,EXPN,FROP,ISENS,LNCHE,LNCU,LNENV,LNSA,LNTIL
+        INTEGER LNFER,LNFLD,LNHAR,LNIC, LNIR,LNPLT,LNRES,LNSIM,NDOF
+        INTEGER NFORC,NYRS,PMTYPE,RUN,TRTN,TRTALL
+        INTEGER ROTNUM, TRTNUM, LUNIO, REPNO
 
 
-      SUBROUTINE READFILEX()
+        CHARACTER*1000 atline
+        CHARACTER*120 FILECTL
+        CHARACTER*80 PATHEX
+        CHARACTER*42 CHEXTR(NAPPL)
+        CHARACTER*30  FILEIO
+        CHARACTER*16 VRNAME
+        CHARACTER*12  FILEX   
+        CHARACTER*8 MODEL, MODELARG
+        CHARACTER*6 ECONO, VARNO
+        CHARACTER*2 CROP,PRCROP
+        CHARACTER*1 RNMODE
 
-      USE ModuleDefs
+        REAL EFINOC, EFNFIX,PLTFOR,WRESND,WRESR
+        REAL INO3(NL),INH4(NL)
+        REAL SWINIT(NL)
 
-      IMPLICIT NONE
+        TYPE (ControlType) CONTROL
+        TYPE (SwitchType)  ISWITCH
+
+      CONTAINS 
+
+        SUBROUTINE READFILEX()
+
+        USE ModuleData
+        USE ModuleDefs
+
+        IMPLICIT NONE
+
+C       Input variables
+
+        RUN     = 1
+        RNMODE  = 'B'
+        ROTNUM  = 0
+        REPNO   = 1
+        MEWTH   = 'M'
+
+C        DSSATP = TRIM(PATHEX)//'DSSATPRO.L47'
 
 
-      CALL INTRO
 
-      END SUBROUTINE
+        CONTROL % REPNO = REPNO
+        CONTROL % RUN = RUN
+        CONTROL % YRDOY = 0
+        CONTROL % FILEX   = FILEX
+        CONTROL % RNMODE  = RNMODE
+        CONTROL % ROTNUM  = ROTNUM
+        CONTROL % TRTNUM  = TRTNUM
+        CONTROL % ERRCODE = 0
 
+        CALL PUT(CONTROL)
+
+        CALL GETLUN('FILEIO', LUNIO)
+        FILEIO = 'DSSAT47.INP'
+
+    
+
+C       TODO in the future, split this into a read function and a
+C       write function 
+
+        CALL INPUT_SUB(
+     &    FILECTL, FILEIO, FILEX, MODELARG, PATHEX,       !Input
+     &    RNMODE, ROTNUM, RUN, TRTNUM,                    !Input
+     &    ISWITCH, CONTROL)                               !Output
+
+        END SUBROUTINE
+
+C       --------------------------------
+C       | PRINTTEST
+C       --------------------------------
+        SUBROUTINE PRINTTEST()
+
+        USE ModuleData
+        USE ModuleDefs
+
+        IMPLICIT NONE
+
+        INTEGER I
+
+        print *, '***'
+        IF (NIRR .GT. 0) THEN
+           DO I = 1, NIRR
+              print *, IDLAPL(I),IRRCOD(I),AMT(I)
+           END DO
+        ENDIF
+        print *, '***'
+
+
+        END SUBROUTINE
+
+C       --------------------------------
+C       | Set irrigation amount
+C       --------------------------------
+        SUBROUTINE SETIRRAMT(DATE, AMOUNT)
+
+        USE ModuleData
+        USE ModuleDefs
+
+        IMPLICIT NONE
+        INTEGER, intent(in) :: DATE
+        real, intent(in) :: AMOUNT
+        
+        AMT(DATE) = AMOUNT
+
+        END SUBROUTINE
+
+C       --------------------------------
+C       | Set irrigation operation 
+C       --------------------------------
+        SUBROUTINE SETIRROP(DATE, NEWOP)
+
+        USE ModuleData
+        USE ModuleDefs
+
+        IMPLICIT NONE
+        INTEGER, intent(in) :: DATE
+        CHARACTER*5, intent(in) :: NEWOP
+
+        IRRCOD(DATE) = NEWOP
+        END SUBROUTINE
+
+C       --------------------------------
+C       | Set irrigation date 
+C       --------------------------------
+        SUBROUTINE SETIRRDATE(DATE, DATEVAL)
+
+        USE ModuleData
+        USE ModuleDefs
+
+        IMPLICIT NONE
+        INTEGER, intent(in) :: DATE,DATEVAL
+        
+        IDLAPL(DATE) = DATEVAL
+
+        END SUBROUTINE
+
+
+C       --------------------------------
+C       | Get irrigation amount (indv)
+C       --------------------------------
+        SUBROUTINE GETIRRAMT(DATE, AMOUNT)
+
+        USE ModuleData
+        USE ModuleDefs
+
+        IMPLICIT NONE
+        INTEGER, intent(in) :: DATE
+        REAL, intent(out) :: amount
+        
+        AMOUNT = AMT(DATE)
+
+        END SUBROUTINE
+
+C       --------------------------------
+C       | Set irrigation amount (whole array)
+C       --------------------------------
+        SUBROUTINE SETIRR(DATES, OPS, AMOUNTS, NAPPS)
+
+        USE ModuleData
+        USE ModuleDefs
+
+        IMPLICIT NONE
+
+        REAL, intent(in), dimension(NAPPS) :: AMOUNTS
+        CHARACTER*5, intent(in), dimension(NAPPS) :: OPS
+        INTEGER, intent(in), dimension(NAPPS) :: DATES
+        integer, intent(in) :: NAPPS 
+        integer :: I
+  
+        NIRR = NAPPS       
+        DO I = 1, NIRR
+           AMT(I) = AMOUNTS(I) 
+        END DO
+
+        DO I = 1, NIRR
+           IRRCOD(I) = OPS(I) 
+        END DO
+
+        DO I = 1, NIRR
+           IDLAPL(I) = DATES(I)
+        END DO
+
+        END SUBROUTINE
+
+C       --------------------------------
+C       | Get irrigation amount (whole array)
+C       --------------------------------
+        SUBROUTINE GETIRRAMTS(AMOUNTS, NAPPS)
+
+        USE ModuleData
+        USE ModuleDefs
+
+        IMPLICIT NONE
+
+        integer, intent(in) :: NAPPS 
+        REAL, intent(out), dimension(NAPPS) :: AMOUNTS
+        integer :: I
+
+C       TODO better way of doing this? 
+        DO I = 1, NIRR
+           AMOUNTS(I) = AMT(I)
+        END DO
+
+        END SUBROUTINE
+
+C       --------------------------------
+C       | Get irrigation operations (whole array)
+C       --------------------------------
+        SUBROUTINE GETIRROPS(OPS, NAPPS)
+
+        USE ModuleData
+        USE ModuleDefs
+
+        IMPLICIT NONE
+
+        integer, intent(in) :: NAPPS 
+        character*5, intent(out), dimension(NAPPS) :: OPS
+        integer :: I
+
+C       TODO better way of doing this? 
+        DO I = 1, NIRR
+            OPS(I) = IRRCOD(I)
+        END DO
+
+        END SUBROUTINE
+
+C       --------------------------------
+C       | Get irrigation date (whole array)
+C       --------------------------------
+        SUBROUTINE GETIRRDATES(DATES, NAPPS)
+
+        USE ModuleData
+        USE ModuleDefs
+
+        IMPLICIT NONE
+
+        integer, intent(in) :: NAPPS 
+        integer, intent(out), dimension(NAPPS) :: DATES
+        integer :: I
+
+C       TODO better way of doing this? 
+        DO I = 1, NIRR
+            DATES(I) = IDLAPL(I)
+        END DO
+
+        END SUBROUTINE
+
+C       --------------------------------
+C       | Get number of irrigation applications
+C       --------------------------------
+        SUBROUTINE GETNIRR(NIRROUT)
+
+        USE ModuleData
+        USE ModuleDefs
+
+        IMPLICIT NONE
+
+        INTEGER, INTENT(OUT) :: NIRROUT 
+    
+        NIRROUT = NIRR
+
+        END SUBROUTINE
+
+
+C       --------------------------------
+C       | Get irrigation operation 
+C       --------------------------------
+        SUBROUTINE GETIRROP(DATE, NEWOP)
+
+        USE ModuleData
+        USE ModuleDefs
+
+        IMPLICIT NONE
+        INTEGER, intent(in) :: DATE
+        CHARACTER*5, intent(out) :: NEWOP
+
+        NEWOP = IRRCOD(DATE)
+        END SUBROUTINE
+
+C       --------------------------------
+C       | Get irrigation date 
+C       --------------------------------
+        SUBROUTINE GETIRRDATE(DATE, DATEVAL)
+
+        USE ModuleData
+        USE ModuleDefs
+
+        IMPLICIT NONE
+        INTEGER, intent(in) :: DATE
+        integer, intent(out) ::DATEVAL
+        
+        DATEVAL = IDLAPL(DATE) 
+
+        END SUBROUTINE
+
+
+
+C       --------------------------------
+C       | WRITETEMPX
+C       --------------------------------
+        SUBROUTINE WRITETEMPX()
+
+        USE ModuleData
+        USE ModuleDefs
+
+        IMPLICIT NONE
+
+        CALL OPTEMPY2K(RNMODE,FILEX,PATHEX,
+     &            YRIC,PRCROP,WRESR,WRESND,EFINOC,EFNFIX,
+     &            SWINIT,INH4,INO3,NYRS,VARNO,VRNAME,CROP,MODEL,
+     &            RUN,FILEIO,EXPN,ECONO,FROP,TRTALL,TRTN,
+     &            CHEXTR,NFORC,PLTFOR,NDOF,PMTYPE,ISENS)
+      
+        CALL OPTEMPXY2K (YRIC,PRCROP,WRESR,WRESND,EFINOC,EFNFIX,
+     &           SWINIT,INH4,INO3,NYRS,VARNO,VRNAME,CROP,
+     &           FILEIO,FROP,ECONO,ATLINE,
+     &           LNSIM,LNCU,LNHAR,LNENV,LNTIL,LNCHE,
+     &           LNFLD,LNSA,LNIC,LNPLT,LNIR,LNFER,LNRES,
+     &           NFORC,PLTFOR,PMTYPE,NDOF,CHEXTR, MODEL, PATHEX)
+
+
+
+        END SUBROUTINE
+
+      END MODULE DSSATWRAP
 
