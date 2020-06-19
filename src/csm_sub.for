@@ -1,4 +1,10 @@
 C=======================================================================
+C
+C  This is an exact copy of the DSSAT CSM main program, except that it's been 
+C  turned into a subroutine. My intent is to keep this as up to 
+C  date with DSSAT's releases as possible in order to avoid introducing 
+C  new bugs. ~ IMK 2020
+C
 C  COPYRIGHT 1998-2019 DSSAT Foundation
 C                      University of Florida, Gainesville, Florida
 C                      International Fertilizer Development Center
@@ -72,7 +78,9 @@ C  02/20/2006 GH  Add RNMODE="G" option for GENCALC
 !  01/11/2007 CHP Changed GETPUT calls to GET and PUT
 !  01/12/2007 CHP Read trt number and rotation number for sequence mode
 C=======================================================================
-      PROGRAM CSM
+
+
+      SUBROUTINE CSM_SUB(FA0, FA1, FA2, FA3, FA4)
 
       USE ModuleDefs 
       USE ModuleData
@@ -92,6 +100,11 @@ C-----------------------------------------------------------------------
       CHARACTER*120 FILECTL !12/11/08 control file includes path
       CHARACTER*120 PATHX
       CHARACTER*130 CHARTEST
+
+C     START FAUX ARGS
+      CHARACTER(len=*), intent(in) :: FA0, FA1, FA2, FA3, FA4
+
+C     END FAUX ARGS
 
       INTEGER       YRDOY,YRSIM,YRPLT,MDATE,YREND,YR,ISIM, YR0, ISIM0
       INTEGER       MULTI,NYRS,INCYD,YEAR,DOY,DAS,TIMDIF
@@ -131,16 +144,16 @@ C     The variable "ISWITCH" is of type "SwitchType".
 C-----------------------------------------------------------------------
 C    Get argument from runtime module to determine path of the EXE files
 C-----------------------------------------------------------------------
-      CALL GETARG(0,PATHX)   !,IPX
-      CALL GETARG(1,DUMMY)   !,IP
+      CALL GETFARG(0,PATHX, FA0, FA1, FA2, FA3, FA4)   !,IPX
+      CALL GETFARG(1,DUMMY, FA0, FA1, FA2, FA3, FA4)   !,IP
       IF ((DUMMY(1:1) .NE. BLANK) .AND. (DUMMY(2:2) .EQ. BLANK))
      &    THEN
-        CALL GETARG(1,RNMODE)   !,IP
+        CALL GETFARG(1, RNMODE, FA0, FA1, FA2, FA3, FA4)   !,IP
         NARG = 1
         CALL CheckRunMode(RNMODE)
       ELSE
-        CALL GETARG(1,MODELARG)  !,IP
-        CALL GETARG(2,RNMODE)    !,IP
+        CALL GETFARG(1,MODELARG, FA0, FA1, FA2, FA3, FA4)  !,IP
+        CALL GETFARG(2,RNMODE, FA0, FA1, FA2, FA3, FA4)    !,IP
         CALL CheckRunMode(RNMODE)
         NARG = 2
       ENDIF
@@ -174,26 +187,29 @@ C-----------------------------------------------------------------------
 
 !     Read experiment file from command line -- run all treatments
       CASE('A')   !run All treatments
-        CALL GETARG(NARG+1,FILEX)   !,IP   !Experiment file
-        CALL GETARG(NARG+2,FILECTL) !,IP   !Simulation control file name
+        CALL GETFARG(NARG+1,FILEX, FA0, FA1, FA2, FA3, FA4)   !,IP   !Experiment file
+        CALL GETFARG(NARG+2,FILECTL, FA0, FA1, FA2, FA3, FA4) !,IP   !Simulation control file name
 
 !     Read experiment file and treatment number from command line
       CASE('C','G')   !Command line, Gencalc
-        CALL GETARG(NARG+1,FILEX)   !,IP   !Experiment file
-        CALL GETARG(NARG+2,TRNARG)  !,IP   !Treatment number
-        CALL GETARG(NARG+3,FILECTL) !,IP   !Simulation control file name
+        CALL GETFARG(NARG+1,FILEX, FA0, FA1, FA2, FA3, FA4)   !,IP   !Experiment file
+        CALL GETFARG(NARG+2,TRNARG, FA0, FA1, FA2, FA3, FA4)  !,IP   !Treatment number
+        CALL GETFARG(NARG+3,FILECTL, FA0, FA1, FA2, FA3, FA4) !,IP   !Simulation control file name
         READ(TRNARG,'(I6)') TRTNUM
 
 !     Get experiment and treatment from batch file
       CASE('B','N','Q','S','F','T','E','L')
 !           Batch, seasoNal, seQuence, Spatial, 
 !           Farm, Gencalc(T), sEnsitivity, Locus 
-        CALL GETARG(NARG+1,FILEB)   !,IP   !Batch file name
-        CALL GETARG(NARG+2,FILECTL) !,IP   !Simulation control file name
+        CALL GETFARG(NARG+1,FILEB, FA0, FA1, FA2, FA3, FA4)   !,IP   !Batch file name
+        CALL GETFARG(NARG+2,FILECTL, FA0, FA1, FA2, FA3, FA4) !,IP   !Simulation control file name
 
 !     Debug mode -- bypass input module and read FILEIO
       CASE ('D')  !Debug
-        CALL GETARG(NARG+1,FILEIO)  !,IP   !INP file
+        print *, 'I did get this far'
+        CALL GETFARG(NARG+1,FILEIO, FA0, FA1, FA2, FA3, FA4)  !,IP   !INP file
+        print *, 'Fileio=[',FILEIO,']'
+        print *, 'Lenfileio ',LEN(FILEIO)
         DO I = 1, LEN(FILEIO)
           FILEIO(I:I) = UPCASE(FILEIO(I:I))
           ROTNUM = 0
@@ -254,6 +270,7 @@ C***********************************************************************
       CONTROL % YRDOY = 0
       CALL PUT(CONTROL)
 
+      print *,'and Im here'
       IF ((INDEX('NSFBT',RNMODE) .GT. 0) .OR. (INDEX('E',RNMODE) .GT.
      &     0 .AND. RUN .EQ. 1)) THEN
         CALL IGNORE (LUNBIO,LINBIO,ISECT,CHARTEST)
@@ -309,17 +326,22 @@ C-----------------------------------------------------------------------
       ELSE
         FILEX = '            '    !Debug mode - no FILEX
         CALL PATHD  (DSSATP,PATHX,LEN_TRIM(PATHX))
+        print *, "PathD=[", dssatp, "]"
         CONTROL % DSSATP = DSSATP
       ENDIF
 C-----------------------------------------------------------------------
 C    Check to see if the temporary file exists
 C-----------------------------------------------------------------------
+      print *,'Doot doot [', FILEIO, ']'
       INQUIRE (FILE = FILEIO,EXIST = FEXIST)
       IF (.NOT. FEXIST) THEN
+        print *,'Whoops'
         CALL ERROR(ERRKEY,2,FILEIO,LUNIO)
       ENDIF
 
       OPEN (LUNIO, FILE = FILEIO,STATUS = 'OLD',IOSTAT=ERRNUM)
+      print *,'LUNIO=[', LUNIO, "]"
+      print *,'errnum=[', errnum, "]"
       IF (ERRNUM .NE. 0) CALL ERROR (ERRKEY,ERRNUM,FILEIO,0)
       READ (LUNIO,300,IOSTAT=ERRNUM) EXPNO,TRTNUM,TRTALL
  300  FORMAT(36X,3(1X,I5))
@@ -393,7 +415,9 @@ C-----------------------------------------------------------------------
       ELSE
         CALL INFO(7,ERRKEY,MSG)
       ENDIF
-
+      print *, 'Yessir'
+      print *, 'nyrs=[', nyrs, ']'
+      print *, 'multi=[', multi, ']'
       CALL LAND(CONTROL, ISWITCH, 
      &          YRPLT, MDATE, YREND)
 
@@ -552,7 +576,7 @@ C-----------------------------------------------------------------------
 
       CALL RUNLIST(CONTROL)
 
-      END PROGRAM CSM 
+      END SUBROUTINE CSM_SUB
 
 !===========================================================================
 ! Variable listing for main program
@@ -611,3 +635,65 @@ C-----------------------------------------------------------------------
 ! YRPLT   Planting date (YYYYDDD)
 ! YRSIM   Start of simulation date (YYYYDDD)
 !===========================================================================
+
+
+C=======================================================================
+C     Subroutine that mimics fetching command line arguments
+C     The goal is to avoid changing the main code as little as possible
+C     filex -> 12 char
+C     filectl -> 120 char
+C     trnarg -> 6
+C     fileb -> 30 
+C=======================================================================
+      SUBROUTINE GETFARG(ARGNO, VAR, FA0, FA1, FA2, FA3, FA4)
+
+      IMPLICIT NONE
+
+      INTEGER ARGNO
+      CHARACTER(len=*) :: VAR
+      CHARACTER(len=*), intent(in) :: FA0,FA1,FA2,FA3,FA4
+
+C      CHARACTER(len=*) :: FAUXARG0, FAUXARG1, FAUXARG2, FAUXARG3
+C      CHARACTER(len=*) :: FAUXARG4
+
+      SELECT CASE (ARGNO)
+        case(0)
+          IF (FA0 .NE. "") THEN 
+            print *, "FA0 [", TRIM(FA0), "]"
+            VAR = TRIM(FA0)
+          ELSE
+            print *, "Skipping"
+          ENDIF
+        case(1)
+          IF (FA1 .NE. "") THEN 
+            print *, "FA1 [", TRIM(FA1), "]"
+            VAR = TRIM(FA1)
+          ELSE
+            print *, "Skipping"
+          ENDIF
+        case(2)
+          IF (FA2 .NE. "") THEN 
+            print *, "FA2 [", TRIM(FA2), "]"
+            VAR = TRIM(FA2)
+          ELSE
+            print *, "Skipping"
+          ENDIF
+        case(3)
+          IF (FA3 .NE. "") THEN 
+            VAR = TRIM(FA3)
+            print *, "FA3 [", TRIM(FA3), "]"
+          ELSE
+            print *, "Skipping"
+          ENDIF
+        case(4)
+          IF (FA4 .NE. "") THEN 
+            print *, "FA4 [", TRIM(FA4), "]"
+            VAR = TRIM(FA4)
+          ELSE
+            print *, "Skipping"
+          ENDIF
+      END SELECT
+      print *, "VAR after [", VAR,"]"
+
+      END SUBROUTINE GETFARG
+

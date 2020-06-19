@@ -20,10 +20,10 @@ class Experiment:
 
         d.dssatwrap.printtest()
         d.dssatwrap.writetempx()
-
    
         self._setup_irrigation()
-            
+  
+        d.dssatwrap.runsim()
 
     def _setup_irrigation(self):
        

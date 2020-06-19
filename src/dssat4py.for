@@ -56,6 +56,28 @@ C     --------------------------------
 
       CONTAINS 
 
+C       --------------------------------
+C       | Run experiment experiment file
+C       --------------------------------
+        SUBROUTINE RUNSIM()
+
+        USE ModuleData
+        USE ModuleDefs
+
+        IMPLICIT NONE
+
+        CHARACTER ::  RUNMODARG
+
+        RUNMODARG = "D"
+
+C        CALL csm_sub(RUNMODARG, TRIM(TRIM(PATHEX)//FILEIO), "", "", "")
+        CALL csm_sub("dscsm047", "MZCER047", RUNMODARG, FILEIO,  "")
+
+        END SUBROUTINE RUNSIM
+
+C       --------------------------------
+C       | Read experiment file
+C       --------------------------------
         SUBROUTINE READFILEX()
 
         USE ModuleData
@@ -73,8 +95,6 @@ C       Input variables
 
 C        DSSATP = TRIM(PATHEX)//'DSSATPRO.L47'
 
-
-
         CONTROL % REPNO = REPNO
         CONTROL % RUN = RUN
         CONTROL % YRDOY = 0
@@ -84,11 +104,13 @@ C        DSSATP = TRIM(PATHEX)//'DSSATPRO.L47'
         CONTROL % TRTNUM  = TRTNUM
         CONTROL % ERRCODE = 0
 
-        CALL PUT(CONTROL)
+
 
         CALL GETLUN('FILEIO', LUNIO)
         FILEIO = 'DSSAT47.INP'
 
+        CONTROL % FILEIO = FILEIO
+        CALL PUT(CONTROL)
     
 
 C       TODO in the future, split this into a read function and a
@@ -341,6 +363,7 @@ C       --------------------------------
 
         IMPLICIT NONE
 
+        print *, "Model=[", model, "]"
         CALL OPTEMPY2K(RNMODE,FILEX,PATHEX,
      &            YRIC,PRCROP,WRESR,WRESND,EFINOC,EFNFIX,
      &            SWINIT,INH4,INO3,NYRS,VARNO,VRNAME,CROP,MODEL,
