@@ -25,6 +25,7 @@ C     --------------------------------
         USE ModuleDefs
        
         IMPLICIT NONE
+        SAVE
 
         INCLUDE 'COMSWI.blk'
         INCLUDE 'COMIBS.blk'
@@ -41,10 +42,11 @@ C     --------------------------------
         CHARACTER*42 CHEXTR(NAPPL)
         CHARACTER*30  FILEIO
         CHARACTER*16 VRNAME
+
         CHARACTER*12  FILEX   
         CHARACTER*8 MODEL, MODELARG
-        CHARACTER*6 ECONO, VARNO
-        CHARACTER*2 CROP,PRCROP
+        CHARACTER*6 ECONO,VARNO
+C        CHARACTER*2 PRCROP
         CHARACTER*1 RNMODE
 
         REAL EFINOC, EFNFIX,PLTFOR,WRESND,WRESR
@@ -84,6 +86,7 @@ C       --------------------------------
         USE ModuleDefs
 
         IMPLICIT NONE
+        CHARACTER*2 CROP,PRCROP
 
 C       Input variables
 
@@ -105,7 +108,6 @@ C        DSSATP = TRIM(PATHEX)//'DSSATPRO.L47'
         CONTROL % ERRCODE = 0
 
 
-
         CALL GETLUN('FILEIO', LUNIO)
         FILEIO = 'DSSAT47.INP'
 
@@ -120,6 +122,23 @@ C       write function
      &    FILECTL, FILEIO, FILEX, MODELARG, PATHEX,       !Input
      &    RNMODE, ROTNUM, RUN, TRTNUM,                    !Input
      &    ISWITCH, CONTROL)                               !Output
+
+C        CROP    = CONTROL % CROP
+C        FILEIO  = CONTROL % FILEIO
+C        MODEL   = CONTROL % MODEL
+C        YRSIM   = CONTROL % YRSIM
+C        VARNO   = CONTROL % VARNO 
+C        VRNAME  = CONTROL % VRNAME
+
+
+        IPLTI   = ISWITCH % IPLTI
+
+
+        print *, "Crop after input_sub =[", CROP, "]"
+C        print *, "varno after input_sub =[", VARNO, "]"
+C        print *, "VRNAME after input_sub =[", VRNAME, "]"
+
+        print *, "Model=[", model, "]"
 
         END SUBROUTINE
 
@@ -362,6 +381,13 @@ C       --------------------------------
         USE ModuleDefs
 
         IMPLICIT NONE
+
+        CHARACTER*2 CROP
+        CHARACTER*2 PRCROP
+
+        print *, "Crop in writetempx=[", CROP, "]"
+C        print *, "varno in writetempx=[", VARNO, "]"
+C        print *, "VRNAME in writetempx=[", VRNAME, "]"
 
         print *, "Model=[", model, "]"
         CALL OPTEMPY2K(RNMODE,FILEX,PATHEX,
