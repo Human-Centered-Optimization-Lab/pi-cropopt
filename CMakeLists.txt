@@ -114,6 +114,7 @@ ENDIF(WIN32)
 set(
     source_list
       "src/dssat4py.for"
+      "src/csm_sub.for"
     	"${OSDefinitions}"
         "/Users/iankropp/Projects/dssat-csm-os/Utilities/CSMVersion.for"
         "/Users/iankropp/Projects/dssat-csm-os/Utilities/ModuleDefs.for"

@@ -20,10 +20,10 @@ class Experiment:
 
         d.dssatwrap.printtest()
         d.dssatwrap.writetempx()
-
    
         self._setup_irrigation()
-            
+  
+        d.dssatwrap.runsim()
 
     def _setup_irrigation(self):
        
@@ -40,9 +40,7 @@ class Experiment:
 
         d.dssatwrap.setirr([2020168, 2020169, 2020170], ["IR002", "IR002", "IR002"], [2.2, 3.4, 4.4], 3)        
 
-        d.dssatwrap.printtest()
 
-        d.dssatwrap.writetempx()
 
 
 path = "/Users/iankropp/Projects/tryImportingDSSAT/rundir/"

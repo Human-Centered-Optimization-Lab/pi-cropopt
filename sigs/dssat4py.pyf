@@ -8,6 +8,10 @@ python module dssat4py ! in
             character*12  intent(inout) :: FILEX
             character*80  intent(inout) :: PATHEX
             character*4   intent(inout) :: WSTA
+            subroutine runsim ! in :dssat4py:src/dssat4py.for
+                use moduledata
+                use moduledefs
+            end subroutine
             subroutine readfilex ! in :dssat4py:src/dssat4py.for
                 use moduledata
                 use moduledefs
