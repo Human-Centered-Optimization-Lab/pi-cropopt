@@ -1,8 +1,8 @@
 from functools import reduce
 from multiprocessing import Pool
 import numpy as np
-from shutil import copytree, copy
-import errno
+from shutil import copytree, copy, rmtree
+from glob import glob
 
 class Dssat4Dum():
 
@@ -13,17 +13,26 @@ class Dssat4Dum():
         self.fileio = fileio
         self.tmp_dir = tmp_dir
         self.activeIds = []       
+       
+        # delete old run directories
+        files2del = glob("%s/dssatrun*" % self.tmp_dir) 
+
+        for f in files2del: 
+            print("Deleting %s..." % f)
+            rmtree(f);
+            print("Deleted.")
+
 
     # irrsched is a nx2 matrix representing an irrigation schedule of n apps
-
     def run(self, irrsched, runid=0):
 
         if runid not in self.activeIds: 
             self._setupDirectory(self.home, self.tmp_dir, runid)
 
-        # self._editIrr(self.fileio, irrsched)
+        fileio_out = "%s/DSSAT47.INP" % self._getRunDir(self.tmp_dir, runid)
+            
 
-        return 
+        self._editIrr(self.fileio, fileio_out, irrsched)
       
     # irrsched is a nx2xy matrix representing j irrigation schedules of n apps
     def run_batch(self, irrsched, threads=1):
@@ -43,11 +52,13 @@ class Dssat4Dum():
     def _setupDirectory(self, home, temp_dir, runid):
 
         # TODO should be cross platform delimiter
-        temp_run_dir = "%s/dssatrun%04d" % (temp_dir,runid) 
+        temp_run_dir = self._getRunDir(temp_dir, runid)
 
         copytree(home, temp_run_dir)
 
-        
+    def _getRunDir(self, temp_dir, runid):
+        return "%s/dssatrun%04d" % (temp_dir,runid) 
+    
 
     def _editIrr(self, fileio_in, fileio_out, irrsched):
 
@@ -59,7 +70,7 @@ class Dssat4Dum():
         frmdatarr = np.apply_along_axis( (lambda a : "   %d IR001  %f" % (a[0], a[1])), 1,irrsched)
 
         frmdat = reduce(
-                lambda a,b : "%s\n\r%s" % (a,b) 
+                lambda a,b : "%s\n%s" % (a,b) 
                 ,frmdatarr
                 )
 
@@ -86,8 +97,11 @@ class Dssat4Dum():
                 raw_result = "%s%s" % (raw_result, line)
                 irrigation_it = -1
 
+        # Write results to file
 
-        return raw_result
+        f = open(fileio_out, "w")
+       
+        f.write(raw_result)
 
         
 dssat_home = "../../rundir/"
