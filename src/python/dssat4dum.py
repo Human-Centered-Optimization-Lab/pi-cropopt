@@ -3,6 +3,8 @@ from multiprocessing import Pool
 import numpy as np
 from shutil import copytree, copy, rmtree
 from glob import glob
+import os
+
 
 class Dssat4Dum():
 
@@ -29,11 +31,14 @@ class Dssat4Dum():
         if runid not in self.activeIds: 
             self._setupDirectory(self.home, self.tmp_dir, runid)
 
-        fileio_out = "%s/DSSAT47.INP" % self._getRunDir(self.tmp_dir, runid)
-            
+        rundir = self._getRunDir(self.tmp_dir, runid)
 
-        self._editIrr(self.fileio, fileio_out, irrsched)
-      
+        fileio_temp = "%s/DSSAT47.INP" % rundir
+
+        self._editIrr(self.fileio, fileio_temp, irrsched)
+
+        self._runDssat(rundir, fileio_temp)
+
     # irrsched is a nx2xy matrix representing j irrigation schedules of n apps
     def run_batch(self, irrsched, threads=1):
 
@@ -49,6 +54,14 @@ class Dssat4Dum():
 
         return yields
 
+    def _runDssat(self, dssat_path, fileio):
+                
+        os.chdir(dssat_path)
+
+        print(fileio)
+        #print(os.popen("./dscsm047 D %s" % fileio).read())
+        print(os.popen("./dscsm047 D DSSAT47.INP" ).read())
+
     def _setupDirectory(self, home, temp_dir, runid):
 
         # TODO should be cross platform delimiter
@@ -57,8 +70,12 @@ class Dssat4Dum():
         copytree(home, temp_run_dir)
 
     def _getRunDir(self, temp_dir, runid):
-        return "%s/dssatrun%04d" % (temp_dir,runid) 
-    
+
+        if temp_dir[-1] == '/':
+            return "%sdssatrun%04d" % (temp_dir,runid) 
+        else:
+            return "%sdssatrun%04d" % (temp_dir,runid) 
+
 
     def _editIrr(self, fileio_in, fileio_out, irrsched):
 
