@@ -3,6 +3,7 @@ from multiprocessing import Pool
 import numpy as np
 from shutil import copytree, copy, rmtree
 from glob import glob
+import subprocess as sp
 import os
 
 
@@ -58,9 +59,11 @@ class Dssat4Dum():
                 
         os.chdir(dssat_path)
 
-        print(fileio)
-        #print(os.popen("./dscsm047 D %s" % fileio).read())
-        print(os.popen("./dscsm047 D DSSAT47.INP" ).read())
+        res = sp.Popen(["./dscsm047", "D", "DSSAT47.INP"] )
+
+        print("Returned with a code %d" % res.returncode)
+
+        # TODO check for errors
 
     def _setupDirectory(self, home, temp_dir, runid):
 
@@ -108,7 +111,7 @@ class Dssat4Dum():
                 raw_result = "%s%s" % (raw_result, line)
 
             if irrigation_it == 3:
-                raw_result = "%s%s\n\r" % (raw_result, frmdat)
+                raw_result = "%s%s\n" % (raw_result, frmdat)
 
             if "*FERTILIZERS" in line:
                 raw_result = "%s%s" % (raw_result, line)
