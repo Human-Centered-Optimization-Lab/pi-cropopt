@@ -4,7 +4,7 @@ import numpy as np
 from shutil import copytree, copy, rmtree
 from glob import glob
 import subprocess as sp
-import os
+import os, re
 
 
 class Dssat4Dum():
@@ -47,9 +47,11 @@ class Dssat4Dum():
 
         self._editIrr(self.fileio, fileio_temp, irrsched)
 
-        self._runDssat(rundir, fileio_temp)
+        yld = self._runDssat(rundir, fileio_temp)
 
-    # irrsched is a nx2xy matrix representing j irrigation schedules of n apps
+        return yld
+
+    # irrsched is a jx2xn matrix representing j irrigation schedules of n apps
     def run_batch(self, irrsched, threads=1):
 
 
@@ -57,17 +59,18 @@ class Dssat4Dum():
 
         # Create the arg list, with the first item being the irrigation 
         # schedule and the second being the run id
-        #args = list(map((lambda a, ind : (a, ind)), irrsched, range(0,batch_count)))
-
         argz = []
         for ind,dat in enumerate(irrsched): 
-            print
             argz.append((ind, dat))
 
-        
         yields = []
-        with Pool(threads) as p: 
-            yields = p.map(self.run, argz)
+        if threads == 1: 
+            # Eschew multiprocessing for debugging ease
+            for r in range(0, batch_count):
+                yields.append(self.run(argz[r]))
+        else: 
+            with Pool(threads) as p: 
+                yields = p.map(self.run, argz)
 
         return yields
 
@@ -75,11 +78,19 @@ class Dssat4Dum():
                 
         os.chdir(dssat_path)
 
-        res = sp.Popen(["./dscsm047", "D", "DSSAT47.INP"] )
-
-        #print("Returned with a code %d" % res.returncode)
+        res = sp.run(["./dscsm047", "D", "DSSAT47.INP"], check=True)
 
         # TODO check for errors
+       
+        # Read output
+
+        reader = open("OVERVIEW.OUT", "r", errors="ignore")
+
+        raw_txt = "".join(reader.readlines())
+        
+        yld = re.search("\s*\w*\s+YIELD\s+:\s+(\d+)\s+kg/ha",raw_txt).group(1)
+
+        return int(yld)
 
     def _setupDirectory(self, home, temp_dir, runid):
 
@@ -140,118 +151,124 @@ class Dssat4Dum():
         f.write(raw_result)
 
         
-dssat_home = "/home/ian/Projects/dssat4py/rundir/"
-fileio = "/home/ian/Projects/dssat4py/rundir/DSSAT47.INP"
+dssat_home = "/Users/iankropp/Projects/dssat4py/rundir/"
+fileio = "/Users/iankropp/Projects/dssat4py/rundir/DSSAT47.INP"
 tmp_dir = "/tmp/"
 
 runner = Dssat4Dum(dssat_home, fileio, tmp_dir)
 
-irrscheds = np.zeros((100, 3, 2))
+#irrscheds = np.zeros((100, 3, 2))
+##irrscheds = np.zeros((10, 3, 2))
+#
+#irrscheds[0] = np.array(np.matrix('[2017123, 8 ; 2017140, 11; 2017144, 17]'))
+#irrscheds[1] = np.array(np.matrix('[2017123, 8 ; 2017140, 6 ; 2017144, 3 ]'))
+#irrscheds[2] = np.array(np.matrix('[2017123, 23; 2017140, 3 ; 2017144, 15]'))
+#irrscheds[3] = np.array(np.matrix('[2017123, 21; 2017140, 13; 2017144, 4 ]'))
+#irrscheds[4] = np.array(np.matrix('[2017123, 11; 2017140, 12; 2017144, 13]'))
+#irrscheds[5] = np.array(np.matrix('[2017123, 12; 2017140, 9 ; 2017144, 9 ]'))
+#irrscheds[6] = np.array(np.matrix('[2017123, 13; 2017140, 3 ; 2017144, 16]'))
+#irrscheds[7] = np.array(np.matrix('[2017123, 22; 2017140, 8 ; 2017144, 12]'))
+#irrscheds[8] = np.array(np.matrix('[2017123, 22; 2017140, 15; 2017144, 19]'))
+#irrscheds[9] = np.array(np.matrix('[2017123, 10; 2017140, 13; 2017144, 17]'))
+#irrscheds[10] = np.array(np.matrix('[2017123, 8 ; 2017140, 11; 2017144, 17]'))
+#irrscheds[11] = np.array(np.matrix('[2017123, 8 ; 2017140, 6 ; 2017144, 3 ]'))
+#irrscheds[12] = np.array(np.matrix('[2017123, 23; 2017140, 3 ; 2017144, 15]'))
+#irrscheds[13] = np.array(np.matrix('[2017123, 21; 2017140, 13; 2017144, 4 ]'))
+#irrscheds[14] = np.array(np.matrix('[2017123, 11; 2017140, 12; 2017144, 13]'))
+#irrscheds[15] = np.array(np.matrix('[2017123, 12; 2017140, 9 ; 2017144, 9 ]'))
+#irrscheds[16] = np.array(np.matrix('[2017123, 13; 2017140, 3 ; 2017144, 16]'))
+#irrscheds[17] = np.array(np.matrix('[2017123, 22; 2017140, 8 ; 2017144, 12]'))
+#irrscheds[18] = np.array(np.matrix('[2017123, 22; 2017140, 15; 2017144, 19]'))
+#irrscheds[19] = np.array(np.matrix('[2017123, 10; 2017140, 13; 2017144, 17]'))
+#irrscheds[20] = np.array(np.matrix('[2017123, 8 ; 2017140, 11; 2017144, 17]'))
+#irrscheds[21] = np.array(np.matrix('[2017123, 8 ; 2017140, 6 ; 2017144, 3 ]'))
+#irrscheds[22] = np.array(np.matrix('[2017123, 23; 2017140, 3 ; 2017144, 15]'))
+#irrscheds[23] = np.array(np.matrix('[2017123, 21; 2017140, 13; 2017144, 4 ]'))
+#irrscheds[24] = np.array(np.matrix('[2017123, 11; 2017140, 12; 2017144, 13]'))
+#irrscheds[25] = np.array(np.matrix('[2017123, 12; 2017140, 9 ; 2017144, 9 ]'))
+#irrscheds[26] = np.array(np.matrix('[2017123, 13; 2017140, 3 ; 2017144, 16]'))
+#irrscheds[27] = np.array(np.matrix('[2017123, 22; 2017140, 8 ; 2017144, 12]'))
+#irrscheds[28] = np.array(np.matrix('[2017123, 22; 2017140, 15; 2017144, 19]'))
+#irrscheds[29] = np.array(np.matrix('[2017123, 10; 2017140, 13; 2017144, 17]'))
+#irrscheds[30] = np.array(np.matrix('[2017123, 8 ; 2017140, 11; 2017144, 17]'))
+#irrscheds[31] = np.array(np.matrix('[2017123, 8 ; 2017140, 6 ; 2017144, 3 ]'))
+#irrscheds[32] = np.array(np.matrix('[2017123, 23; 2017140, 3 ; 2017144, 15]'))
+#irrscheds[33] = np.array(np.matrix('[2017123, 21; 2017140, 13; 2017144, 4 ]'))
+#irrscheds[34] = np.array(np.matrix('[2017123, 11; 2017140, 12; 2017144, 13]'))
+#irrscheds[35] = np.array(np.matrix('[2017123, 12; 2017140, 9 ; 2017144, 9 ]'))
+#irrscheds[36] = np.array(np.matrix('[2017123, 13; 2017140, 3 ; 2017144, 16]'))
+#irrscheds[37] = np.array(np.matrix('[2017123, 22; 2017140, 8 ; 2017144, 12]'))
+#irrscheds[38] = np.array(np.matrix('[2017123, 22; 2017140, 15; 2017144, 19]'))
+#irrscheds[39] = np.array(np.matrix('[2017123, 10; 2017140, 13; 2017144, 17]'))
+#irrscheds[40] = np.array(np.matrix('[2017123, 8 ; 2017140, 11; 2017144, 17]'))
+#irrscheds[41] = np.array(np.matrix('[2017123, 8 ; 2017140, 6 ; 2017144, 3 ]'))
+#irrscheds[42] = np.array(np.matrix('[2017123, 23; 2017140, 3 ; 2017144, 15]'))
+#irrscheds[43] = np.array(np.matrix('[2017123, 21; 2017140, 13; 2017144, 4 ]'))
+#irrscheds[44] = np.array(np.matrix('[2017123, 11; 2017140, 12; 2017144, 13]'))
+#irrscheds[45] = np.array(np.matrix('[2017123, 12; 2017140, 9 ; 2017144, 9 ]'))
+#irrscheds[46] = np.array(np.matrix('[2017123, 13; 2017140, 3 ; 2017144, 16]'))
+#irrscheds[47] = np.array(np.matrix('[2017123, 22; 2017140, 8 ; 2017144, 12]'))
+#irrscheds[48] = np.array(np.matrix('[2017123, 22; 2017140, 15; 2017144, 19]'))
+#irrscheds[49] = np.array(np.matrix('[2017123, 10; 2017140, 13; 2017144, 17]'))
+#irrscheds[50] = np.array(np.matrix('[2017123, 8 ; 2017140, 11; 2017144, 17]'))
+#irrscheds[51] = np.array(np.matrix('[2017123, 8 ; 2017140, 6 ; 2017144, 3 ]'))
+#irrscheds[52] = np.array(np.matrix('[2017123, 23; 2017140, 3 ; 2017144, 15]'))
+#irrscheds[53] = np.array(np.matrix('[2017123, 21; 2017140, 13; 2017144, 4 ]'))
+#irrscheds[54] = np.array(np.matrix('[2017123, 11; 2017140, 12; 2017144, 13]'))
+#irrscheds[55] = np.array(np.matrix('[2017123, 12; 2017140, 9 ; 2017144, 9 ]'))
+#irrscheds[56] = np.array(np.matrix('[2017123, 13; 2017140, 3 ; 2017144, 16]'))
+#irrscheds[57] = np.array(np.matrix('[2017123, 22; 2017140, 8 ; 2017144, 12]'))
+#irrscheds[58] = np.array(np.matrix('[2017123, 22; 2017140, 15; 2017144, 19]'))
+#irrscheds[59] = np.array(np.matrix('[2017123, 10; 2017140, 13; 2017144, 17]'))
+#irrscheds[60] = np.array(np.matrix('[2017123, 8 ; 2017140, 11; 2017144, 17]'))
+#irrscheds[61] = np.array(np.matrix('[2017123, 8 ; 2017140, 6 ; 2017144, 3 ]'))
+#irrscheds[62] = np.array(np.matrix('[2017123, 23; 2017140, 3 ; 2017144, 15]'))
+#irrscheds[63] = np.array(np.matrix('[2017123, 21; 2017140, 13; 2017144, 4 ]'))
+#irrscheds[64] = np.array(np.matrix('[2017123, 11; 2017140, 12; 2017144, 13]'))
+#irrscheds[65] = np.array(np.matrix('[2017123, 12; 2017140, 9 ; 2017144, 9 ]'))
+#irrscheds[66] = np.array(np.matrix('[2017123, 13; 2017140, 3 ; 2017144, 16]'))
+#irrscheds[67] = np.array(np.matrix('[2017123, 22; 2017140, 8 ; 2017144, 12]'))
+#irrscheds[68] = np.array(np.matrix('[2017123, 22; 2017140, 15; 2017144, 19]'))
+#irrscheds[69] = np.array(np.matrix('[2017123, 10; 2017140, 13; 2017144, 17]'))
+#irrscheds[70] = np.array(np.matrix('[2017123, 8 ; 2017140, 11; 2017144, 17]'))
+#irrscheds[71] = np.array(np.matrix('[2017123, 8 ; 2017140, 6 ; 2017144, 3 ]'))
+#irrscheds[72] = np.array(np.matrix('[2017123, 23; 2017140, 3 ; 2017144, 15]'))
+#irrscheds[73] = np.array(np.matrix('[2017123, 21; 2017140, 13; 2017144, 4 ]'))
+#irrscheds[74] = np.array(np.matrix('[2017123, 11; 2017140, 12; 2017144, 13]'))
+#irrscheds[75] = np.array(np.matrix('[2017123, 12; 2017140, 9 ; 2017144, 9 ]'))
+#irrscheds[76] = np.array(np.matrix('[2017123, 13; 2017140, 3 ; 2017144, 16]'))
+#irrscheds[77] = np.array(np.matrix('[2017123, 22; 2017140, 8 ; 2017144, 12]'))
+#irrscheds[78] = np.array(np.matrix('[2017123, 22; 2017140, 15; 2017144, 19]'))
+#irrscheds[79] = np.array(np.matrix('[2017123, 10; 2017140, 13; 2017144, 17]'))
+#irrscheds[80] = np.array(np.matrix('[2017123, 8 ; 2017140, 11; 2017144, 17]'))
+#irrscheds[81] = np.array(np.matrix('[2017123, 8 ; 2017140, 6 ; 2017144, 3 ]'))
+#irrscheds[82] = np.array(np.matrix('[2017123, 23; 2017140, 3 ; 2017144, 15]'))
+#irrscheds[83] = np.array(np.matrix('[2017123, 21; 2017140, 13; 2017144, 4 ]'))
+#irrscheds[84] = np.array(np.matrix('[2017123, 11; 2017140, 12; 2017144, 13]'))
+#irrscheds[85] = np.array(np.matrix('[2017123, 12; 2017140, 9 ; 2017144, 9 ]'))
+#irrscheds[86] = np.array(np.matrix('[2017123, 13; 2017140, 3 ; 2017144, 16]'))
+#irrscheds[87] = np.array(np.matrix('[2017123, 22; 2017140, 8 ; 2017144, 12]'))
+#irrscheds[88] = np.array(np.matrix('[2017123, 22; 2017140, 15; 2017144, 19]'))
+#irrscheds[89] = np.array(np.matrix('[2017123, 10; 2017140, 13; 2017144, 17]'))
+#irrscheds[90] = np.array(np.matrix('[2017123, 8 ; 2017140, 11; 2017144, 17]'))
+#irrscheds[91] = np.array(np.matrix('[2017123, 8 ; 2017140, 6 ; 2017144, 3 ]'))
+#irrscheds[92] = np.array(np.matrix('[2017123, 23; 2017140, 3 ; 2017144, 15]'))
+#irrscheds[93] = np.array(np.matrix('[2017123, 21; 2017140, 13; 2017144, 4 ]'))
+#irrscheds[94] = np.array(np.matrix('[2017123, 11; 2017140, 12; 2017144, 13]'))
+#irrscheds[95] = np.array(np.matrix('[2017123, 12; 2017140, 9 ; 2017144, 9 ]'))
+#irrscheds[96] = np.array(np.matrix('[2017123, 13; 2017140, 3 ; 2017144, 16]'))
+#irrscheds[97] = np.array(np.matrix('[2017123, 22; 2017140, 8 ; 2017144, 12]'))
+#irrscheds[98] = np.array(np.matrix('[2017123, 22; 2017140, 15; 2017144, 19]'))
+#irrscheds[99] = np.array(np.matrix('[2017123, 10; 2017140, 13; 2017144, 17]'))
 
+#irrscheds = np.zeros((100, 3, 2))
+irrscheds = np.zeros((1, 3, 2))
+#
 irrscheds[0] = np.array(np.matrix('[2017123, 8 ; 2017140, 11; 2017144, 17]'))
-irrscheds[1] = np.array(np.matrix('[2017123, 8 ; 2017140, 6 ; 2017144, 3 ]'))
-irrscheds[2] = np.array(np.matrix('[2017123, 23; 2017140, 3 ; 2017144, 15]'))
-irrscheds[3] = np.array(np.matrix('[2017123, 21; 2017140, 13; 2017144, 4 ]'))
-irrscheds[4] = np.array(np.matrix('[2017123, 11; 2017140, 12; 2017144, 13]'))
-irrscheds[5] = np.array(np.matrix('[2017123, 12; 2017140, 9 ; 2017144, 9 ]'))
-irrscheds[6] = np.array(np.matrix('[2017123, 13; 2017140, 3 ; 2017144, 16]'))
-irrscheds[7] = np.array(np.matrix('[2017123, 22; 2017140, 8 ; 2017144, 12]'))
-irrscheds[8] = np.array(np.matrix('[2017123, 22; 2017140, 15; 2017144, 19]'))
-irrscheds[9] = np.array(np.matrix('[2017123, 10; 2017140, 13; 2017144, 17]'))
-irrscheds[10] = np.array(np.matrix('[2017123, 8 ; 2017140, 11; 2017144, 17]'))
-irrscheds[11] = np.array(np.matrix('[2017123, 8 ; 2017140, 6 ; 2017144, 3 ]'))
-irrscheds[12] = np.array(np.matrix('[2017123, 23; 2017140, 3 ; 2017144, 15]'))
-irrscheds[13] = np.array(np.matrix('[2017123, 21; 2017140, 13; 2017144, 4 ]'))
-irrscheds[14] = np.array(np.matrix('[2017123, 11; 2017140, 12; 2017144, 13]'))
-irrscheds[15] = np.array(np.matrix('[2017123, 12; 2017140, 9 ; 2017144, 9 ]'))
-irrscheds[16] = np.array(np.matrix('[2017123, 13; 2017140, 3 ; 2017144, 16]'))
-irrscheds[17] = np.array(np.matrix('[2017123, 22; 2017140, 8 ; 2017144, 12]'))
-irrscheds[18] = np.array(np.matrix('[2017123, 22; 2017140, 15; 2017144, 19]'))
-irrscheds[19] = np.array(np.matrix('[2017123, 10; 2017140, 13; 2017144, 17]'))
-irrscheds[20] = np.array(np.matrix('[2017123, 8 ; 2017140, 11; 2017144, 17]'))
-irrscheds[21] = np.array(np.matrix('[2017123, 8 ; 2017140, 6 ; 2017144, 3 ]'))
-irrscheds[22] = np.array(np.matrix('[2017123, 23; 2017140, 3 ; 2017144, 15]'))
-irrscheds[23] = np.array(np.matrix('[2017123, 21; 2017140, 13; 2017144, 4 ]'))
-irrscheds[24] = np.array(np.matrix('[2017123, 11; 2017140, 12; 2017144, 13]'))
-irrscheds[25] = np.array(np.matrix('[2017123, 12; 2017140, 9 ; 2017144, 9 ]'))
-irrscheds[26] = np.array(np.matrix('[2017123, 13; 2017140, 3 ; 2017144, 16]'))
-irrscheds[27] = np.array(np.matrix('[2017123, 22; 2017140, 8 ; 2017144, 12]'))
-irrscheds[28] = np.array(np.matrix('[2017123, 22; 2017140, 15; 2017144, 19]'))
-irrscheds[29] = np.array(np.matrix('[2017123, 10; 2017140, 13; 2017144, 17]'))
-irrscheds[30] = np.array(np.matrix('[2017123, 8 ; 2017140, 11; 2017144, 17]'))
-irrscheds[31] = np.array(np.matrix('[2017123, 8 ; 2017140, 6 ; 2017144, 3 ]'))
-irrscheds[32] = np.array(np.matrix('[2017123, 23; 2017140, 3 ; 2017144, 15]'))
-irrscheds[33] = np.array(np.matrix('[2017123, 21; 2017140, 13; 2017144, 4 ]'))
-irrscheds[34] = np.array(np.matrix('[2017123, 11; 2017140, 12; 2017144, 13]'))
-irrscheds[35] = np.array(np.matrix('[2017123, 12; 2017140, 9 ; 2017144, 9 ]'))
-irrscheds[36] = np.array(np.matrix('[2017123, 13; 2017140, 3 ; 2017144, 16]'))
-irrscheds[37] = np.array(np.matrix('[2017123, 22; 2017140, 8 ; 2017144, 12]'))
-irrscheds[38] = np.array(np.matrix('[2017123, 22; 2017140, 15; 2017144, 19]'))
-irrscheds[39] = np.array(np.matrix('[2017123, 10; 2017140, 13; 2017144, 17]'))
-irrscheds[40] = np.array(np.matrix('[2017123, 8 ; 2017140, 11; 2017144, 17]'))
-irrscheds[41] = np.array(np.matrix('[2017123, 8 ; 2017140, 6 ; 2017144, 3 ]'))
-irrscheds[42] = np.array(np.matrix('[2017123, 23; 2017140, 3 ; 2017144, 15]'))
-irrscheds[43] = np.array(np.matrix('[2017123, 21; 2017140, 13; 2017144, 4 ]'))
-irrscheds[44] = np.array(np.matrix('[2017123, 11; 2017140, 12; 2017144, 13]'))
-irrscheds[45] = np.array(np.matrix('[2017123, 12; 2017140, 9 ; 2017144, 9 ]'))
-irrscheds[46] = np.array(np.matrix('[2017123, 13; 2017140, 3 ; 2017144, 16]'))
-irrscheds[47] = np.array(np.matrix('[2017123, 22; 2017140, 8 ; 2017144, 12]'))
-irrscheds[48] = np.array(np.matrix('[2017123, 22; 2017140, 15; 2017144, 19]'))
-irrscheds[49] = np.array(np.matrix('[2017123, 10; 2017140, 13; 2017144, 17]'))
-irrscheds[50] = np.array(np.matrix('[2017123, 8 ; 2017140, 11; 2017144, 17]'))
-irrscheds[51] = np.array(np.matrix('[2017123, 8 ; 2017140, 6 ; 2017144, 3 ]'))
-irrscheds[52] = np.array(np.matrix('[2017123, 23; 2017140, 3 ; 2017144, 15]'))
-irrscheds[53] = np.array(np.matrix('[2017123, 21; 2017140, 13; 2017144, 4 ]'))
-irrscheds[54] = np.array(np.matrix('[2017123, 11; 2017140, 12; 2017144, 13]'))
-irrscheds[55] = np.array(np.matrix('[2017123, 12; 2017140, 9 ; 2017144, 9 ]'))
-irrscheds[56] = np.array(np.matrix('[2017123, 13; 2017140, 3 ; 2017144, 16]'))
-irrscheds[57] = np.array(np.matrix('[2017123, 22; 2017140, 8 ; 2017144, 12]'))
-irrscheds[58] = np.array(np.matrix('[2017123, 22; 2017140, 15; 2017144, 19]'))
-irrscheds[59] = np.array(np.matrix('[2017123, 10; 2017140, 13; 2017144, 17]'))
-irrscheds[60] = np.array(np.matrix('[2017123, 8 ; 2017140, 11; 2017144, 17]'))
-irrscheds[61] = np.array(np.matrix('[2017123, 8 ; 2017140, 6 ; 2017144, 3 ]'))
-irrscheds[62] = np.array(np.matrix('[2017123, 23; 2017140, 3 ; 2017144, 15]'))
-irrscheds[63] = np.array(np.matrix('[2017123, 21; 2017140, 13; 2017144, 4 ]'))
-irrscheds[64] = np.array(np.matrix('[2017123, 11; 2017140, 12; 2017144, 13]'))
-irrscheds[65] = np.array(np.matrix('[2017123, 12; 2017140, 9 ; 2017144, 9 ]'))
-irrscheds[66] = np.array(np.matrix('[2017123, 13; 2017140, 3 ; 2017144, 16]'))
-irrscheds[67] = np.array(np.matrix('[2017123, 22; 2017140, 8 ; 2017144, 12]'))
-irrscheds[68] = np.array(np.matrix('[2017123, 22; 2017140, 15; 2017144, 19]'))
-irrscheds[69] = np.array(np.matrix('[2017123, 10; 2017140, 13; 2017144, 17]'))
-irrscheds[70] = np.array(np.matrix('[2017123, 8 ; 2017140, 11; 2017144, 17]'))
-irrscheds[71] = np.array(np.matrix('[2017123, 8 ; 2017140, 6 ; 2017144, 3 ]'))
-irrscheds[72] = np.array(np.matrix('[2017123, 23; 2017140, 3 ; 2017144, 15]'))
-irrscheds[73] = np.array(np.matrix('[2017123, 21; 2017140, 13; 2017144, 4 ]'))
-irrscheds[74] = np.array(np.matrix('[2017123, 11; 2017140, 12; 2017144, 13]'))
-irrscheds[75] = np.array(np.matrix('[2017123, 12; 2017140, 9 ; 2017144, 9 ]'))
-irrscheds[76] = np.array(np.matrix('[2017123, 13; 2017140, 3 ; 2017144, 16]'))
-irrscheds[77] = np.array(np.matrix('[2017123, 22; 2017140, 8 ; 2017144, 12]'))
-irrscheds[78] = np.array(np.matrix('[2017123, 22; 2017140, 15; 2017144, 19]'))
-irrscheds[79] = np.array(np.matrix('[2017123, 10; 2017140, 13; 2017144, 17]'))
-irrscheds[80] = np.array(np.matrix('[2017123, 8 ; 2017140, 11; 2017144, 17]'))
-irrscheds[81] = np.array(np.matrix('[2017123, 8 ; 2017140, 6 ; 2017144, 3 ]'))
-irrscheds[82] = np.array(np.matrix('[2017123, 23; 2017140, 3 ; 2017144, 15]'))
-irrscheds[83] = np.array(np.matrix('[2017123, 21; 2017140, 13; 2017144, 4 ]'))
-irrscheds[84] = np.array(np.matrix('[2017123, 11; 2017140, 12; 2017144, 13]'))
-irrscheds[85] = np.array(np.matrix('[2017123, 12; 2017140, 9 ; 2017144, 9 ]'))
-irrscheds[86] = np.array(np.matrix('[2017123, 13; 2017140, 3 ; 2017144, 16]'))
-irrscheds[87] = np.array(np.matrix('[2017123, 22; 2017140, 8 ; 2017144, 12]'))
-irrscheds[88] = np.array(np.matrix('[2017123, 22; 2017140, 15; 2017144, 19]'))
-irrscheds[89] = np.array(np.matrix('[2017123, 10; 2017140, 13; 2017144, 17]'))
-irrscheds[90] = np.array(np.matrix('[2017123, 8 ; 2017140, 11; 2017144, 17]'))
-irrscheds[91] = np.array(np.matrix('[2017123, 8 ; 2017140, 6 ; 2017144, 3 ]'))
-irrscheds[92] = np.array(np.matrix('[2017123, 23; 2017140, 3 ; 2017144, 15]'))
-irrscheds[93] = np.array(np.matrix('[2017123, 21; 2017140, 13; 2017144, 4 ]'))
-irrscheds[94] = np.array(np.matrix('[2017123, 11; 2017140, 12; 2017144, 13]'))
-irrscheds[95] = np.array(np.matrix('[2017123, 12; 2017140, 9 ; 2017144, 9 ]'))
-irrscheds[96] = np.array(np.matrix('[2017123, 13; 2017140, 3 ; 2017144, 16]'))
-irrscheds[97] = np.array(np.matrix('[2017123, 22; 2017140, 8 ; 2017144, 12]'))
-irrscheds[98] = np.array(np.matrix('[2017123, 22; 2017140, 15; 2017144, 19]'))
-irrscheds[99] = np.array(np.matrix('[2017123, 10; 2017140, 13; 2017144, 17]'))
 
 
+print(runner.run_batch(irrscheds, 1))
 
-runner.run_batch(irrscheds, 4)
 #print(runner.run(irrscheds[0],0))
 
 
