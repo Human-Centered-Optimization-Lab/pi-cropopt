@@ -6,12 +6,11 @@ from pymoo.configuration import Configuration
 from datetime import datetime
 import os
 from numpy import genfromtxt
+from cropover import Cropover
 
 Configuration.show_compile_hint = False
 
-# Custom stuff 
-from CropoverTests import CropoverTests
-from Cropover import Cropover
+from cropopt import CropOpt
 
 
 max_run = 50 
@@ -23,13 +22,23 @@ seeds = genfromtxt('seeds.csv', delimiter=',')
 
 seeds = seeds.astype(int)
 
+dssat_home = "/home/ian/Projects/dssat4py/src/python"
+fileio = "/home/ian/Projects/dssat4py/rundir/DSSAT47.INP"
+tempdir = "/tmp/"
+
+threads = 1
+
+date_ranges = np.array(np.matrix("[2018135, 2018140, 1, 20; 2018200, 2018204, 0, 19]"))
+
 
 # Runs with cropover
 for run in range(max_run):
 
     seed = seeds[run + max_run]
 
-    prob = CropoverTests(seed=seed)
+
+
+    prob = CropOpt(threads, dssat_home, fileio, tempdir, date_ranges, seed=seed)
     cropover = Cropover(eta=30, prob=1.0)
 
     algorithm = NSGA2(pop_size=100, 
@@ -61,7 +70,7 @@ for run in range(max_run):
 
     seed = seeds[run]
 
-    prob = CropoverTests(seed=seed)
+    prob = Cropover(seed=seed)
     cropover = Cropover(eta=30, prob=1.0)
 
     algorithm = NSGA2(pop_size=100, 

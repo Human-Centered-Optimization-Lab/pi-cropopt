@@ -1,6 +1,6 @@
-
-from multiprocessing import Pool
-
+import numpy as np
+from pymoo.model.problem import Problem
+from dssat4dum import Dssat4Dum
 
 class CropOpt(Problem):
 
@@ -16,7 +16,7 @@ class CropOpt(Problem):
     # date_ranges   -- 4xn array of period beginnings, period endings, period 
     #                   minimums, and period maximums
     # 
-    def __init__(self, threads, dssat_home, dssat_inp, date_ranges):
+    def __init__(self, threads, dssat_home, dssat_inp, tmp_dir, date_ranges, seed=0):
 
         self.threads        = threads
         self.dssat_home     = dssat_home
@@ -26,19 +26,46 @@ class CropOpt(Problem):
 
         # +1 to avoid fencepost error
         day_count = np.sum(
-                self.date_ranges[:,MAX_DATE] - self.date_ranges[:,MIN_DATE] + 1
+                self.date_ranges[:,self.MAX_DATE] - self.date_ranges[:,self.MIN_DATE] + 1
                 ) 
 
+        mins = np.ones(day_count) * -1
+        maxs = np.ones(day_count) * -1
+
+
+        offset = 0 
+        for period in range(0, np.size(self.date_ranges, 0)):
+
+            minDate = date_ranges[period,self.MIN_DATE]
+            maxDate = date_ranges[period,self.MAX_DATE]
+
+            minindex = offset
+            maxindex = minindex + (maxDate - minDate)  + 1
+
+            mins[minindex:maxindex] = date_ranges[period, self.MIN_APP]
+            maxs[minindex:maxindex] = date_ranges[period, self.MAX_APP]
+            
+            offset = (maxDate - minDate) + 1
+
         # TODO make sure we don't need any constraints
+        print("in")
         super().__init__(n_var=day_count,
                          n_obj=2,
                          n_constr=0,
-                         xl=self.date_ranges[:,MIN_APP],
-                         xu=self.date_ranges[:,MAX_APP])
+                         xl=mins,
+                         xu=maxs)
+
+        print("done")
+        return  
 
     def _evaluate(self, x, out, *args, **kwargs):
 
-        d_runner = dssat4py(self.dssat_home, self.dssat_inp, self.tmp_dir)
+        print("******")
+        print(np.shape(x))
+        print("******")
+
+        #d_runner = dssat4dum(self.dssat_home, self.dssat_inp, self.tmp_dir)
+
 
         # message x to work in eval_batch
 
