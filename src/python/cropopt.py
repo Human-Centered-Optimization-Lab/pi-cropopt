@@ -18,6 +18,7 @@ class CropOpt(Problem):
     # 
     def __init__(self, threads, dssat_home, dssat_inp, tmp_dir, date_ranges, seed=0):
 
+
         self.threads        = threads
         self.dssat_home     = dssat_home
         self.dssat_inp      = dssat_inp
@@ -33,39 +34,51 @@ class CropOpt(Problem):
         maxs = np.ones(day_count) * -1
 
 
-        offset = 0 
-        for period in range(0, np.size(self.date_ranges, 0)):
+        
+        for indx, period in enumerate(self._calc_period_indices(date_ranges)):
 
-            minDate = date_ranges[period,self.MIN_DATE]
-            maxDate = date_ranges[period,self.MAX_DATE]
+            minindex = period[0]
+            maxindex = period[1]
 
-            minindex = offset
-            maxindex = minindex + (maxDate - minDate)  + 1
+            mins[minindex:maxindex] = date_ranges[indx, self.MIN_APP]
+            maxs[minindex:maxindex] = date_ranges[indx, self.MAX_APP]
+           
+#        offset = 0 
+#        for period in range(0, np.size(self.date_ranges, 0)):
 
-            mins[minindex:maxindex] = date_ranges[period, self.MIN_APP]
-            maxs[minindex:maxindex] = date_ranges[period, self.MAX_APP]
+#            minDate = date_ranges[period,self.MIN_DATE]
+#            maxDate = date_ranges[period,self.MAX_DATE]
+
+#            minindex = offset
+#            maxindex = minindex + (maxDate - minDate)  + 1
+
+#            mins[minindex:maxindex] = date_ranges[period, self.MIN_APP]
+#            maxs[minindex:maxindex] = date_ranges[period, self.MAX_APP]
             
-            offset = (maxDate - minDate) + 1
+#            offset = (maxDate - minDate) + 1
+
 
         # TODO make sure we don't need any constraints
-        print("in")
         super().__init__(n_var=day_count,
                          n_obj=2,
                          n_constr=0,
                          xl=mins,
                          xu=maxs)
 
-        print("done")
         return  
 
     def _evaluate(self, x, out, *args, **kwargs):
 
-        print("******")
-        print(np.shape(x))
-        print("******")
+        irrapps = self._build_applications(x, self.date_ranges)
 
-        #d_runner = dssat4dum(self.dssat_home, self.dssat_inp, self.tmp_dir)
+        print(irrapps)
+        print(irrapps)
+        print(irrapps)
 
+        d_runner = Dssat4Dum(self.dssat_home, self.dssat_inp, self.tmp_dir)
+    
+        d_runner.awefawef
+       
 
         # message x to work in eval_batch
 
@@ -76,10 +89,50 @@ class CropOpt(Problem):
         out["F"] = objectives
 
 
-    def _format_irrigation(self, x):
+    def _calc_period_indices(self, date_ranges):
+        
+        res = []  
+        
+        offset = 0 
+        for period in range(0, np.size(date_ranges, 0)):
 
-        # TODO impelement 
+            minDate = date_ranges[period,self.MIN_DATE]
+            maxDate = date_ranges[period,self.MAX_DATE]
 
-        return x
+            minindex = offset
+            maxindex = minindex + (maxDate - minDate)  + 1
+
+            res.append((minindex, maxindex))
+            
+            offset = (maxDate - minDate) + 1
+        return res
+
+
+    def _build_applications(self, x, date_ranges): 
+
+        app_count = np.size(x, 1)
+
+        pop_size = np.size(x, 0)
+
+        irrscheds = np.ones((pop_size, app_count, 2)) * -1
+
+        period_inds = self._calc_period_indices(date_ranges)
+
+        # plug in the genome
+        irrscheds[:, :, 1 ] = x
+
+        # Plug in the dates
+        for periodInd, period in enumerate(period_inds): 
+
+            startInd = period[0]
+            endInd = period[1]
+
+            startDate = date_ranges[periodInd][0]
+            endDate = date_ranges[periodInd][1]
+            irrscheds[:,startInd:endInd, 0 ] = np.array(range(startDate,endDate+1))    
+
+
+        return irrscheds     
+
 
 
