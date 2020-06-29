@@ -145,8 +145,8 @@ class Dssat4Dum():
         f.write(raw_result)
 
         
-dssat_home = "/Users/iankropp/Projects/dssat4py/rundir/"
-fileio = "/Users/iankropp/Projects/dssat4py/rundir/DSSAT47.INP"
+dssat_home = "/home/ian/Projects/dssat4py/rundir/"
+fileio = "/home/ian/Projects/dssat4py/rundir/DSSAT47.INP"
 tmp_dir = "/tmp/"
 
 runner = Dssat4Dum(dssat_home, fileio, tmp_dir)
@@ -267,7 +267,7 @@ irrscheds2 = np.zeros((1, 16, 2))
 irrscheds2[0] = np.array(np.matrix('[1982063,13; 1982077,10; 1982094,10; 1982107,13; 1982111,18; 1982122,25; 1982126,25; 1982129,13; 1982132,15; 1982134,19; 1982137,20; 1982141,20; 1982148,15; 1982158,19; 1982161, 4; 1982162,25]'))
 
 
-print(runner.run_batch(irrscheds, 8))
+print(runner.run_batch(irrscheds, 4))
 
 #print(runner.run(irrscheds[0],0))
 
