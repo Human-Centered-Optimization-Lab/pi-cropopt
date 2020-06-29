@@ -21,9 +21,9 @@ class Dssat4Dum():
         files2del = glob("%s/dssatrun*" % self.tmp_dir) 
 
         for f in files2del: 
-            print("Deleting %s..." % f)
+            #print("Deleting %s..." % f)
             rmtree(f);
-            print("Deleted.")
+            #print("Deleted.")
 
 
     # irrsched is a nx2 matrix representing an irrigation schedule of n apps
@@ -66,7 +66,7 @@ class Dssat4Dum():
             with Pool(threads) as p: 
                 yields = p.map(self.run, argz)
 
-        return yields
+        return np.array(yields)[np.newaxis]
 
     def _runDssat(self, dssat_path, fileio):
                 
@@ -255,8 +255,6 @@ if __name__ == "__main__":
     irrscheds[97] = np.array(np.matrix('[1982123, 22; 1982140, 8 ; 1982144, 12]'))
     irrscheds[98] = np.array(np.matrix('[1982123, 22; 1982140, 15; 1982144, 19]'))
     irrscheds[99] = np.array(np.matrix('[1982123, 10; 1982140, 13; 1982144, 17]'))
-
-
 
 
 

@@ -22,13 +22,13 @@ seeds = genfromtxt('seeds.csv', delimiter=',')
 
 seeds = seeds.astype(int)
 
-dssat_home = "/home/ian/Projects/dssat4py/src/python"
+dssat_home = "/home/ian/Projects/dssat4py/rundir/"
 fileio = "/home/ian/Projects/dssat4py/rundir/DSSAT47.INP"
 tempdir = "/tmp/"
 
-threads = 1
+threads = 4 
 
-date_ranges = np.array(np.matrix("[2018135, 2018140, 1, 20; 2018200, 2018204, 0, 19]"))
+date_ranges = np.array(np.matrix("[1982135, 1982140, 1, 20; 1982200, 1982204, 0, 19]"))
 
 
 # Runs with cropover

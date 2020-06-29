@@ -71,22 +71,13 @@ class CropOpt(Problem):
 
         irrapps = self._build_applications(x, self.date_ranges)
 
-        print(irrapps)
-        print(irrapps)
-        print(irrapps)
-
-        d_runner = Dssat4Dum(self.dssat_home, self.dssat_inp, self.tmp_dir)
+        runner = Dssat4Dum(self.dssat_home, self.dssat_inp, self.tmp_dir)
     
-        d_runner.awefawef
-       
+        yields = runner.run_batch(irrapps, self.threads)
+   
+        irr_totals = np.sum(x,1)[np.newaxis]
 
-        # message x to work in eval_batch
-
-        irrsched = self._format_irrigation(x)
-
-        objectives = d_runner.eval_batch(irrsched, self.threads)
-
-        out["F"] = objectives
+        out["F"] = np.concatenate((-yields, irr_totals), axis=0).T
 
 
     def _calc_period_indices(self, date_ranges):
