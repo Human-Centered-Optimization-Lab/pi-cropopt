@@ -1,8 +1,8 @@
-*EXP.DETAILS: UFGA8201MZ NIT X IRR, GAINESVILLE 2N*3I                                
+*EXP.DETAILS: CASS1701MZ CORN FIELD EXPERIMENT                                       
 
 *FILES
 @N  EXP.DATA    AFILE        ADIR
-  1 EXP         UFGA8201.MZA                                                                                 
+  1 EXP         CASS1701.MZA                                                                                 
 @N  SPECIES     SPFILE       SPDIR
   1 SPE         MZCER047.SPE ./Genotype/                                                                     
 @N  ECOTYPE     EFILE        EDIR
@@ -12,15 +12,15 @@
 @N  SOIL        SFILE        SDIR
   1 SOIL        SOIL.SOL     ./Soil/                                                                         
 @N  WEATHER     WFILE        WDIR
-  1 WEATH       UFGA8201.WTH ./Weather/                                                                      
+  1 WEATH       CASS1701.WTH ./Weather/                                                                      
 
 *SIMULATION CONTROL
 @N  GENERAL     NYERS NREPS START   SDATE RSEED SNAME.................... MODEL...
-  1 GE              1     1     S 1982056  2150 N X IRRIGATION, GAINESVI  MZCER047
+  1 GE              1     1     S 2017135  2150 N X IRRIGATION, GAINESVI  MZCER047
 @N  OPTIONS     WATER NITRO SYMBI PHOSP POTAS DISES  CHEM  TILL   CO2
   1 OP              Y     Y     N     N     N     N     N     Y     M
 @N  METHODS     WTHER INCON LIGHT EVAPO INFIL PHOTO HYDRO NSWIT SOMDY MESEV MESOL METMP MEGHG
-  1 ME              M     M     E     R     S     R     R     1     G     S     2     D     0
+  1 ME              M     M     E     R     S     R     R     1     G     R     2     D     0
 @N  MANAGEMENT  PLANT IRRIG FERTI RESID HARVS
   1 MA              R     R     R     N     M
 @N  OUTPUTS     FNAME OVVEW SUMRY FROPT GROUT CAOUT WAOUT NIOUT MIOUT DIOUT  LONG CHOUT OPOUT
@@ -28,7 +28,7 @@
 
 !AUTOMATIC MANAGEM
 @N  PLANTING      PFRST   PLAST PH2OL PH2OU PH2OD PSTMX PSTMN
-  1 PL          1982050 1982064   40.  100.   30.   40.   10.
+  1 PL          1988135 1988140   40.  100.   30.   40.   10.
 @N  IRRIGATION  IMDEP ITHRL ITHRU IROFF IMETH IRAMT IREFF
   1 IR            30.   50.  100. GS000 IR001  10.0 1.000
 @N  NITROGEN    NMDEP NMTHR NAMNT NCODE NAOFF
@@ -36,69 +36,55 @@
 @N  RESIDUES    RIPCN RTIME RIDEP
   1 RE           100.     1   20.
 @N  HARVEST     HFRST   HLAST HPCNP HRCNR
-  1 HA              0 1983057  100.    0.
+  1 HA              0 2017335  100.    0.
 
 *TREATMENTS
 @N   R O C TNAME....................  CU  FL  SA  IC  MP  MI  MF  MR  MC  MT  ME  MH  SM
-  4  1 0 0 IRRIGATED HIGH NITROGEN     1   1   0   1   1   2   2   0   0   0   0   0   1
+  1  1 0 0 RAINFED HIGH NITROGEN       1   1   0   1   1   1   1   0   0   0   0   0   1
 
 *CULTIVARS
 @C  CR INGENO CNAME
-  1 MZ IB0035 McCurdy 84aa    
+  1 MZ PC0001 MI              
 
 *FIELDS
 @L  ID_FIELD WSTA....  FLSA  FLOB  FLDT  FLDD  FLDS  FLST SLTX   SLDP ID_SOIL
-  1 UFGA0002 UFGA8201   0.0    0. DR000    0.  100. 00000 -99    180. IBMZ910014
+  1 CASS8801 CASS1701   0.0    0. DR000    0.  100. 00000 SL     180. IB00000009
 @L             XCRD            YCRD      ELEV              AREA  SLEN  FLWR  SLAS PRMGT
   1        29.63000       -82.37000     40.00               1.0  100.   1.0   0.0   -99   -99
 
 *INITIAL CONDITIONS
 @C  PCR     ICDAT  ICRT  ICND  ICRN  ICRE  ICWD ICRES ICREN ICREP ICRIP ICRID
-  1 MZ    1982056   100     0  1.00  1.00   0.0  1000  0.80  0.00  100.   15.
+  1 MZ    2017135   100     0  1.00  1.00   0.0  1000  0.80  0.00  100.   15.
 @C   ICBL  SH2O  SNH4  SNO3
   1    5. 0.086   0.5   0.1
   1   15. 0.086   0.5   0.1
   1   30. 0.086   0.5   0.1
   1   45. 0.086   0.5   0.1
   1   60. 0.086   0.5   0.1
-  1   90. 0.076   0.6   0.1
-  1  120. 0.076   0.5   0.1
-  1  150. 0.130   0.5   0.1
-  1  180. 0.258   0.5   0.1
 
 *PLANTING DETAILS
 @P    PDATE   EDATE  PPOP  PPOE  PLME  PLDS  PLRS  PLRD  PLDP  PLWT  PAGE  PENV  PLPH  SPRL
-  1 1982057     -99   7.2   7.2     S     R   61.    0.   7.0  -99.  -99. -99.0 -99.0   0.0
+  1 2017135     -99   7.2   7.2     S     R   61.    0.   7.0  -99.  -99. -99.0 -99.0   0.0
 
 *IRRIGATION
 @I   IEFF  IDEP  ITHR  IEPT  IOFF  IAME  IAMT
-  2 1.000   30.   75.  -99. GS000 IR001   0.0
+  1 1.000   30.   75.  -99. GS000 IR001   0.0
 @I    IDATE  IROP IRVAL
-  2 1982063 IR001  13.0
-  2 1982077 IR001  10.0
-  2 1982094 IR001  10.0
-  2 1982107 IR001  13.0
-  2 1982111 IR001  18.0
-  2 1982122 IR001  25.0
-  2 1982126 IR001  25.0
-  2 1982129 IR001  13.0
-  2 1982132 IR001  15.0
-  2 1982134 IR001  19.0
-  2 1982137 IR001  20.0
-  2 1982141 IR001  20.0
-  2 1982148 IR001  15.0
-  2 1982158 IR001  19.0
-  2 1982161 IR001   4.0
-  2 1982162 IR001  25.0
+  1 2017150 IR001  10.0
+  1 2017161 IR001  10.0
+  1 2017171 IR001  10.0
+  1 2017181 IR001  10.0
+  1 2017191 IR001  10.0
+  1 2017201 IR001  10.0
+  1 2017211 IR001  10.0
+  1 2017222 IR001  10.0
+  1 2017232 IR001  10.0
+  1 2017242 IR001  10.0
 
 *FERTILIZERS
 @F    FDATE  FMCD  FACD  FDEP  FAMN  FAMP  FAMK  FAMC  FAMO  FOCD
-  2 1982074 FE001 AP001   10.   56.    0.    0.    0.    0.   -99
-  2 1982089 FE001 AP001   10.   52.    0.    0.    0.    0.   -99
-  2 1982102 FE001 AP001   10.   75.    0.    0.    0.    0.   -99
-  2 1982118 FE001 AP001   10.   37.    0.    0.    0.    0.   -99
-  2 1982127 FE001 AP001   10.   55.    0.    0.    0.    0.   -99
-  2 1982137 FE001 AP001   10.  126.    0.    0.    0.    0.   -99
+  1 2017135 FE001 AP001   10.   70.   10.    4.    0.    0.   -99
+  1 2017196 FE001 AP001   10.  200.    0.    0.    0.    0.   -99
 
 *RESIDUES
 @R    RDATE  RCOD  RAMT  RESN  RESP  RESK  RINP  RDEP  RMET

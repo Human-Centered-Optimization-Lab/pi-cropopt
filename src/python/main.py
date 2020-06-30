@@ -33,7 +33,7 @@ Path(outputdir).mkdir(parents=True, exist_ok=True)
 
 threads = 4 
 
-date_ranges = np.array(np.matrix("[1982135, 1982140, 1, 20; 1982200, 1982204, 0, 19]"))
+date_ranges = np.array(np.matrix("[2017135, 2017140, 1, 20; 2017200, 2017204, 0, 19]"))
 
 
 # Runs with cropover
