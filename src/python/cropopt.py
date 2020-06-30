@@ -69,12 +69,16 @@ class CropOpt(Problem):
 
     def _evaluate(self, x, out, *args, **kwargs):
 
+        # Put into application format
         irrapps = self._build_applications(x, self.date_ranges)
 
+        # Set up a dssat runner that will handle the batch
         runner = Dssat4Dum(self.dssat_home, self.dssat_inp, self.tmp_dir)
     
+        # Run batch 
         yields = runner.run_batch(irrapps, self.threads)
-   
+  
+        # Sum up irrigation
         irr_totals = np.sum(x,1)[np.newaxis]
 
         out["F"] = np.concatenate((-yields, irr_totals), axis=0).T
@@ -99,6 +103,31 @@ class CropOpt(Problem):
         return res
 
 
+    # Reformat the genome to irrigation applications for each of the 
+    # population's individuals.
+    #
+    # Input x (dimensions p x k) 
+    #           s.t. p is the # of individuals
+    #           and k is the dimension of the genome 
+    #
+    # Input date_ranges (see comments above)
+    #
+    # Output (dimension p x k x 2)
+    #
+    # e.g. for one individaul:
+    #
+    #  x = [23.2, 3.5, 67]
+    #   and  
+    #  date_ranges = 
+    #   [[2018102, 2018103, 0, 10],
+    #     2018110, 2018110, 0, 10]]
+    #
+    # is transformed into 
+    #
+    #  [[2018102,23.2],
+    #   [2018103,3.5],
+    #   [2018110,67]]
+    #
     def _build_applications(self, x, date_ranges): 
 
         app_count = np.size(x, 1)
