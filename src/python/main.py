@@ -7,6 +7,7 @@ from datetime import datetime
 import os
 from numpy import genfromtxt
 from cropover import Cropover
+from pathlib import Path
 
 Configuration.show_compile_hint = False
 
@@ -25,6 +26,10 @@ seeds = seeds.astype(int)
 dssat_home = "/home/ian/Projects/dssat4py/rundir/"
 fileio = "/home/ian/Projects/dssat4py/rundir/DSSAT47.INP"
 tempdir = "/tmp/"
+outputdir = "/home/ian/Projects/dssat4py/src/python/output/"
+timestamp = "%d-%02d-%02d_%02d-%02d-%02d" % (dateTimeObj.year, dateTimeObj.month, dateTimeObj.day, dateTimeObj.hour, dateTimeObj.minute, dateTimeObj.second)
+outputdir = outputdir + "batch" + timestamp
+Path(outputdir).mkdir(parents=True, exist_ok=True)
 
 threads = 4 
 
@@ -38,7 +43,9 @@ for run in range(max_run):
 
 
 
-    prob = CropOpt(threads, dssat_home, fileio, tempdir, date_ranges, seed=seed)
+    prob = CropOpt(threads, dssat_home, fileio, tempdir, 
+            date_ranges, outputdir, run, seed=seed)
+
     cropover = Cropover(eta=30, prob=1.0)
 
     algorithm = NSGA2(pop_size=100, 

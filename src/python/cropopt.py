@@ -16,14 +16,17 @@ class CropOpt(Problem):
     # date_ranges   -- 4xn array of period beginnings, period endings, period 
     #                   minimums, and period maximums
     # 
-    def __init__(self, threads, dssat_home, dssat_inp, tmp_dir, date_ranges, seed=0):
+    def __init__(self, threads, dssat_home, dssat_inp, 
+            tmp_dir, date_ranges, output_dir, run, seed=0):
 
-
-        self.threads        = threads
-        self.dssat_home     = dssat_home
-        self.dssat_inp      = dssat_inp
-        self.tmp_dir        = tmp_dir
-        self.date_ranges    = date_ranges
+        self.threads     = threads
+        self.dssat_home  = dssat_home
+        self.dssat_inp   = dssat_inp
+        self.tmp_dir     = tmp_dir
+        self.date_ranges = date_ranges
+        self.output_dir  = output_dir
+        self.run         = run
+        self.generation  = 0
 
         # +1 to avoid fencepost error
         day_count = np.sum(
@@ -81,7 +84,14 @@ class CropOpt(Problem):
         # Sum up irrigation
         irr_totals = np.sum(x,1)[np.newaxis]
 
-        out["F"] = np.concatenate((-yields, irr_totals), axis=0).T
+        objectives = np.concatenate((-yields, irr_totals), axis=0).T
+
+        np.savetxt("%s/run%04d_gen%04d_obj.csv" % (self.output_dir, self.run, self.generation), objectives, delimiter=",")
+        np.savetxt("%s/run%04d_gen%04d_var.csv" % (self.output_dir, self.run, self.generation), x, delimiter=",")
+        
+        self.generation = self.generation + 1
+
+        out["F"] = objectives
 
 
     def _calc_period_indices(self, date_ranges):
