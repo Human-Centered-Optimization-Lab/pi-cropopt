@@ -41,9 +41,9 @@ class Dssat4Dum():
 
         self._editIrr(self.fileio, fileio_temp, irrsched)
 
-        yld = self._runDssat(rundir, fileio_temp)
+        (yld, leaching) = self._runDssat(rundir, fileio_temp)
 
-        return yld
+        return (yld, leaching)
 
     # irrsched is a jx2xn matrix representing j irrigation schedules of n apps
     def run_batch(self, irrsched, threads=1):
@@ -57,16 +57,16 @@ class Dssat4Dum():
         for ind,dat in enumerate(irrsched): 
             argz.append((ind, dat))
 
-        yields = []
+        results = []
         if threads == 1: 
             # Eschew multiprocessing for debugging ease
             for r in range(0, batch_count):
-                yields.append(self.run(argz[r]))
+                results.append(self.run(argz[r]))
         else: 
             with Pool(threads) as p: 
-                yields = p.map(self.run, argz)
+                results = p.map(self.run, argz)
 
-        return np.array(yields)[np.newaxis]
+        return np.array(results)
 
     def _runDssat(self, dssat_path, fileio):
                 
@@ -76,15 +76,21 @@ class Dssat4Dum():
 
         # TODO check for errors
        
-        # Read output
-
+        # Read yield
         reader = open("OVERVIEW.OUT", "r", errors="ignore")
 
         raw_txt = "".join(reader.readlines())
         
         yld = re.search("\s*\w*\s+YIELD\s+:\s+(\d+)\s+kg/ha",raw_txt).group(1)
 
-        return int(yld)
+        # Read yield
+        
+        reader = open("SoilNiBal.OUT", "r", errors="ignore")
+        raw_txt = "".join(reader.readlines())
+        leaching = re.search("N leached\s+(\d+\.?\d*)",raw_txt).group(1)
+
+
+        return (float(yld), float(leaching))
 
     def _setupDirectory(self, home, temp_dir, runid):
 
@@ -264,8 +270,9 @@ if __name__ == "__main__":
 
     irrscheds2[0] = np.array(np.matrix('[2017063,13; 2017077,10; 2017094,10; 2017107,13; 2017111,18; 2017122,25; 2017126,25; 2017129,13; 2017132,15; 2017134,19; 2017137,20; 2017141,20; 2017148,15; 2017158,19; 2017161, 4; 2017162,25]'))
 
+    threads = 1
 
-    print(runner.run_batch(irrscheds, 4))
+    print(runner.run_batch(irrscheds, threads))
 
     #print(runner.run(irrscheds[0],0))
 
