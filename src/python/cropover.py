@@ -136,7 +136,7 @@ class Cropover(Crossover):
             c1[to_save1[0,:].astype(int)] = p1[to_save1[0,:].astype(int)]
             c2[to_save2[0,:].astype(int)] = p2[to_save2[0,:].astype(int)]
 
-        return c2, c2
+        return c1, c2
 
     @staticmethod
     def crowding_ranking(positions):
