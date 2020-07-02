@@ -1,5 +1,6 @@
 import numpy as np
 from pymoo.model.problem import Problem
+
 from dssat4dum import Dssat4Dum
 
 class CropOpt(Problem):
@@ -45,49 +46,40 @@ class CropOpt(Problem):
 
             mins[minindex:maxindex] = date_ranges[indx, self.MIN_APP]
             maxs[minindex:maxindex] = date_ranges[indx, self.MAX_APP]
-           
-#        offset = 0 
-#        for period in range(0, np.size(self.date_ranges, 0)):
 
-#            minDate = date_ranges[period,self.MIN_DATE]
-#            maxDate = date_ranges[period,self.MAX_DATE]
-
-#            minindex = offset
-#            maxindex = minindex + (maxDate - minDate)  + 1
-
-#            mins[minindex:maxindex] = date_ranges[period, self.MIN_APP]
-#            maxs[minindex:maxindex] = date_ranges[period, self.MAX_APP]
-            
-#            offset = (maxDate - minDate) + 1
-
-
-        # TODO make sure we don't need any constraints
+        # TODO constraints? 
         super().__init__(n_var=day_count,
-                         n_obj=2,
+                         n_obj=3,           # (Yield, leaching, total irrigation)
                          n_constr=0,
                          xl=mins,
                          xu=maxs)
 
-        return  
-
     def _evaluate(self, x, out, *args, **kwargs):
 
+        # Round the genome to the nearest mm
+        x_rounded = np.around(x)
+
         # Put into application format
-        irrapps = self._build_applications(x, self.date_ranges)
+        irrapps = self._build_applications(x_rounded, self.date_ranges)
 
         # Set up a dssat runner that will handle the batch
         runner = Dssat4Dum(self.dssat_home, self.dssat_inp, self.tmp_dir)
     
         # Run batch 
-        yields = runner.run_batch(irrapps, self.threads)
-  
-        # Sum up irrigation
-        irr_totals = np.sum(x,1)[np.newaxis]
+        yield_and_leaching = runner.run_batch(irrapps, self.threads)
+ 
+        yld = yield_and_leaching[:,0][np.newaxis]
 
-        objectives = np.concatenate((-yields, irr_totals), axis=0).T
+        leaching = yield_and_leaching[:,1][np.newaxis]
+
+        # Sum up irrigation
+        irr_totals = np.sum(x_rounded,1)[np.newaxis]
+
+        # First column of results are yield, second is leaching
+        objectives = np.concatenate((-yld, leaching, irr_totals), axis=0).T
 
         np.savetxt("%s/run%04d_gen%04d_obj.csv" % (self.output_dir, self.run, self.generation), objectives, delimiter=",")
-        np.savetxt("%s/run%04d_gen%04d_var.csv" % (self.output_dir, self.run, self.generation), x, delimiter=",")
+        np.savetxt("%s/run%04d_gen%04d_var.csv" % (self.output_dir, self.run, self.generation), x_rounded, delimiter=",")
         
         self.generation = self.generation + 1
 
