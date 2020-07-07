@@ -1,5 +1,6 @@
 import numpy as np
 from pymoo.model.problem import Problem
+import sys
 
 from dssat4dum import Dssat4Dum
 
@@ -7,8 +8,21 @@ class CropOpt(Problem):
 
     MIN_DATE    = 0
     MAX_DATE    = 1
-    MIN_APP     = 2
-    MAX_APP     = 3
+    APP_TYPE    = 2
+
+    # Irrigation params
+    MIN_IRR_APP = 3
+    MAX_IRR_APP = 4
+   
+    # Nutrient params
+    N_APP = 3
+    PHOS_APP = 4
+    POT_APP = 5
+    
+
+
+    IRR_APP_TYPE = 0
+    NUT_APP_TYPE = 1
 
     #
     # threads       -- Number of threads for optimization
@@ -29,23 +43,41 @@ class CropOpt(Problem):
         self.run         = run
         self.generation  = 0
 
+        # Separate the nutrient apps from the irrigation apps
+        irrigation_ranges = date_ranges[date_ranges[:,2] == self.IRR_APP_TYPE]
+        nutrient_ranges   = date_ranges[date_ranges[:,2] == self.NUT_APP_TYPE]
+
+
+        # Count irrigation dates
         # +1 to avoid fencepost error
-        day_count = np.sum(
-                self.date_ranges[:,self.MAX_DATE] - self.date_ranges[:,self.MIN_DATE] + 1
+        day_count = irr_count = np.sum(
+                irrigation_ranges[:,self.MAX_DATE] - irrigation_ranges[:,self.MIN_DATE] + 1
                 ) 
+
+        # Count nutrient applications 
+        nutrient_app_count = np.size(nutrient_ranges,0)
+        day_count += nutrient_app_count
 
         mins = np.ones(day_count) * -1
         maxs = np.ones(day_count) * -1
 
+       
+        (irr_period_indices, nutrient_period_indices) = self._calc_period_indices(date_ranges)
 
+        for period in irr_period_indices:
+
+            (periodInd, minindex, maxindex) = period
+
+            mins[minindex:maxindex] = date_ranges[periodInd, self.MIN_IRR_APP]
+            maxs[minindex:maxindex] = date_ranges[periodInd, self.MAX_IRR_APP]
         
-        for indx, period in enumerate(self._calc_period_indices(date_ranges)):
+        for period in nutrient_period_indices:
 
-            minindex = period[0]
-            maxindex = period[1]
+            (periodInd, indx) = period
 
-            mins[minindex:maxindex] = date_ranges[indx, self.MIN_APP]
-            maxs[minindex:maxindex] = date_ranges[indx, self.MAX_APP]
+            mins[indx] = date_ranges[periodInd, self.MIN_DATE]
+            maxs[indx] = date_ranges[periodInd, self.MAX_DATE]
+
 
         # TODO constraints? 
         super().__init__(n_var=day_count,
@@ -86,12 +118,20 @@ class CropOpt(Problem):
         out["F"] = objectives
 
 
+    # Returns (a, b, c)
+    #
+    # a -> original date range index
+    # b -> Beginning of range in genome
+    # c -> End of range in genome
+    #
     def _calc_period_indices(self, date_ranges):
         
-        res = []  
-        
+        res_irr = []  
+        res_nut = []  
+       
         offset = 0 
         for period in range(0, np.size(date_ranges, 0)):
+
 
             minDate = date_ranges[period,self.MIN_DATE]
             maxDate = date_ranges[period,self.MAX_DATE]
@@ -99,10 +139,15 @@ class CropOpt(Problem):
             minindex = offset
             maxindex = minindex + (maxDate - minDate)  + 1
 
-            res.append((minindex, maxindex))
+            if date_ranges[period, self.APP_TYPE] == self.IRR_APP_TYPE:
+                res_irr.append((period,minindex, maxindex))
+                offset = (maxDate - minDate) + 1
+            else:
+                res_nut.append((period, offset))
+                offset += 1
             
-            offset = (maxDate - minDate) + 1
-        return res
+
+        return (res_irr, res_nut)
 
 
     # Reformat the genome to irrigation applications for each of the 
@@ -121,8 +166,8 @@ class CropOpt(Problem):
     #  x = [23.2, 3.5, 67]
     #   and  
     #  date_ranges = 
-    #   [[2018102, 2018103, 0, 10],
-    #     2018110, 2018110, 0, 10]]
+    #   [[2018102, 2018103, 0, 0, 10],
+    #     2018110, 2018110, 0, 0, 10]]
     #
     # is transformed into 
     #
@@ -136,25 +181,61 @@ class CropOpt(Problem):
 
         pop_size = np.size(x, 0)
 
-        irrscheds = np.ones((pop_size, app_count, 2)) * -1
+        scheds = np.ones((pop_size, app_count, 5)) * -1
 
-        period_inds = self._calc_period_indices(date_ranges)
+        (irr_period_inds, nut_period_inds) = self._calc_period_indices(date_ranges)
 
-        # plug in the genome
-        irrscheds[:, :, 1 ] = x
+        # plug in the genome for irrigation
+        #scheds[:, :, 1 ] = x[]
 
-        # Plug in the dates
-        for periodInd, period in enumerate(period_inds): 
+        # Plug in the irrigation dates
+        for period in irr_period_inds: 
 
-            startInd = period[0]
-            endInd = period[1]
+            (periodInd, startInd, endInd) = period
+
+            # Plug in the genome for this irrigation period
+            scheds[:, startInd:endInd,1] = x[:, startInd:endInd]
 
             startDate = date_ranges[periodInd][0]
             endDate = date_ranges[periodInd][1]
-            irrscheds[:,startInd:endInd, 0 ] = np.array(range(startDate,endDate+1))    
+            scheds[:,startInd:endInd, 0 ] = np.array(range(startDate,endDate+1))    
+
+            # Empty nutrient values
+            scheds[:,startInd:endInd, 2 ] = 0
+            scheds[:,startInd:endInd, 3 ] = 0
+            scheds[:,startInd:endInd, 4 ] = 0
 
 
-        return irrscheds     
+        # Translate the nutrient dates 
+        for period in nut_period_inds:
 
+            (periodInd, indx) = period
+           
+            date = np.around(x[:,indx])
+            n_amount = date_ranges[periodInd, self.N_APP]
+            phos_amount = date_ranges[periodInd, self.PHOS_APP]
+            pot_amount = date_ranges[periodInd, self.POT_APP]
+
+            # Empty irrigation value
+            scheds[:, indx, 1]  = 0
+
+            if np.sum(np.isnan(date)) != 0:
+                sys.exit("Whoops")
+
+            # Fill in nutrient values
+            scheds[:, indx, 0]  = date
+            scheds[:, indx, 2]  = n_amount
+            scheds[:, indx, 3]  = phos_amount
+            scheds[:, indx, 4]  = pot_amount
+
+        if np.sum(scheds == -1) != 0:
+            sys.exit("Schedule not properly built")
+
+
+        if np.sum(scheds == None) != 0:
+            sys.exit("Schedule not properly built")
+
+
+        return scheds     
 
 

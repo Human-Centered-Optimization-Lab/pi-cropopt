@@ -35,9 +35,35 @@ outputdir = outputdir + "batch" + timestamp
 Path(outputdir).mkdir(parents=True, exist_ok=True)
 generations = 200
 
-threads = 4 
+threads = 1
 
-date_ranges = np.array(np.matrix("[2017198, 2017299, 0, 10]"))
+# 
+# Irrigation type 
+# Col 1: Period begin date
+# Col 2: Period end date
+# Col 3: IRR=0,
+# Col 4: IRR min
+# Col 5: IRR max
+# Col 6: 0
+# Col 7: 0
+#
+
+# 
+# Nutrient type 
+# Col 1: Period begin date
+# Col 2: Period end date
+# Col 3: NUT=1,
+# Col 4: Nitrogen amount
+# Col 5: Phos amount
+# Col 6: Pot amount
+#
+date_ranges = np.array(
+        np.matrix("""
+        [2017198, 2017299, 0,   0,  10, 0;
+         2017135, 2017135, 1,  70,  10, 4;
+         2017190, 2017200, 1, 200,   0, 0 
+            ]""")
+    )
 
 ref_dirs = get_reference_directions("energy", 3, 90, seed=1)
 
