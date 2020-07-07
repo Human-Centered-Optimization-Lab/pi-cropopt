@@ -21,16 +21,14 @@ class Dssat4Dum():
         files2del = glob("%s/dssatrun*" % self.tmp_dir) 
 
         for f in files2del: 
-            #print("Deleting %s..." % f)
             rmtree(f);
-            #print("Deleted.")
 
 
     # irrsched is a nx2 matrix representing an irrigation schedule of n apps
     def run(self, argz):
 
         runid = argz[0]
-        irrsched = argz[1]
+        appsched = argz[1]
 
         if runid not in self.activeIds: 
             self._setupDirectory(self.home, self.tmp_dir, runid)
@@ -39,22 +37,23 @@ class Dssat4Dum():
 
         fileio_temp = "%s/DSSAT47.INP" % rundir
 
-        self._editIrr(self.fileio, fileio_temp, irrsched)
+        self._editApp(self.fileio, fileio_temp, appsched)
 
         (yld, leaching) = self._runDssat(rundir, fileio_temp)
 
         return (yld, leaching)
 
-    # irrsched is a jx2xn matrix representing j irrigation schedules of n apps
-    def run_batch(self, irrsched, threads=1):
+    # appsched is a jx5xn matrix representing j schedules of n apps 
+    # with date, irrigation, nitrogen, phosphorus, and potassium
+    def run_batch(self, appsched, threads=1):
 
 
-        batch_count = np.size(irrsched, 0)
+        batch_count = np.size(appsched, 0)
 
         # Create the arg list, with the first item being the irrigation 
         # schedule and the second being the run id
         argz = []
-        for ind,dat in enumerate(irrsched): 
+        for ind,dat in enumerate(appsched): 
             argz.append((ind, dat))
 
         results = []
@@ -107,42 +106,92 @@ class Dssat4Dum():
             return "%sdssatrun%04d" % (temp_dir,runid) 
 
 
-    def _editIrr(self, fileio_in, fileio_out, irrsched):
+    def _editApp(self, fileio_in, fileio_out, irrsched):
 
         # Read data 
         reader = open(fileio_in, "r")
 
         raw_txt = reader.readlines()
 
-        frmdatarr = np.apply_along_axis( (lambda a : "   %d IR001  %f" % (a[0], a[1])), 1,irrsched)
+        # Build lines of irrigation applications
+        formattedIrrApp = np.apply_along_axis( 
+                (lambda a : "   %d IR001  %f" % (a[0], a[1]) if a[1] != 0 else None
+            ), 1,irrsched)
 
-        frmdat = reduce(
-                lambda a,b : "%s\n%s" % (a,b) 
-                ,frmdatarr
-                )
+        # Convert array of irrigation application to a string
+        formattedIrr = reduce(
+            lambda a,b : "%s\n%s" % (a,b),
+            # remove None values (nutrient applications)
+            filter(
+                (lambda x : x != "None"), 
+                formattedIrrApp
+            )
+        )
+
+        # Build lines of nutrient applications
+        formatStr = "   %d FE001 AP001   10. % 4d. % 4d. % 4d.    0.    0.   -99"
+
+        formattedNutApp = np.apply_along_axis( 
+                (lambda a : formatStr % (a[0], a[2], a[3], a[4]) if (a[2] != 0 or a[3] != 0 or a[4] != 0) else None
+            ), 1,irrsched)
+        
+        formattedNutrients = reduce(
+            lambda a,b : "%s\n%s" % (a,b),
+            # remove None values (nutrient applications)
+            filter(
+                (lambda x : x != None), 
+                formattedNutApp
+            )
+        )
+
+
+        print("-----\n%s\n-----" % formattedIrr)
+        print("-----\n%s\n-----" % formattedNutrients)
 
         # Parse file and insert values 
 
         raw_result = ""
-        irrigation_it = -1
+        irrigation_iter = -1
+        nutrient_iter = -1
 
         for line in raw_txt:
 
+            # If irrigation is reached, mark that we've start processing 
             if "*IRRIGATION" in line:
-                irrigation_it += 1
+                irrigation_iter += 1
 
-            if irrigation_it >= 0: 
-                irrigation_it += 1        
+            # If processing irrigation, mark another line of irrigation processed
+            if irrigation_iter >= 0: 
+                irrigation_iter += 1        
 
-            if irrigation_it <= 2 :
+            # If not processing irrigation data, concat to result
+            if irrigation_iter <= 2 and nutrient_iter <= 0 :
                 raw_result = "%s%s" % (raw_result, line)
 
-            if irrigation_it == 3:
-                raw_result = "%s%s\n" % (raw_result, frmdat)
+            # Process the last line after irrigation
+            if irrigation_iter == 3:
+                raw_result = "%s%s\n" % (raw_result, formattedIrr)
 
+            # If we've reached fertilizer, stop process irrigation  
+            # and start processing fertilizer
             if "*FERTILIZERS" in line:
                 raw_result = "%s%s" % (raw_result, line)
-                irrigation_it = -1
+                irrigation_iter = -1
+                nutrient_iter += 1
+
+            # If processing nutrients, mark another line of nutrient processed
+            if nutrient_iter >= 0: 
+                nutrient_iter += 1
+
+            # Process the last line after irrigation
+            if nutrient_iter == 1:
+                raw_result = "%s%s\n" % (raw_result, formattedNutrients)
+
+            
+            if "*RESIDUES" in line:
+                raw_result = "%s%s" % (raw_result, line)
+                nutrient_iter = -1
+
 
         # Write results to file
 
@@ -266,13 +315,32 @@ if __name__ == "__main__":
 
 
 
-    irrscheds2 = np.zeros((1, 16, 2))
+    appscheds2 = np.zeros((1, 18, 5))
 
-    irrscheds2[0] = np.array(np.matrix('[2017063,13; 2017077,10; 2017094,10; 2017107,13; 2017111,18; 2017122,25; 2017126,25; 2017129,13; 2017132,15; 2017134,19; 2017137,20; 2017141,20; 2017148,15; 2017158,19; 2017161, 4; 2017162,25]'))
+    appscheds2[0] = np.array(np.matrix("""
+       [2017063,13,  0, 0, 0; 
+        2017077,10,  0, 0, 0; 
+        2017094,10,  0, 0, 0; 
+        2017107,13,  0, 0, 0; 
+        2017111,18,  0, 0, 0; 
+        2017122,25,  0, 0, 0; 
+        2017126,25,  0, 0, 0; 
+        2017129,13,  0, 0, 0; 
+        2017132,15,  0, 0, 0; 
+        2017134,19,  0, 0, 0; 
+        2017137,20,  0, 0, 0; 
+        2017141,20,  0, 0, 0; 
+        2017148,15,  0, 0, 0; 
+        2017158,19,  0, 0, 0; 
+        2017161, 4,  0, 0, 0; 
+        2017162,25,  0, 0, 0; 
+        2017135, 0, 70,10, 4; 
+        2017196, 0,200, 0, 0  
+        ]"""))
 
     threads = 1
 
-    print(runner.run_batch(irrscheds, threads))
+    print(runner.run_batch(appscheds2, threads))
 
     #print(runner.run(irrscheds[0],0))
 
