@@ -10,13 +10,14 @@ import os, re
 class Dssat4Dum():
 
 
-    def __init__(self, home, fileio, tmp_dir):
+    def __init__(self, home, fileio, tmp_dir, constant_apps=None):
 
         self.home = home
         self.fileio = fileio
         self.tmp_dir = tmp_dir
         self.activeIds = []       
-       
+        self.constant_apps = constant_apps 
+
         # delete old run directories
         files2del = glob("%s/dssatrun*" % self.tmp_dir) 
 
@@ -29,6 +30,9 @@ class Dssat4Dum():
 
         runid = argz[0]
         appsched = argz[1]
+
+        if self.constant_apps is not None:
+            appsched = np.concatenate((appsched, self.constant_apps))
 
         if runid not in self.activeIds: 
             self._setupDirectory(self.home, self.tmp_dir, runid)
@@ -145,8 +149,8 @@ class Dssat4Dum():
         )
 
 
-        print("-----\n%s\n-----" % formattedIrr)
-        print("-----\n%s\n-----" % formattedNutrients)
+        #print("-----\n%s\n-----" % formattedIrr)
+        #print("-----\n%s\n-----" % formattedNutrients)
 
         # Parse file and insert values 
 

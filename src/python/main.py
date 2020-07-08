@@ -60,10 +60,11 @@ threads = 1
 date_ranges = np.array(
         np.matrix("""
         [2017198, 2017299, 0,   0,  10, 0;
-         2017135, 2017135, 1,  70,  10, 4;
          2017190, 2017200, 1, 200,   0, 0 
             ]""")
     )
+
+constant_apps = np.array([[2017135, 0, 70, 10, 4]])
 
 ref_dirs = get_reference_directions("energy", 3, 90, seed=1)
 
@@ -86,7 +87,7 @@ def startRuns(with_co):
 
 
         prob = CropOpt(threads, dssat_home, fileio, tempdir, 
-                date_ranges, gen_dir, run, seed=seed)
+                date_ranges, gen_dir, run, seed=seed, constant_apps=constant_apps)
 
         cropover = Cropover(eta=30, prob=1.0)
 
