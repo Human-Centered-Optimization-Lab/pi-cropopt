@@ -14,27 +14,12 @@
 
 source ~/.bashrc
 
-printenv
-
-#export PATH=$PATH:$HOME/anaconda3/bin
-
 export PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/sw/bin"
 export PATH=$PATH:$HOME/anaconda3/envs/cropopt/bin
 
-
 conda init bash 
-#source activate animaltrck
 conda activate cropopt
 
-type -p pip
-type -p python
-pip show pymoo
-
-# I had to add this to get the modules installed. I don't know where they're installed to 
-#pip install -U pymoo networkx pandas sklearn  seaborn hmmlearn geopy
-#pip list
-
-#cd $HOME/Projects/live-animal-movement-tracker                   ### change to the directory where your code is located
 cd $HOME/Projects/cropopt/src/python
  
 python main.py              ### call your executable (similar to mpirun)
