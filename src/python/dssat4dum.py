@@ -4,7 +4,7 @@ import numpy as np
 from shutil import copytree, copy, rmtree
 from glob import glob
 import subprocess as sp
-import os, re
+import os, re, sys
 
 
 class Dssat4Dum():
@@ -117,9 +117,12 @@ class Dssat4Dum():
 
         raw_txt = reader.readlines()
 
+        # Work around https://github.com/numpy/numpy/issues/8352
+        blank = np.array("", object)
+
         # Build lines of irrigation applications
         formattedIrrApp = np.apply_along_axis( 
-                (lambda a : "   %d IR001  %f" % (a[0], a[1]) if a[1] != 0 else None
+                (lambda a : "   %d IR001  %f" % (a[0], a[1]) if a[1] != 0 else blank
             ), 1,irrsched)
 
         # Convert array of irrigation application to a string
@@ -127,7 +130,7 @@ class Dssat4Dum():
             lambda a,b : "%s\n%s" % (a,b),
             # remove None values (nutrient applications)
             filter(
-                (lambda x : x != "None"), 
+                (lambda x : x != "" ), 
                 formattedIrrApp
             )
         )
@@ -136,18 +139,20 @@ class Dssat4Dum():
         formatStr = "   %d FE001 AP001   10. % 4d. % 4d. % 4d.    0.    0.   -99"
 
         formattedNutApp = np.apply_along_axis( 
-                (lambda a : formatStr % (a[0], a[2], a[3], a[4]) if (a[2] != 0 or a[3] != 0 or a[4] != 0) else None
+                (lambda a : formatStr % (a[0], a[2], a[3], a[4]) if (a[2] != 0 or a[3] != 0 or a[4] != 0) else blank 
             ), 1,irrsched)
         
         formattedNutrients = reduce(
             lambda a,b : "%s\n%s" % (a,b),
             # remove None values (nutrient applications)
             filter(
-                (lambda x : x != None), 
+                (lambda x : x != "" ), 
                 formattedNutApp
             )
         )
 
+        if "None" in  formattedIrr : 
+            sys.exit("Unexpected 'None' found in output ")
 
         #print("-----\n%s\n-----" % formattedIrr)
         #print("-----\n%s\n-----" % formattedNutrients)
@@ -206,9 +211,9 @@ class Dssat4Dum():
 
 if __name__ == "__main__":
             
-    dssat_home = "/home/ian/Projects/dssat4py/rundir/"
-    fileio = "/home/ian/Projects/dssat4py/rundir/DSSAT47.INP"
-    tmp_dir = "/tmp/"
+    dssat_home = "/mnt/home/kroppian/Projects/cropopt/rundir"
+    fileio = "/mnt/home/kroppian/Projects/cropopt/rundir/DSSAT47.INP"
+    tmp_dir = "/dev/shm/"
 
     runner = Dssat4Dum(dssat_home, fileio, tmp_dir)
 
