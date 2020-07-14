@@ -105,8 +105,23 @@ class CropOpt(Problem):
 
         leaching = yield_and_leaching[:,1][np.newaxis]
 
+        # Calc irrigation indices 
+
+        ranges = self._calc_period_indices(self.date_ranges)[0]
+
+        ranges = np.array(ranges)
+
+        ranges = ranges[:,1:3]
+
+        irr_indices = []
+
+        for row in range(np.size(ranges,0)):
+              irr_indices += list(range(ranges[row,0], ranges[row,1]))
+
+
         # Sum up irrigation
-        irr_totals = np.sum(x_rounded,1)[np.newaxis]
+        #irr_totals = np.sum(x_rounded[irr_indices],1)[np.newaxis]
+        irr_totals = np.sum(x_rounded[:,irr_indices],1)[np.newaxis]
 
         # First column of results are yield, second is leaching
         objectives = np.concatenate((-yld, leaching, irr_totals), axis=0).T
