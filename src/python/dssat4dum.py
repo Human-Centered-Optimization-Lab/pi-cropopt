@@ -109,22 +109,14 @@ class Dssat4Dum():
         else:
             return "%sdssatrun%04d" % (temp_dir,runid) 
 
+    def formatIrrSched(self, irrSched):
 
-    def _editApp(self, fileio_in, fileio_out, irrsched):
-
-        # Read data 
-        reader = open(fileio_in, "r")
-
-        raw_txt = reader.readlines()
-
-        # Work around https://github.com/numpy/numpy/issues/8352
         blank = np.array("", object)
-
         # Build lines of irrigation applications
         formattedIrrApp = np.apply_along_axis( 
                 (lambda a : "   %d IR001  %f" % (a[0], a[1]) if a[1] != 0 else blank
-            ), 1,irrsched)
-
+            ), 1,irrSched)
+               
         # Convert array of irrigation application to a string
         formattedIrr = reduce(
             lambda a,b : "%s\n%s" % (a,b),
@@ -135,12 +127,17 @@ class Dssat4Dum():
             )
         )
 
+        return formattedIrr
+
+    def formatNutSched(self, nitroSched):
+
+        blank = np.array("", object)
         # Build lines of nutrient applications
         formatStr = "   %d FE001 AP001   10. % 4d. % 4d. % 4d.    0.    0.   -99"
 
         formattedNutApp = np.apply_along_axis( 
                 (lambda a : formatStr % (a[0], a[2], a[3], a[4]) if (a[2] != 0 or a[3] != 0 or a[4] != 0) else blank 
-            ), 1,irrsched)
+            ), 1, nitroSched)
         
         formattedNutrients = reduce(
             lambda a,b : "%s\n%s" % (a,b),
@@ -150,6 +147,22 @@ class Dssat4Dum():
                 formattedNutApp
             )
         )
+
+        return formattedNutrients
+
+    def _editApp(self, fileio_in, fileio_out, irrsched):
+
+        # Read data 
+        reader = open(fileio_in, "r")
+
+        raw_txt = reader.readlines()
+
+        # Work around https://github.com/numpy/numpy/issues/8352
+
+
+        formattedIrr = self.formatIrrSched(irrsched)
+
+        formattedNutrients = self.formatNutSched(irrsched)
 
         if "None" in  formattedIrr : 
             sys.exit("Unexpected 'None' found in output ")
@@ -211,9 +224,9 @@ class Dssat4Dum():
 
 if __name__ == "__main__":
             
-    dssat_home = "/mnt/home/kroppian/Projects/cropopt/rundir"
-    fileio = "/mnt/home/kroppian/Projects/cropopt/rundir/DSSAT47.INP"
-    tmp_dir = "/dev/shm/"
+    dssat_home = "/home/ian/Projects/dssat4py/rundir"
+    fileio = "/home/ian/Projects/dssat4py/rundir/DSSAT47.INP"
+    tmp_dir = "/tmp/"
 
     runner = Dssat4Dum(dssat_home, fileio, tmp_dir)
 
