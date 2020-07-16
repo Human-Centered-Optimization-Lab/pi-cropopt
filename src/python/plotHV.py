@@ -28,10 +28,10 @@ def get_hv(files):
 
     files.sort()
 
-    #ideal_point = np.array([-100000, 0, 2017000])
-    ideal_point = np.array([0, 1000, 3000000])
+    #nadir_point = np.array([-100000, 0, 2017000])
+    ref_point = np.array([0, 1000, 3000])
 
-    hv = get_performance_indicator("hv", ref_point=ideal_point)
+    hv = get_performance_indicator("hv", ref_point=ref_point)
 
     hv_vals = []
 
@@ -50,7 +50,12 @@ def get_hv(files):
 # Main
 #
 
-all_run_files = sys.argv[1:]
+file_list = sys.argv[1]
+
+with open(file_list) as f:
+    all_run_files = [line[0:-1] for line in f.readlines()  ]
+
+#all_run_files = open(argv[1], "")
 
 get_run_no = lambda a : int(re.search("run(\d{4})",a).group(1))
 
@@ -58,17 +63,33 @@ runs_raw = list(map(get_run_no, all_run_files))
 
 runs = set(runs_raw)
 
-colors = ["red", "blue", "pink"]
-
 plt.figure()
 
-for (indx, run) in enumerate(runs): 
 
-    files = list(filter(lambda a : ("run%04d" % run) in a , all_run_files))
+for run_type in ("with_run", "without_run"):
 
-    hv_vals = get_hv(files)
+    for (indx, run) in enumerate(runs): 
 
-    plt.plot(hv_vals)
+        print("*********************")
+        print("Run type: %s, run %s" % (run_type, run))
+        print("*********************")
+
+        # Only pull runs of the same type and number
+        run_filter = lambda a : (("run%04d" % run) in a) and (run_type in a) and (int(re.search("run0(\d{3})",a).group(1)) < 250) 
+
+        files = list(filter(run_filter, all_run_files))
+
+        hv_vals = get_hv(files)
+
+        if run_type == "with_run":
+            color = "red"
+        else: 
+            color = "blue"
+
+        plt.plot(hv_vals, color=color)
+
+
+
 
 plt.show()
 
