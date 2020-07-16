@@ -9,6 +9,7 @@ from numpy import genfromtxt
 from cropover import Cropover
 from pathlib import Path
 from pymoo.factory import get_reference_directions
+import psutil
 
 Configuration.show_compile_hint = False
 
@@ -26,16 +27,18 @@ seeds = genfromtxt('seeds.csv', delimiter=',')
 
 seeds = seeds.astype(int)
 
-dssat_home = "/home/ian/Projects/dssat4py/rundir/"
-fileio = "/home/ian/Projects/dssat4py/rundir/DSSAT47.INP"
-tempdir = "/tmp/"
-outputdir = "/home/ian/Projects/dssat4py/src/python/output/"
+dssat_home = "/mnt/home/kroppian/Projects/cropopt/rundir/"
+fileio = "/mnt/home/kroppian/Projects/cropopt/rundir/DSSAT47.INP"
+tempdir = "/dev/shm/"
+outputdir = "/mnt/home/kroppian/Projects/cropopt/src/python/output/"
 timestamp = "%d-%02d-%02d_%02d-%02d-%02d" % (dateTimeObj.year, dateTimeObj.month, dateTimeObj.day, dateTimeObj.hour, dateTimeObj.minute, dateTimeObj.second)
 outputdir = outputdir + "batch" + timestamp
 Path(outputdir).mkdir(parents=True, exist_ok=True)
-generations = 200
+generations = 500
 
-threads = 1
+pop_size = 100
+
+threads = 20
 
 # 
 # Irrigation type 
@@ -74,6 +77,15 @@ def startRuns(with_co):
 
     for run in range(max_run):
 
+        ## START -- Analyze memory 
+        mem_avail = psutil.virtual_memory().available * 100 / psutil.virtual_memory().total 
+        print("-----------Start Mem sitch:-----------")
+        print("Mem_avail %d" % mem_avail)
+
+        print("-----------End mem sitch-----------")
+        ## END -- Analyze memory 
+
+
         if with_co:
             seed = seeds[run]
             fileName = "with_run"
@@ -92,12 +104,12 @@ def startRuns(with_co):
         cropover = Cropover(eta=30, prob=1.0)
 
         if with_co:
-            algorithm = NSGA3(pop_size=100, 
+            algorithm = NSGA3(pop_size=pop_size, 
                     ref_dirs=ref_dirs,
                     eliminate_duplicates=True,
                     crossover=cropover)
         else: 
-            algorithm = NSGA3(pop_size=100, 
+            algorithm = NSGA3(pop_size=pop_size, 
                     ref_dirs=ref_dirs,
                     eliminate_duplicates=True)
 
@@ -111,6 +123,7 @@ def startRuns(with_co):
         paretoFront[:,1] = paretoFront[:,1]*-1
 
         np.savetxt("%s/%s%04d.csv" % (outputdir, fileName, run), paretoFront, delimiter=",")
+
 
         print("\n\n========== Run %d complete ==========\n\n" % run)
 
