@@ -63,7 +63,7 @@ class CropOpt(Problem):
         maxs = np.ones(day_count) * -1
 
        
-        (irr_period_indices, nutrient_period_indices) = self._calc_period_indices(date_ranges)
+        (irr_period_indices, nutrient_period_indices) = self.calc_period_indices(date_ranges)
 
         for period in irr_period_indices:
 
@@ -107,7 +107,7 @@ class CropOpt(Problem):
 
         # Calc irrigation indices 
 
-        ranges = self._calc_period_indices(self.date_ranges)[0]
+        ranges = self.calc_period_indices(self.date_ranges)[0]
 
         ranges = np.array(ranges)
 
@@ -140,7 +140,7 @@ class CropOpt(Problem):
     # b -> Beginning of range in genome
     # c -> End of range in genome
     #
-    def _calc_period_indices(self, date_ranges):
+    def calc_period_indices(self, date_ranges):
         
         res_irr = []  
         res_nut = []  
@@ -199,7 +199,7 @@ class CropOpt(Problem):
 
         scheds = np.ones((pop_size, app_count, 5)) * -1
 
-        (irr_period_inds, nut_period_inds) = self._calc_period_indices(date_ranges)
+        (irr_period_inds, nut_period_inds) = self.calc_period_indices(date_ranges)
 
         # plug in the genome for irrigation
         #scheds[:, :, 1 ] = x[]
