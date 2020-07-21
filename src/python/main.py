@@ -10,6 +10,8 @@ from cropover import Cropover
 from pathlib import Path
 from pymoo.factory import get_reference_directions
 import psutil
+from SparseSampler import SparseSampler
+
 
 Configuration.show_compile_hint = False
 
@@ -34,7 +36,8 @@ outputdir = "/mnt/home/kroppian/Projects/cropopt/src/python/output/"
 timestamp = "%d-%02d-%02d_%02d-%02d-%02d" % (dateTimeObj.year, dateTimeObj.month, dateTimeObj.day, dateTimeObj.hour, dateTimeObj.minute, dateTimeObj.second)
 outputdir = outputdir + "batch" + timestamp
 Path(outputdir).mkdir(parents=True, exist_ok=True)
-generations = 500
+generations = 200
+sample_sparsity = 20
 
 pop_size = 100
 
@@ -97,6 +100,11 @@ def startRuns(with_co):
         gen_dir =  outputdir + "/gendat_%s/" % fileName
         Path(gen_dir).mkdir(parents=True, exist_ok=True)
 
+        nutrient_inds = CropOpt.calc_period_indices(CropOpt, date_ranges)[1]
+        nutrient_inds = [a[1] for a in nutrient_inds]
+
+        s_sampler = SparseSampler(sample_sparsity, sampled_mask=nutrient_inds)
+
 
         prob = CropOpt(threads, dssat_home, fileio, tempdir, 
                 date_ranges, gen_dir, run, seed=seed, constant_apps=constant_apps)
@@ -107,7 +115,8 @@ def startRuns(with_co):
             algorithm = NSGA3(pop_size=pop_size, 
                     ref_dirs=ref_dirs,
                     eliminate_duplicates=True,
-                    crossover=cropover)
+                    crossover=cropover,
+                    sampling=s_sampler)
         else: 
             algorithm = NSGA3(pop_size=pop_size, 
                     ref_dirs=ref_dirs,
@@ -135,14 +144,5 @@ startRuns(True)
 print("\n\n========== With CropOpt run complete ==========\n\n" )
 startRuns(False)
 print("\n\n========== Without CropOpt run complete ==========\n\n")
-
-
-
-
-
-
-
-
-
 
 
