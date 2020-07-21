@@ -10,20 +10,26 @@ import re
 def get_nondoms(solutions):
 
     paretoFront = []
-    for (indx, solution_outer) in enumerate(solutions): 
+    for (indx_outer, solution_outer) in enumerate(solutions): 
         non_dominated = True
-        for solution_inner in solutions: 
-          
+        for (indx_inner, solution_inner) in enumerate(solutions): 
+         
+            if indx_outer == indx_inner: 
+                continue
+
             dominated = True
 
             for dim in range(np.size(solutions, 1)) :
                 dominated = dominated and (solution_inner[dim] > solution_outer[dim])
 
+
             if dominated:
                 non_dominated = False
 
         if non_dominated:
-            paretoFront.append(indx)
+            paretoFront.append(indx_outer)
+
+    #paretoFront = np.array(paretoFront)
 
     return paretoFront
 
