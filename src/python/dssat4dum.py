@@ -99,7 +99,6 @@ class Dssat4Dum():
 
         # TODO should be cross platform delimiter
         temp_run_dir = self._getRunDir(temp_dir, runid)
-
         copytree(home, temp_run_dir)
 
     def _getRunDir(self, temp_dir, runid):
@@ -116,16 +115,21 @@ class Dssat4Dum():
         formattedIrrApp = np.apply_along_axis( 
                 (lambda a : "   %d IR001  %f" % (a[0], a[1]) if a[1] != 0 else blank
             ), 1,irrSched)
-               
-        # Convert array of irrigation application to a string
-        formattedIrr = reduce(
-            lambda a,b : "%s\n%s" % (a,b),
-            # remove None values (nutrient applications)
-            filter(
+              
+        nonZeros = list(filter(
                 (lambda x : x != "" ), 
                 formattedIrrApp
+            ))
+
+        if len(nonZeros) != 0:
+            # Convert array of irrigation application to a string
+            formattedIrr = reduce(
+                lambda a,b : "%s\n%s" % (a,b),
+                # remove None values (nutrient applications)
+                nonZeros               
             )
-        )
+        else: 
+            formattedIrr = ""
 
         return formattedIrr
 
@@ -138,15 +142,22 @@ class Dssat4Dum():
         formattedNutApp = np.apply_along_axis( 
                 (lambda a : formatStr % (a[0], a[2], a[3], a[4]) if (a[2] != 0 or a[3] != 0 or a[4] != 0) else blank 
             ), 1, nitroSched)
-        
-        formattedNutrients = reduce(
-            lambda a,b : "%s\n%s" % (a,b),
-            # remove None values (nutrient applications)
-            filter(
-                (lambda x : x != "" ), 
-                formattedNutApp
+       
+        nonZeros = list(filter(
+            (lambda x : x != "" ), 
+            formattedNutApp
+        ))
+
+        if len(nonZeros) != 0:
+            formattedNutrients = reduce(
+                lambda a,b : "%s\n%s" % (a,b),
+                # remove None values (nutrient applications)
+                nonZeros
             )
-        )
+        else:
+            formattedNutrients = ""
+
+
 
         return formattedNutrients
 
