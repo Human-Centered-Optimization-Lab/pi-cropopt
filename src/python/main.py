@@ -37,6 +37,7 @@ timestamp = "%d-%02d-%02d_%02d-%02d-%02d" % (dateTimeObj.year, dateTimeObj.month
 outputdir = outputdir + "batch" + timestamp
 Path(outputdir).mkdir(parents=True, exist_ok=True)
 generations = 200
+
 sample_sparsity = 20
 
 pop_size = 100
@@ -105,7 +106,6 @@ def startRuns(with_co):
 
         s_sampler = SparseSampler(sample_sparsity, sampled_mask=nutrient_inds)
 
-
         prob = CropOpt(threads, dssat_home, fileio, tempdir, 
                 date_ranges, gen_dir, run, seed=seed, constant_apps=constant_apps)
 
@@ -126,10 +126,24 @@ def startRuns(with_co):
                        algorithm,
                        ('n_gen', generations),
                        seed=seed,
+                       save_history=True,
                        verbose=True)
 
         paretoFront = res.F
         paretoFront[:,1] = paretoFront[:,1]*-1
+
+
+        for gen in res.history:
+
+            gen_n = gen.n_gen
+           
+            objectives = np.array([indiv.F for indiv in gen.pop ])
+            x = np.array([indiv.X for indiv in gen.pop ])
+
+            # save generational data 
+            np.savetxt("%s/run%04d_gen%04d_obj.csv" % (gen_dir, run, gen_n), objectives, delimiter=",")
+            np.savetxt("%s/run%04d_gen%04d_var.csv" % (gen_dir, run, gen_n), x, delimiter=",")
+                
 
         np.savetxt("%s/%s%04d.csv" % (outputdir, fileName, run), paretoFront, delimiter=",")
 

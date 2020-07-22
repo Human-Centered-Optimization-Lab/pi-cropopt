@@ -125,9 +125,6 @@ class CropOpt(Problem):
 
         # First column of results are yield, second is leaching
         objectives = np.concatenate((-yld, leaching, irr_totals), axis=0).T
-
-        np.savetxt("%s/run%04d_gen%04d_obj.csv" % (self.output_dir, self.run, self.generation), objectives, delimiter=",")
-        np.savetxt("%s/run%04d_gen%04d_var.csv" % (self.output_dir, self.run, self.generation), x_rounded, delimiter=",")
         
         self.generation = self.generation + 1
 
