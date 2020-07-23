@@ -1,5 +1,5 @@
 import numpy as np
-from plotHV import get_nondoms
+from pymoo.util.nds.non_dominated_sorting import NonDominatedSorting
 
 def app_counter(varz, obj, vars2exclude=[], objs2exclude=[]):
 
@@ -8,8 +8,13 @@ def app_counter(varz, obj, vars2exclude=[], objs2exclude=[]):
     for obj2exclude in objs2exclude:
         objs_to_include.remove(obj2exclude)
 
+    non_doms  = NonDominatedSorting().do(obj[:,list(objs_to_include)])
+
+    # get the first front
+    non_doms  = non_doms[0]
+
     # Ignore the middle column, because it's all zeros 
-    varz = varz[get_nondoms(obj[:,list(objs_to_include)]),:]
+    varz = varz[non_doms,:]
 
     col_count = np.size(varz,1)
 
