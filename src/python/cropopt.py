@@ -31,7 +31,7 @@ class CropOpt(Problem):
     # date_ranges   -- 4xn array of period beginnings, period endings, period 
     #                   minimums, and period maximums
     # 
-    def __init__(self, threads, dssat_home, dssat_inp, 
+    def __init__(self, threads, dssat_home, dssat_exe, dssat_inp, 
             tmp_dir, date_ranges, output_dir, run, seed=0, constant_apps=None):
 
         self.threads     = threads
@@ -40,6 +40,7 @@ class CropOpt(Problem):
         self.tmp_dir     = tmp_dir
         self.date_ranges = date_ranges
         self.output_dir  = output_dir
+        self.dssat_exe   = dssat_exe
         self.run         = run
         self.generation  = 0
         self.constant_apps = constant_apps
@@ -96,7 +97,7 @@ class CropOpt(Problem):
         irrapps = self._build_applications(x_rounded, self.date_ranges)
 
         # Set up a dssat runner that will handle the batch
-        runner = Dssat4Dum(self.dssat_home, self.dssat_inp, self.tmp_dir, constant_apps=self.constant_apps)
+        runner = Dssat4Dum(self.dssat_home, self.dssat_inp, self.dssat_exe, self.tmp_dir, constant_apps=self.constant_apps)
     
         # Run batch 
         yield_and_leaching = runner.run_batch(irrapps, self.threads)

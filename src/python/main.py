@@ -30,8 +30,9 @@ seeds = genfromtxt('seeds.csv', delimiter=',')
 seeds = seeds.astype(int)
 
 dssat_home = "/mnt/home/kroppian/Projects/cropopt/rundir/"
+dssat_exe = "/mnt/home/kroppian/Projects/cropopt/dscsm047"
 fileio = "/mnt/home/kroppian/Projects/cropopt/rundir/DSSAT47.INP"
-tempdir = "/dev/shm/"
+tempdir = "/mnt/scratch/kroppian/"
 outputdir = "/mnt/home/kroppian/Projects/cropopt/src/python/output/"
 timestamp = "%d-%02d-%02d_%02d-%02d-%02d" % (dateTimeObj.year, dateTimeObj.month, dateTimeObj.day, dateTimeObj.hour, dateTimeObj.minute, dateTimeObj.second)
 outputdir = outputdir + "batch" + timestamp
@@ -106,7 +107,7 @@ def startRuns(with_co):
 
         s_sampler = SparseSampler(sample_sparsity, sampled_mask=nutrient_inds)
 
-        prob = CropOpt(threads, dssat_home, fileio, tempdir, 
+        prob = CropOpt(threads, dssat_home,dssat_exe, fileio, tempdir, 
                 date_ranges, gen_dir, run, seed=seed, constant_apps=constant_apps)
 
         cropover = Cropover(eta=30, prob=1.0)

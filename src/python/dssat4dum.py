@@ -10,13 +10,15 @@ import os, re, sys
 class Dssat4Dum():
 
 
-    def __init__(self, home, fileio, tmp_dir, constant_apps=None):
+    def __init__(self, home, fileio, exe_path, tmp_dir, constant_apps=None):
 
         self.home = home
         self.fileio = fileio
         self.tmp_dir = tmp_dir
         self.activeIds = []       
         self.constant_apps = constant_apps 
+        self.exe_path = exe_path
+        self.exe_setup = False
 
         # delete old run directories
         files2del = glob("%s/dssatrun*" % self.tmp_dir) 
@@ -75,7 +77,7 @@ class Dssat4Dum():
                 
         os.chdir(dssat_path)
 
-        res = sp.run(["./dscsm047", "D", "DSSAT47.INP"], check=True)
+        res = sp.run([self.exe_path, "D", "DSSAT47.INP"], check=True)
 
         # TODO check for errors
        
@@ -100,6 +102,7 @@ class Dssat4Dum():
         # TODO should be cross platform delimiter
         temp_run_dir = self._getRunDir(temp_dir, runid)
         copytree(home, temp_run_dir)
+
 
     def _getRunDir(self, temp_dir, runid):
 
