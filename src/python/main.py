@@ -121,7 +121,8 @@ def startRuns(with_co):
         else: 
             algorithm = NSGA3(pop_size=pop_size, 
                     ref_dirs=ref_dirs,
-                    eliminate_duplicates=True)
+                    eliminate_duplicates=True,
+                    sampling=s_sampler)
 
         res = minimize(prob,
                        algorithm,
@@ -154,9 +155,10 @@ def startRuns(with_co):
 
 ### Main ###
 
-print("\n\n========== With CropOpt run starting ==========\n\n" )
-startRuns(True)
-print("\n\n========== With CropOpt run complete ==========\n\n" )
+#print("\n\n========== With CropOpt run starting ==========\n\n" )
+#startRuns(True)
+#print("\n\n========== With CropOpt run complete ==========\n\n" )
+print("\n\n========== Without CropOpt run complete ==========\n\n" )
 startRuns(False)
 print("\n\n========== Without CropOpt run complete ==========\n\n")
 
