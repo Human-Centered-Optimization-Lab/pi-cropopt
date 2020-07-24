@@ -1,9 +1,8 @@
 import numpy as np
 from appCounter import app_counter
 import matplotlib.pyplot as plt
-from plotHV import get_nondoms
 from pymoo.util.nds.non_dominated_sorting import NonDominatedSorting
-
+import sys 
 
 # Constants 
 offset = [10, 0]
@@ -12,9 +11,12 @@ o2exclude = [1]
 
 v2exclude = [102]
 
+if len(sys.argv) != 2 + 1: 
+    print("Usage: %s VARIABLE_FILE OBJECTIVE_FILE" % sys.argv[0])
+    sys.exit(1)
 
-var_file = "/Users/iankropp/tempMount/run5/batch2020-07-23_09-49-58/gendat_with_run/run0000_gen0199_var.csv"
-obj_file = "/Users/iankropp/tempMount/run5/batch2020-07-23_09-49-58/gendat_with_run/run0000_gen0199_obj.csv"
+var_file = sys.argv[1]
+obj_file = sys.argv[2]
 
 varz = np.genfromtxt(var_file, delimiter=',')
 obj  = np.genfromtxt(obj_file, delimiter=',')
