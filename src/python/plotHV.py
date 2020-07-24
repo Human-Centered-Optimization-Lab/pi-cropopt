@@ -2,44 +2,15 @@ import sys
 import numpy as np
 from pymoo.factory import get_performance_indicator
 import matplotlib.pyplot as plt
+from pymoo.util.nds.non_dominated_sorting import NonDominatedSorting
 import re
-
-#
-# Functions
-#
-def get_nondoms(solutions):
-
-    paretoFront = []
-    for (indx_outer, solution_outer) in enumerate(solutions): 
-        non_dominated = True
-        for (indx_inner, solution_inner) in enumerate(solutions): 
-         
-            if indx_outer == indx_inner: 
-                continue
-
-            dominated = True
-
-            for dim in range(np.size(solutions, 1)) :
-                dominated = dominated and (solution_inner[dim] > solution_outer[dim])
-
-
-            if dominated:
-                non_dominated = False
-
-        if non_dominated:
-            paretoFront.append(indx_outer)
-
-    #paretoFront = np.array(paretoFront)
-
-    return paretoFront
 
 
 def get_hv(files):
 
     files.sort()
 
-    #nadir_point = np.array([-100000, 0, 2017000])
-    ref_point = np.array([0, 1000, 3000])
+    ref_point = np.array([0, 3000])
 
     hv = get_performance_indicator("hv", ref_point=ref_point)
 
@@ -50,7 +21,10 @@ def get_hv(files):
         print("processing %s..." % f)
         solutions = np.genfromtxt(f, delimiter=',')
 
-        nd_sols = solutions[get_nondoms(solutions),:]
+        objs_to_include = (0,2)
+        non_doms = NonDominatedSorting().do(solutions[:,objs_to_include])[0]
+
+        nd_sols = solutions[non_doms[np.newaxis].T,objs_to_include]
 
         hv_vals.append(hv.calc(nd_sols))
 
@@ -100,11 +74,9 @@ if __name__ == "__main__":
 
             plt.plot(hv_vals, color=color)
 
-
-
-
     plt.show()
 
+    
 
 
 
