@@ -4,6 +4,11 @@ from mpl_toolkits.mplot3d import Axes3D
 from pymoo.util.nds.non_dominated_sorting import NonDominatedSorting
 import numpy as np
 
+# Example run
+#  sshfs hpcc:/mnt/home/kroppian/Projects/cropopt/oldjobs/ ~/tempMount
+#  python  src/python/plotRuns.py ~/tempMount/run7/batch2020-07-24_17-11-53/gendat_with*/*199*obj*csv
+#:
+
 objs_to_include = (0,1,2)
 
 files = sys.argv[1:]
