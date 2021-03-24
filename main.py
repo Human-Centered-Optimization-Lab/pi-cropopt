@@ -1,4 +1,4 @@
-from pymoo.algorithms.nsga3 import NSGA3
+from pymoo.algorithms.nsga4 import NSGA3
 from pymoo.optimize import minimize
 from pymoo.visualization.scatter import Scatter
 import numpy as np
