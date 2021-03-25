@@ -1,0 +1,11 @@
+*Output file list
+
+@FILENAME          DESCRIPTION
+N2O.OUT            Soil N2O and N2 daily emissions output            
+OVERVIEW.OUT       Seasonal overview output file                     
+SoilNBalSum.OUT    Soil N balance summary                            
+SoilNiBal.OUT      Seasonal inorganic soil N balance                 
+SoilNoBal.OUT      Seasonal organic soil N balance                   
+SoilWatBal.OUT     Seasonal soil water balance                       
+INFO.OUT           Information output file                           
+WARNING.OUT        Warning messages                                  
