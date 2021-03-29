@@ -83,7 +83,33 @@ class Dssat4Dum():
 
         return np.array(results)
 
-    
+    def replacetxt(string, field_no, value):
+
+        chunks = re.findall(r"\s+\S+[\s]?", string)
+
+        zones = []
+        prev_chunk_end = 0 
+        for chunk in chunks:
+            chunk_length = len(chunk)
+            zones.append((prev_chunk_end, prev_chunk_end+chunk_length-2))
+            prev_chunk_end =  prev_chunk_end+chunk_length
+
+        replace_str_len = len(chunks[field_no])
+
+        
+        if field_no != (len(chunks)-1):
+            replace_str_frmt = "{:>%d} " % (replace_str_len-1)
+        else:
+            replace_str_frmt = "{:>%d}" % (replace_str_len)
+
+
+
+        replace_str = replace_str_frmt.format(value) 
+        
+        chunks[field_no] = replace_str
+
+        return "[%s]" % "".join(chunks)
+        
 
     def _runDssat(self, dssat_path, fileio):
                 
