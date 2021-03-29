@@ -6,9 +6,14 @@ from glob import glob
 import subprocess as sp
 import os, re, sys
 
+class DssatCode():
+
+    def __init__(self, section, row, column):
+        self.section = section
+        self.row = row 
+        self.column = column
 
 class Dssat4Dum():
-
 
     def __init__(self, home, fileio, exe_path, tmp_dir, constant_apps=None):
 
@@ -19,6 +24,12 @@ class Dssat4Dum():
         self.constant_apps = constant_apps 
         self.exe_path = exe_path
         self.exe_setup = False
+
+        self.code_lookup = {
+                'pdate' : DssatCode("PLANTING DETAILS", 0, 0),
+                'sdate' : DssatCode("SIMULATION CONTROL", 0, 4)
+                'icdat' : DssatCode("INITIAL CONDITIONS ", 0, 1)
+            }
 
         # delete old run directories
         files2del = glob("%s/dssatrun*" % self.tmp_dir) 
@@ -51,8 +62,7 @@ class Dssat4Dum():
 
     # appsched is a jx5xn matrix representing j schedules of n apps 
     # with date, irrigation, nitrogen, phosphorus, and potassium
-    def run_batch(self, appsched, threads=1):
-
+    def run_batch(self, appsched, threads=1, updates={}):
 
         batch_count = np.size(appsched, 0)
 
@@ -72,6 +82,8 @@ class Dssat4Dum():
                 results = p.map(self.run, argz)
 
         return np.array(results)
+
+    
 
     def _runDssat(self, dssat_path, fileio):
                 
@@ -222,7 +234,6 @@ class Dssat4Dum():
             # Process the last line after irrigation
             if nutrient_iter == 1:
                 raw_result = "%s%s\n" % (raw_result, formattedNutrients)
-
             
             if "*RESIDUES" in line:
                 raw_result = "%s%s" % (raw_result, line)
@@ -376,9 +387,17 @@ if __name__ == "__main__":
 
     threads = 1
 
+
+    updates = { 'PDATE': 120 }
+
+
     print(runner.run_batch(appsched1, threads))
 
     #print(runner.run_batch(irrscheds,1))
+
+
+
+
 
 
 
