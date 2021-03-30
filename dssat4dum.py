@@ -27,8 +27,8 @@ class Dssat4Dum():
 
         self.code_lookup = {
                 'pdate' : DssatCode("PLANTING DETAILS", 0, 0),
-                'sdate' : DssatCode("SIMULATION CONTROL", 0, 4)
-                'icdat' : DssatCode("INITIAL CONDITIONS ", 0, 1)
+                'sdate' : DssatCode("SIMULATION CONTROL", 0, 4),
+                'icdat' : DssatCode("INITIAL CONDITIONS ", 0, 1),
             }
 
         # delete old run directories
@@ -39,7 +39,7 @@ class Dssat4Dum():
 
 
     # irrsched is a nx2 matrix representing an irrigation schedule of n apps
-    def run(self, argz):
+    def run(self, argz, updates={}):
 
         runid = argz[0]
         appsched = argz[1]
@@ -54,7 +54,7 @@ class Dssat4Dum():
 
         fileio_temp = "%s/DSSAT47.INP" % rundir
 
-        self._editApp(self.fileio, fileio_temp, appsched)
+        self._editExp(self.fileio, fileio_temp, appsched)
 
         (yld, leaching) = self._runDssat(rundir, fileio_temp)
 
@@ -76,14 +76,17 @@ class Dssat4Dum():
         if threads == 1: 
             # Eschew multiprocessing for debugging ease
             for r in range(0, batch_count):
-                results.append(self.run(argz[r]))
+                results.append(self.run(argz[r], updates=updates))
         else: 
             with Pool(threads) as p: 
                 results = p.map(self.run, argz)
 
         return np.array(results)
 
-    def replacetxt(string, field_no, value):
+    def _needs_replace(lookup, updates):
+        return True
+
+    def _replace_txt(string, field_no, value):
 
         chunks = re.findall(r"\s+\S+[\s]?", string)
 
@@ -109,7 +112,6 @@ class Dssat4Dum():
         chunks[field_no] = replace_str
 
         return "[%s]" % "".join(chunks)
-        
 
     def _runDssat(self, dssat_path, fileio):
                 
@@ -203,7 +205,7 @@ class Dssat4Dum():
 
         return formattedNutrients
 
-    def _editApp(self, fileio_in, fileio_out, irrsched):
+    def _editExp(self, fileio_in, fileio_out, irrsched, updates={}):
 
         # Read data 
         reader = open(fileio_in, "r")
@@ -228,43 +230,98 @@ class Dssat4Dum():
         irrigation_iter = -1
         nutrient_iter = -1
 
+        progress = [("IRRIGATION", -1), ("FERTILIZERS", -1)] 
+
+        NAME = 0
+        ITER = 1
+
+        progress_new = [["FILES", -1], ["SIMULATION CONTROL", -1], 
+                ["EXP.DETAILS", -1], ["TREATMENTS", -1], ["CULTIVARS", -1],
+                ["FIELDS", -1], ["INITIAL CONDITIONS", -1], 
+                ["PLANTING DETAILS", -1], ["IRRIGATION", -1], 
+                ["FERTILIZERS", -1], ["RESIDUES", -1], ["CHEMICALS", -1],
+                ["TILLAGE", -1], ["ENVIRONMENT", -1], ["HARVEST", -1],
+                ["SOIL", -1], ["CULTIVAR", -1]]
+
+        curr_field = -1
+
+        raw_result_new = []
+
         for line in raw_txt:
 
-            # If irrigation is reached, mark that we've start processing 
-            if "*IRRIGATION" in line:
-                irrigation_iter += 1
+            # Check if the next field has arrived
+            if ("*%s" % progress_new[curr_field+1][NAME]) in line:
+                curr_field += 1
+                progress_new[curr_field+1][NAME] = 0
 
-            # If processing irrigation, mark another line of irrigation processed
-            if irrigation_iter >= 0: 
-                irrigation_iter += 1        
+            curr_iter = progress_new[curr_field][ITER]
+            curr_name = progress_new[curr_field][NAME]
+          
+            if curr_iter == 0:
+                # Print the section header by default
+                raw_result_new.append(line)
+            elif curr_name == "IRRIGATION" and curr_iter > 1: 
+                # Print the special irrigation section
+                raw_result_new.append(formattedIrr)
+            elif curr_name == "FERTILIZERS":    
+                # Print the special fertilizer section
+                raw_result_new.append(formattedNutrients)
+            else:
+                # Perform the find and replace
+                #if _needs_replace(self.code_lookup, updates):
+                #    raw_result_new.append(formattedNutrients)
+                #    # Update line
+                #    #_replace_txt(line, )
+                raw_result_new.append(line)
 
-            # If not processing irrigation data, concat to result
-            if irrigation_iter <= 2 and nutrient_iter <= 0 :
-                raw_result = "%s%s" % (raw_result, line)
 
-            # Process the last line after irrigation
-            if irrigation_iter == 3:
-                raw_result = "%s%s\n" % (raw_result, formattedIrr)
 
-            # If we've reached fertilizer, stop process irrigation  
-            # and start processing fertilizer
-            if "*FERTILIZERS" in line:
-                raw_result = "%s%s" % (raw_result, line)
-                irrigation_iter = -1
-                nutrient_iter += 1
+            # If none of the fields have been reached, 
+            # just print out unedited fields
+            #if progress_new[curr_field][0] == -1:
+            #    raw_result = "%s%s" % (raw_result, line)
 
-            # If processing nutrients, mark another line of nutrient processed
-            if nutrient_iter >= 0: 
-                nutrient_iter += 1
 
-            # Process the last line after irrigation
-            if nutrient_iter == 1:
-                raw_result = "%s%s\n" % (raw_result, formattedNutrients)
-            
-            if "*RESIDUES" in line:
-                raw_result = "%s%s" % (raw_result, line)
-                nutrient_iter = -1
+        #for line in raw_txt:
+        #    
+        #    break 
 
+        #    # If irrigation is reached, mark that we've start processing 
+        #    if "*IRRIGATION" in line:
+        #        irrigation_iter += 1
+
+        #    # If processing irrigation, mark another line of irrigation processed
+        #    if irrigation_iter >= 0: 
+        #        irrigation_iter += 1        
+
+        #    # If not processing irrigation data, concat to result
+        #    if irrigation_iter <= 2 and nutrient_iter <= 0 :
+        #        raw_result = "%s%s" % (raw_result, line)
+
+        #    # Process the last line after irrigation
+        #    if irrigation_iter == 3:
+        #        raw_result = "%s%s\n" % (raw_result, formattedIrr)
+
+        #    # If we've reached fertilizer, stop process irrigation  
+        #    # and start processing fertilizer
+        #    if "*FERTILIZERS" in line:
+        #        raw_result = "%s%s" % (raw_result, line)
+        #        irrigation_iter = -1
+        #        nutrient_iter += 1
+
+        #    # If processing nutrients, mark another line of nutrient processed
+        #    if nutrient_iter >= 0: 
+        #        nutrient_iter += 1
+
+        #    # Process the last line after irrigation
+        #    if nutrient_iter == 1:
+        #        raw_result = "%s%s\n" % (raw_result, formattedNutrients)
+        #    
+        #    if "*RESIDUES" in line:
+        #        raw_result = "%s%s" % (raw_result, line)
+        #        nutrient_iter = -1
+
+        raw_result = "".join(raw_result_new)
 
         # Write results to file
 
@@ -417,7 +474,7 @@ if __name__ == "__main__":
     updates = { 'PDATE': 120 }
 
 
-    print(runner.run_batch(appsched1, threads))
+    print(runner.run_batch(appsched2, threads, updates=updates))
 
     #print(runner.run_batch(irrscheds,1))
 
