@@ -39,10 +39,11 @@ class Dssat4Dum():
 
 
     # irrsched is a nx2 matrix representing an irrigation schedule of n apps
-    def run(self, argz, updates={}):
+    def run(self, argz):
 
         runid = argz[0]
         appsched = argz[1]
+        updates = argz[2]
 
         if self.constant_apps is not None:
             appsched = np.concatenate((appsched, self.constant_apps))
@@ -70,13 +71,13 @@ class Dssat4Dum():
         # schedule and the second being the run id
         argz = []
         for ind,dat in enumerate(appsched): 
-            argz.append((ind, dat))
+            argz.append((ind, dat, updates))
 
         results = []
         if threads == 1: 
             # Eschew multiprocessing for debugging ease
             for r in range(0, batch_count):
-                results.append(self.run(argz[r], updates=updates))
+                results.append(self.run(argz[r]))
         else: 
             with Pool(threads) as p: 
                 results = p.map(self.run, argz)
