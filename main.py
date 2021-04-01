@@ -1,9 +1,11 @@
 import pandas as pd
 import numpy as np
+from cropopt import CropOpt
+from sps import SPS
 
 ## Parameters: 
 
-#app_man_xlxs = "/Users/iankropp/OneDrive - Michigan State University/Documents/Shared/todo/paper1Innovization/management/original_Cass_Irrigation_Nitrogen_Application_Climatology_1980_2017.xlsx"
+# Agricultural parameters
 app_man_csv = "management_dates.csv"
 app_man = pd.read_csv(app_man_csv)
 
@@ -13,6 +15,19 @@ plant_date = 135
 
 total_nitro = 200
 
+# dssat parameters 
+home_dir = "/Users/iankropp"
+
+dssat_home = "%s/Projects/agovization/dhome" % home_dir
+dssat_exe = "%s/Projects/agovization/dhome/dscsm047" % home_dir
+dssat_inp = "%s/Projects/agovization/dhome/DSSAT47.INP" % home_dir
+output_dir = "%s/Projects/agovization/output/" % home_dir
+
+tmp_dir = "/tmp/"
+
+# Runtime parameters
+seed = 20210401
+threads = 1
 
 ## Derived parameters 
 
@@ -48,65 +63,30 @@ plant_date += int(year * 1e3)
 #
 
 date_ranges = [
-        [irr_date_lb,   irr_date_ub,    0,                     0, 10, 0],       # Irrigation period 
-        [plant_date,    plant_date,     1, int(total_nitro*0.75),  0, 0],  # Preplant incorporation 
-        [nitro_date_lb, nitro_date_ub,  1, int(total_nitro*0.25),  0, 0]]   
+        [irr_date_lb,   irr_date_ub,    0,                     0, 10, 0], # Irrigation period 
+        [nitro_date_lb, nitro_date_ub,  1, int(total_nitro*0.25),  0, 0]] # 
 
+# Preplant incorporation 
+constant_apps = np.array([[plant_date, 0, int(total_nitro*0.75), 0, 0]])
 
 date_ranges = np.array(date_ranges)
 
-print(date_ranges)
+year_updates = { 'pdate': plant_date, 'sdate': plant_date, 'icdat': plant_date }
 
-# 1: Year
-# 2: Irrigation period 
-# 3: Nitrogen timing (determined by weather properties)
-# 4: Plant date (determined by weather properties)
+## Main 
 
 
-## Objective function
+for run in range(reps):
 
-    # Parameters: irrigation days for this 
+    print("Initializing Run %d" % run)
 
+    seed = year + plant_date + run
 
-
-## Main -- Run setup
-
-# Optimization params:
-# Objectives -- 
-#   maximize yield
-#   minimize irrigation
+    prob = CropOpt(threads, dssat_home, dssat_exe, dssat_inp,
+                           tmp_dir, date_ranges, output_dir, run, seed=0, 
+                           updates=year_updates, constant_apps=None)
 
 
-
-
-
-dssat_home = "/home/ian/Projects/dssat4py/rundir"
-fileio = "/home/ian/Projects/dssat4py/rundir/DSSAT47.INP"
-tmp_dir = "/tmp/"
-
-#runner = Dssat4Dum(dssat_home, fileio, tmp_dir)
-#
-#threads = 7
-#
-#print(runner.run_batch(appscheds2, threads))
-#
-#
-#updates = { 'pdate': 2000135, 'sdate': 2000135, 'icdat': 2000135 }
-#
-#
-#print(runner.run_batch(appsched1[:10], threads, updates=updates))
-
-
-#print(runner.run(irrscheds[0],0))
-
-
-
-
-
-# Decision variables --
-#   x --> (period end) - (period start)
-#   
-
-
+    print("Starting run %d" % run)
 
 
