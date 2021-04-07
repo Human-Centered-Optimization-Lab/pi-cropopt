@@ -2,91 +2,144 @@ import pandas as pd
 import numpy as np
 from cropopt import CropOpt
 from sps import SPS
+from pymoo.algorithms.nsga3 import NSGA3
+from pymoo.factory import get_reference_directions
+from pymoo.optimize import minimize
+import sys
+from pathlib import Path
+from datetime import datetime
 
-## Parameters: 
+if __name__ == "__main__":
 
-# Agricultural parameters
-app_man_csv = "management_dates.csv"
-app_man = pd.read_csv(app_man_csv)
+    ## Parameters: 
 
-reps = 20
-year = 2000
-plant_date = 135 
+    dateTimeObj = datetime.now()
+    timestamp = "%d-%02d-%02d_%02d-%02d-%02d" % (dateTimeObj.year, dateTimeObj.month, dateTimeObj.day, dateTimeObj.hour, dateTimeObj.minute, dateTimeObj.second)
 
-total_nitro = 200
+    # Agricultural parameters
+    app_man_csv = "management_dates.csv"
+    app_man = pd.read_csv(app_man_csv)
 
-# dssat parameters 
-home_dir = "/Users/iankropp"
+    reps = 2 
+    year = 2000
+    plant_date = 135 
 
-dssat_home = "%s/Projects/agovization/dhome" % home_dir
-dssat_exe = "%s/Projects/agovization/dhome/dscsm047" % home_dir
-dssat_inp = "%s/Projects/agovization/dhome/DSSAT47.INP" % home_dir
-output_dir = "%s/Projects/agovization/output/" % home_dir
+    total_nitro = 200
 
-tmp_dir = "/tmp/"
+    # dssat parameters 
+    home_dir = "/Users/iankropp"
 
-# Runtime parameters
-seed = 20210401
-threads = 1
+    dssat_home = "%s/Projects/agovization/dhome" % home_dir
+    dssat_exe = "%s/Projects/agovization/dhome/dscsm047" % home_dir
+    dssat_inp = "%s/Projects/agovization/dhome/DSSAT47.INP" % home_dir
+    output_dir = "%s/Projects/agovization/output/" % home_dir
 
-## Derived parameters 
+    tmp_dir = "/tmp/"
 
-if year % 4 == 0: 
-    plant_date += 1
+    # Runtime optimization parameters
+    threads = 6  
+    initial_sparsity = 0.1
+    pop_size = 100
+    ref_dirs = get_reference_directions("energy", 3, 90, seed=1)
+    generations = 2
 
-first_nut_app = plant_date
+    ## Derived parameters 
 
-# Calcualte irrigation bounds
-# (between the 30-year minimum of V6 and maximum of R2)
-irr_date_lb = min(app_man[app_man.Year < 2010].V8)  # TODO change to V6 when data is available
-irr_date_ub = max(app_man[app_man.Year < 2010].R2)
+    if year % 4 == 0: 
+        plant_date += 1
 
-nitro_date_lb = min(app_man[app_man.Year < 2010].V8)  # TODO change to V6 when data is available
-nitro_date_ub = max(app_man[app_man.Year < 2010].V14)
+    first_nut_app = plant_date
 
-# Reformat the mins and maxes for the given year
-# 
-irr_date_lb += int(year * 1e3)
-irr_date_ub += int(year * 1e3)
-nitro_date_lb += int(year * 1e3)
-nitro_date_ub += int(year * 1e3)
-plant_date += int(year * 1e3)
+    # Calcualte irrigation bounds
+    # (between the 30-year minimum of V6 and maximum of R2)
+    irr_date_lb = min(app_man[app_man.Year < 2010].V8)  # TODO change to V6 when data is available
+    irr_date_ub = max(app_man[app_man.Year < 2010].R2)
 
-#
-# Irrigation type            Nutrient type
-# Col 1: Period begin date   Col 1: Period begin date  
-# Col 2: Period end date     Col 2: Period end date    
-# Col 3: IRR=0,              Col 3: NUT=1,             
-# Col 4: IRR min             Col 4: Nitrogen amount    
-# Col 5: IRR max             Col 5: Phos amount        
-# Col 6: 0                   Col 6: Pot amount         
-#
+    nitro_date_lb = min(app_man[app_man.Year < 2010].V8)  # TODO change to V6 when data is available
+    nitro_date_ub = max(app_man[app_man.Year < 2010].V14)
 
-date_ranges = [
-        [irr_date_lb,   irr_date_ub,    0,                     0, 10, 0], # Irrigation period 
-        [nitro_date_lb, nitro_date_ub,  1, int(total_nitro*0.25),  0, 0]] # 
+    # Reformat the mins and maxes for the given year
+    # 
+    irr_date_lb += int(year * 1e3)
+    irr_date_ub += int(year * 1e3)
+    nitro_date_lb += int(year * 1e3)
+    nitro_date_ub += int(year * 1e3)
+    plant_date += int(year * 1e3)
 
-# Preplant incorporation 
-constant_apps = np.array([[plant_date, 0, int(total_nitro*0.75), 0, 0]])
+    #
+    # Irrigation type            Nutrient type
+    # Col 1: Period begin date   Col 1: Period begin date  
+    # Col 2: Period end date     Col 2: Period end date    
+    # Col 3: IRR=0,              Col 3: NUT=1,             
+    # Col 4: IRR min             Col 4: Nitrogen amount    
+    # Col 5: IRR max             Col 5: Phos amount        
+    # Col 6: 0                   Col 6: Pot amount         
+    #
 
-date_ranges = np.array(date_ranges)
+    date_ranges = [
+            [irr_date_lb,   irr_date_ub,    0,                     0, 10, 0], # Irrigation period 
+            [nitro_date_lb, nitro_date_ub,  1, int(total_nitro*0.25),  0, 0]] # 
 
-year_updates = { 'pdate': plant_date, 'sdate': plant_date, 'icdat': plant_date }
+    # Preplant incorporation 
+    constant_apps = np.array([[plant_date, 0, int(total_nitro*0.75), 0, 0]])
 
-## Main 
+    date_ranges = np.array(date_ranges)
 
+    year_updates = { 'pdate': plant_date, 'sdate': plant_date, 'icdat': plant_date }
 
-for run in range(reps):
-
-    print("Initializing Run %d" % run)
-
-    seed = year + plant_date + run
-
-    prob = CropOpt(threads, dssat_home, dssat_exe, dssat_inp,
-                           tmp_dir, date_ranges, output_dir, run, seed=0, 
-                           updates=year_updates, constant_apps=None)
+    ## Main 
 
 
-    print("Starting run %d" % run)
+    for run in range(reps):
+
+        print("Initializing Run %d" % run)
+
+        seed = year + plant_date + run
+
+        prob = CropOpt(threads, dssat_home, dssat_exe, dssat_inp,
+                               tmp_dir, date_ranges, output_dir, run, seed=0, 
+                               updates=year_updates, constant_apps=None)
+
+
+        print("Starting run %d" % run)
+
+        nutrient_inds = CropOpt.calc_period_indices(CropOpt, date_ranges)[1]
+        nutrient_inds = [a[1] for a in nutrient_inds]
+
+        sps_sampler = SPS(initial_sparsity, sampled_mask=nutrient_inds)
+
+        algorithm = NSGA3(pop_size=pop_size, 
+                ref_dirs=ref_dirs,
+                eliminate_duplicates=True,
+                sampling=sps_sampler)
+
+        res = minimize(prob,
+                       algorithm,
+                       ('n_gen', generations),
+                       seed=seed,
+                       save_history=True,
+                       verbose=True)
+
+        paretoFront = res.F
+        paretoFront[:,1] = paretoFront[:,1]*-1
+
+        print("Recording run %d" % run)
+
+        for gen in res.history:
+
+            gen_n = gen.n_gen
+           
+            objectives = np.array([indiv.F for indiv in gen.pop ])
+            x = np.array([indiv.X for indiv in gen.pop ])
+
+            full_output_dir = "%s/batch%s" % (output_dir, timestamp)
+
+            Path(full_output_dir).mkdir(parents=True, exist_ok=True)
+
+            # save generational data 
+            np.savetxt("%s/run%04d_gen%04d_obj.csv" % (full_output_dir, run, gen_n), objectives, delimiter=",")
+            np.savetxt("%s/run%04d_gen%04d_var.csv" % (full_output_dir, run, gen_n), x, delimiter=",")
+
+            np.savetxt("%s/run%04d_finalgen.csv" % (full_output_dir, run), paretoFront, delimiter=",")
 
 
