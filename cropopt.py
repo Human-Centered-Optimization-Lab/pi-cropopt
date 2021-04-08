@@ -135,11 +135,19 @@ class CropOpt(Problem):
         out["F"] = objectives
 
 
-    # Returns (a, b, c)
+    # 
+    # Returns (irr_periods, nut_periods)
     #
-    # a -> original date range index
-    # b -> Beginning of range in genome
-    # c -> End of range in genome
+    # irr_periods = [(a_1, b_1, c_1), (a_2, b_2, c_2), ...]
+    #
+    # a_n -> period index 
+    # b_n -> Beginning of range in genome
+    # c_n -> End of range in genome 
+    #
+    # nut_periods = [(a_1, b_1), (a_2, b_2)]
+    #
+    # a_n -> period index
+    # b_n -> index in genome
     #
     def calc_period_indices(self, date_ranges):
         
