@@ -20,7 +20,7 @@ if __name__ == "__main__":
     app_man_csv = "management_dates.csv"
     app_man = pd.read_csv(app_man_csv)
 
-    reps = 2 
+    reps = 1
     year = 2000
     plant_date = 135 
 
@@ -104,6 +104,7 @@ if __name__ == "__main__":
         print("Starting run %d" % run)
 
         nutrient_inds = CropOpt.calc_period_indices(CropOpt, date_ranges)[1]
+
         nutrient_inds = [a[1] for a in nutrient_inds]
 
         sps_sampler = SPS(initial_sparsity, sampled_mask=nutrient_inds)
@@ -141,5 +142,22 @@ if __name__ == "__main__":
             np.savetxt("%s/run%04d_gen%04d_var.csv" % (full_output_dir, run, gen_n), x, delimiter=",")
 
             np.savetxt("%s/run%04d_finalgen.csv" % (full_output_dir, run), paretoFront, delimiter=",")
+
+    # metadata on the genome structure
+    statement = {
+                'indices': CropOpt.calc_period_indices(CropOpt, date_ranges),
+                'date_ranges': date_ranges.tolist(),
+                'constant_apps': constant_apps.tolist()
+            }
+
+
+
+    with open("%s/genome_structure.py" % full_output_dir, 'w') as f:f.write(repr(statement))
+    
+
+    #print("Copy the following statement into the script")
+
+    #print("period_indices=%s" % statement_str)
+
 
 
