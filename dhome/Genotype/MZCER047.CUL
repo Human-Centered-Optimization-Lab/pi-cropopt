@@ -44,8 +44,8 @@
 !
 @VAR#  VRNAME.......... EXPNO   ECO#    P1    P2    P5    G2    G3 PHINT
 !                                        1     2     3     4     5     6
-PC0001 MI                   . IB0001 192.0 .8250 780.0 750.0  8.50 56.59
-PC0001 2500-2600 GDD        . IB0001 160.0 0.750 780.0 750.0  8.50 49.00
+! Ian Kropp -- commenting this out for the cass coefficients (see bottom of file)
+!PC0001 2500-2600 GDD        . IB0001 160.0 0.750 780.0 750.0  8.50 49.00
 PC0002 2600-2650 GDD        . IB0001 185.0 0.750 850.0 800.0  8.50 49.00
 PC0003 2650-2700 GDD        . IB0001 212.0 0.750 850.0 800.0  8.50 49.00
 PC0004 2700-2750 GDD        . IB0001 240.0 0.750 850.0 800.0  8.50 49.00
@@ -223,7 +223,7 @@ KY0017 H612                 . IB0001 130.0 0.500 390.0 825.0 10.15 75.00
 KY0018 KATUMANICOMP-II      . IB0001 125.0 0.500 660.0 450.0 10.50 75.00
 
 !J.B.Naab data 2003-2006, re-calibrated by kjb 1/2/12
-GH0010 OBATANPA             . IB0001 280.0 0.000 750.0 540.0  7.50 40.00
+GH0010 OBATAMPA             . IB0001 280.0 0.000 750.0 540.0  7.50 40.00
 
 !Four Global Futures maize cultivars (3 life cycle by 2 "yield levels")
 !Composite: same maturity as Garst 8808 and WH403), but G2 and G3 mid-way.
@@ -244,3 +244,7 @@ CYMA01 wh403                . IB0001 265.0 0.760 685.0 760.0  7.60 38.90
 
 ! Added by Camilo Andrade from Embrapa Maize and Sorghum
 EBSL06 BRS1030-SL2009       . IB0001 263.8 0.500 1034  700.0  5.20 44.22 !Single-cross hybrid from Embrapa
+
+
+! Added by Ian Kropp for CASS county 
+PC0001 MI                   . IB0001 192.0 .8250 780.0 750.0  8.50 56.59
