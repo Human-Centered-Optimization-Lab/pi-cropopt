@@ -37,7 +37,7 @@ if __name__ == "__main__":
     tmp_dir = "/tmp/"
 
     # Runtime optimization parameters
-    threads = 6  
+    threads = 6
     initial_sparsity = 0.1
     pop_size = 100
     ref_dirs = get_reference_directions("energy", 3, 90, seed=1)
@@ -98,7 +98,7 @@ if __name__ == "__main__":
 
         prob = CropOpt(threads, dssat_home, dssat_exe, dssat_inp,
                                tmp_dir, date_ranges, output_dir, run, seed=0, 
-                               updates=year_updates, constant_apps=None)
+                               updates=year_updates, constant_apps=constant_apps)
 
 
         print("Starting run %d" % run)
