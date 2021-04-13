@@ -20,8 +20,13 @@ if __name__ == "__main__":
     app_man_csv = "management_dates.csv"
     app_man = pd.read_csv(app_man_csv)
 
+    if len(sys.argv) != 2: 
+        print("Usage: %s YEAR" % sys.argv[0])
+        sys.exit(1)
+
+    year = int(sys.argv[1])
+
     reps = 1
-    year = 2000
     plant_date = 135 
 
     total_nitro = 200
@@ -30,18 +35,18 @@ if __name__ == "__main__":
     home_dir = "/Users/iankropp"
 
     dssat_home = "%s/Projects/agovization/dhome" % home_dir
-    dssat_exe = "%s/Projects/agovization/dhome/dscsm047" % home_dir
+    dssat_exe = "%s/Projects/agovization/dhome/dscsm047-macos" % home_dir
     dssat_inp = "%s/Projects/agovization/dhome/DSSAT47.INP" % home_dir
     output_dir = "%s/Projects/agovization/output/" % home_dir
 
     tmp_dir = "/tmp/"
 
     # Runtime optimization parameters
-    threads = 6
+    threads = 1
     initial_sparsity = 0.1
     pop_size = 100
     ref_dirs = get_reference_directions("energy", 3, 90, seed=1)
-    generations = 2
+    generations = 200
 
     ## Derived parameters 
 
