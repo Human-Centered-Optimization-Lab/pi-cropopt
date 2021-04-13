@@ -9,7 +9,7 @@ ECOTYPE        MZCER047.ECO ./Genotype/
 CULTIVAR       MZCER047.CUL ./Genotype/                                                                     
 PESTS          MZCER047.PST ./Pest/                                                                         
 SOILS          SOIL.SOL     ./Soil/                                                                         
-WEATHER        CASS1701.WTH ./Weather/                                                                      
+WEATHER        CASSREPR.WTH ./Weather/                                                                      
 OUTPUT         OVERVIEW
 *SIMULATION CONTROL 
                    1     1     S 2017135  2150 N X IRRIGATION, GAINESVI 
@@ -30,7 +30,7 @@ OUTPUT         OVERVIEW
 *CULTIVARS          
    MZ PC0001 MI              
 *FIELDS             
-   CASS1701 CASSCASSREPR   0.0    0. DR000    0. 100.0 00000 SL     180. IB00000009
+   CASS1701 CASSREPR   0.0    0. DR000    0. 100.0 00000 SL     180. IB00000009
           29.63000       -82.37000     40.00               1.0  100.   1.0   0.0   -99   -99
 *INITIAL CONDITIONS 
    MZ    2017135   100     0  1.00  1.00   0.0  1000  0.80  0.00  100.   15.
