@@ -26,23 +26,23 @@ if __name__ == "__main__":
 
     year = int(sys.argv[1])
 
-    reps = 1
-    plant_date = 135 
+    reps = 30
+    plant_date = 136
 
     total_nitro = 200
 
     # dssat parameters 
-    home_dir = "/Users/iankropp"
+    home_dir = "/work/ian/"
 
     dssat_home = "%s/Projects/agovization/dhome" % home_dir
-    dssat_exe = "%s/Projects/agovization/dhome/dscsm047-macos" % home_dir
+    dssat_exe = "%s/Projects/agovization/dhome/dscsm047-linux" % home_dir
     dssat_inp = "%s/Projects/agovization/dhome/DSSAT47.INP" % home_dir
     output_dir = "%s/Projects/agovization/output/" % home_dir
 
     tmp_dir = "/tmp/"
 
     # Runtime optimization parameters
-    threads = 1
+    threads = 20
     initial_sparsity = 0.1
     pop_size = 100
     ref_dirs = get_reference_directions("energy", 3, 90, seed=1)
@@ -138,7 +138,7 @@ if __name__ == "__main__":
             objectives = np.array([indiv.F for indiv in gen.pop ])
             x = np.array([indiv.X for indiv in gen.pop ])
 
-            full_output_dir = "%s/batch%s" % (output_dir, timestamp)
+            full_output_dir = "%s/year_%s_%s" % (output_dir, str(year), timestamp)
 
             Path(full_output_dir).mkdir(parents=True, exist_ok=True)
 
