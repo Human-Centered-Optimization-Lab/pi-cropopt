@@ -6,6 +6,7 @@ from glob import glob
 import subprocess as sp
 import os, re, sys
 import json
+import pandas as pd
 
 class DssatCode():
 
@@ -32,17 +33,23 @@ class Dssat4Dum():
                 'icdat' : DssatCode("INITIAL CONDITIONS", 0, 1),
             }
 
-        # delete old run directories
-        files2del = glob("%s/dssatrun*" % self.tmp_dir) 
 
         self._run_record = {}
+        
+        self.clean_workspace()
+
+
+    def clean_workspace(self):
+
+        # delete old run directories
+        files2del = glob("%s/dssatrun*" % self.tmp_dir) 
 
         for f in files2del: 
             rmtree(f);
 
 
     # irrsched is a nx2 matrix representing an irrigation schedule of n apps
-    def run(self, argz):
+    def _run(self, argz):
 
         runid = argz[0]
         appsched = argz[1]
@@ -60,16 +67,43 @@ class Dssat4Dum():
 
         run_key = self._editExp(self.fileio, fileio_temp, appsched, updates= updates)
 
-        sched_key = json.dumps(appsched.tolist())
+        appsched_list = appsched.tolist()
+
+        # Remove any days that have no applications
+        appsched_list_cleaned = [r for r in appsched_list if (r[1] + r[2] + r[3] + r[4] != 0)]
+
+        sched_key = json.dumps(appsched_list_cleaned)
 
         (yld, leaching) = self._runDssat(rundir, fileio_temp)
 
-        self._run_record[sched_key] = (yld, leaching)
+        return (yld, leaching, sched_key)
 
-        return (yld, leaching)
-
-    def dump_run_record(self):
+    def _dump_run_record(self):
         return self._run_record
+
+    def generate_report(self):
+     
+        yields   = []
+        leaching = []
+        scheds   = []
+        
+        for k in self._run_record.keys():
+
+            sched_raw = json.loads(k)
+            sched = np.array(sched_raw)
+
+            scheds.append(sched)
+            yields.append(self._run_record[k][0])
+            leaching.append(self._run_record[k][1])
+
+        raw_report = {  'yield': yields , 
+                        'leaching': leaching,
+                        'scheds': scheds}
+
+        report = pd.DataFrame(raw_report)
+
+        return report
+
 
     # appsched is a jx5xn matrix representing j schedules of n apps 
     # with date, irrigation, nitrogen, phosphorus, and potassium
@@ -88,12 +122,21 @@ class Dssat4Dum():
         if threads == 1: 
             # Eschew multiprocessing for debugging ease
             for r in range(0, batch_count):
-                results.append(self.run(argz[r]))
+                results.append(self._run(argz[r]))
         else: 
             with Pool(threads) as p: 
-                results = p.map(self.run, argz)
+                results = p.map(self._run, argz)
 
-        return np.array(results)
+        # Save the most recent runs
+        for result in results:
+            sched_key = result[2]
+            yield_ = result[0]
+            leaching = result[1]
+            self._run_record[sched_key] = (yield_, leaching)
+
+        # Remove the run records from the simple results
+        results_cleaned = [(a[0], a[1]) for a in results]
+        return np.array(results_cleaned)
 
     @staticmethod 
     def _replace_txt(string, field_no, value):
@@ -255,7 +298,6 @@ class Dssat4Dum():
             if (curr_field + 1) < len(progress_new) and ("*%s" % progress_new[curr_field+1][NAME]) in line:
                 curr_field += 1
                 progress_new[curr_field][ITER] = 0
-                #print("New field: %s" % progress_new[curr_field][NAME])
 
             curr_iter = progress_new[curr_field][ITER]
             curr_name = progress_new[curr_field][NAME]
@@ -479,7 +521,7 @@ if __name__ == "__main__":
 
     appsched3[2] = np.array(np.matrix("""
        [2000063,13,  0, 0, 0; 
-        2000077,11,  0, 0, 0; 
+        2000077, 0,  0, 0, 0; 
         2000094,10,  0, 0, 0; 
         2000107,13,  0, 0, 0; 
         2000111,18,  0, 0, 0; 
@@ -509,7 +551,6 @@ if __name__ == "__main__":
 
     runner = Dssat4Dum(dssat_home, fileio, dssat_exe, tmp_dir)
 
-
     threads = 1
 
     updates = { 'pdate': 1980135, 'sdate': 1980135, 'icdat': 1980135 }
@@ -517,8 +558,8 @@ if __name__ == "__main__":
 
     print(runner.run_batch(appsched3, threads, updates=updates))
 
-
-    #print(runner.run_batch(irrscheds,1))
+    
+    print(runner.generate_report())
 
 
 

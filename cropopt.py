@@ -81,6 +81,9 @@ class CropOpt(Problem):
             mins[indx] = date_ranges[periodInd, self.MIN_DATE]
             maxs[indx] = date_ranges[periodInd, self.MAX_DATE]
 
+        # Set up a dssat runner that will handle the batch
+        self.runner = Dssat4Dum(self.dssat_home, self.dssat_inp, self.dssat_exe, 
+                self.tmp_dir, constant_apps=self.constant_apps)
 
         # TODO constraints? 
         super().__init__(n_var=day_count,
@@ -97,12 +100,10 @@ class CropOpt(Problem):
         # Put into application format
         irrapps = self._build_applications(x_rounded, self.date_ranges)
 
-        # Set up a dssat runner that will handle the batch
-        runner = Dssat4Dum(self.dssat_home, self.dssat_inp, self.dssat_exe, 
-                self.tmp_dir, constant_apps=self.constant_apps)
     
-        # Run batch l
-        yield_and_leaching = runner.run_batch(irrapps, self.threads, updates=self.updates)
+        # Run batch 
+        self.runner.clean_workspace()
+        yield_and_leaching = self.runner.run_batch(irrapps, self.threads, updates=self.updates)
  
         yld = yield_and_leaching[:,0][np.newaxis]
 
@@ -134,7 +135,11 @@ class CropOpt(Problem):
 
         out["F"] = objectives
 
+    def get_report(self):
 
+        return self.runner.generate_report()
+
+    
     # 
     # Returns (irr_periods, nut_periods)
     #

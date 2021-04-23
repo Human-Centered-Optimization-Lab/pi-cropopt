@@ -8,6 +8,7 @@ from pymoo.optimize import minimize
 import sys
 from pathlib import Path
 from datetime import datetime
+import pickle
 
 if __name__ == "__main__":
 
@@ -26,27 +27,27 @@ if __name__ == "__main__":
 
     year = int(sys.argv[1])
 
-    reps = 30
+    reps = 2
     plant_date = 136
 
     total_nitro = 200
 
     # dssat parameters 
-    home_dir = "/work/ian/"
+    home_dir = "/Users/iankropp/"
 
     dssat_home = "%s/Projects/agovization/dhome" % home_dir
-    dssat_exe = "%s/Projects/agovization/dhome/dscsm047-linux" % home_dir
+    dssat_exe = "%s/Projects/agovization/dhome/dscsm047-macos" % home_dir
     dssat_inp = "%s/Projects/agovization/dhome/DSSAT47.INP" % home_dir
     output_dir = "%s/Projects/agovization/output/" % home_dir
 
     tmp_dir = "/tmp/"
 
     # Runtime optimization parameters
-    threads = 20
+    threads = 4
     initial_sparsity = 0.1
     pop_size = 100
     ref_dirs = get_reference_directions("energy", 3, 90, seed=1)
-    generations = 200
+    generations = 2
 
     ## Derived parameters 
 
@@ -148,6 +149,7 @@ if __name__ == "__main__":
 
             np.savetxt("%s/run%04d_finalgen.csv" % (full_output_dir, run), paretoFront, delimiter=",")
 
+
     # metadata on the genome structure
     statement = {
                 'indices': CropOpt.calc_period_indices(CropOpt, date_ranges),
@@ -158,7 +160,13 @@ if __name__ == "__main__":
 
 
     with open("%s/genome_structure.py" % full_output_dir, 'w') as f:f.write(repr(statement))
-    
+
+    report = prob.get_report()
+
+    output = open('%s/run_sim_record.pkl' % full_output_dir, 'wb')
+    pickle.dump(report, output)
+
+
 
     #print("Copy the following statement into the script")
 
