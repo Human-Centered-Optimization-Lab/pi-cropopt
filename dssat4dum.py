@@ -198,59 +198,42 @@ class Dssat4Dum():
         else:
             return "%sdssatrun%04d" % (temp_dir,runid) 
 
-    def formatIrrSched(self, irrSched):
+    def formatIrrSched(self, appSched):
 
-        blank = np.array("", object)
-        # Build lines of irrigation applications
-        formattedIrrApp = np.apply_along_axis( 
-                (lambda a : "   %d IR001  %f" % (a[0], a[1]) if a[1] != 0 else blank
-            ), 1,irrSched)
-              
-        nonZeros = list(filter(
-                (lambda x : x != "" ), 
-                formattedIrrApp
-            ))
+        # Filter out the non-irrigation rows
+        irr_rows = appSched[:,1] != 0
+        irr_apps = appSched[irr_rows]
 
-        if len(nonZeros) != 0:
-            # Convert array of irrigation application to a string
-            formattedIrr = reduce(
-                lambda a,b : "%s\n%s" % (a,b),
-                # remove None values (nutrient applications)
-                nonZeros               
-            )
-        else: 
-            formattedIrr = ""
+        # Sort the irrigation rows
+        irr_apps = irr_apps[irr_apps[:,0].argsort()]
+        
+        formatted_irr_list = ["   %d IR001  %f" % (r[0], r[1]) for r in irr_apps if len(r) > 0 ]
 
-        return formattedIrr + "\n"
+        formatted_irr = "\n".join(formatted_irr_list)
 
-    def formatNutSched(self, nitroSched):
+        return formatted_irr + "\n"
 
-        blank = np.array("", object)
+    def formatNutSched(self, appSched):
+
         # Build lines of nutrient applications
         formatStr = "   %d FE001 AP001   10. % 4d. % 4d. % 4d.    0.    0.   -99"
 
-        formattedNutApp = np.apply_along_axis( 
-                (lambda a : formatStr % (a[0], a[2], a[3], a[4]) if (a[2] != 0 or a[3] != 0 or a[4] != 0) else blank 
-            ), 1, nitroSched)
+        # Filter out the non-nutrient rows
+        nitro_rows = np.logical_or(appSched[:,2] != 0, appSched[:,3] != 0, appSched[:,4] != 0) 
+        nitroSched = appSched[nitro_rows]
        
-        nonZeros = list(filter(
-            (lambda x : x != "" ), 
-            formattedNutApp
-        ))
+        # Sort the nitrogen applications
+        nitroSched = nitroSched[nitroSched[:,0].argsort()]
 
-        # If there were no valid nutrient applications, return a application with zero amounts
-        if len(nonZeros) != 0:
-            formattedNutrients = reduce(
-                lambda a,b : "%s\n%s" % (a,b),
-                # remove None values (nutrient applications)
-                nonZeros
-            )
-        else:
-            formattedNutrients = formatStr % (99001, 0, 0, 0)
+        formattedNutAppList =  [formatStr % (r[0], r[2], r[3], r[4]) for r in nitroSched if len(r) > 0]
+
+        formattedNutApp = "\n".join(formattedNutAppList)
 
 
+        if formattedNutApp == '':
+           formattedNutApp = formatStr % (99001, 0, 0, 0)
 
-        return formattedNutrients + "\n"
+        return formattedNutApp + "\n"
 
     def _editExp(self, fileio_in, fileio_out, irrsched, updates={}):
 
@@ -522,9 +505,9 @@ if __name__ == "__main__":
     appsched3[2] = np.array(np.matrix("""
        [2000063,13,  0, 0, 0; 
         2000077, 0,  0, 0, 0; 
-        2000094,10,  0, 0, 0; 
         2000107,13,  0, 0, 0; 
         2000111,18,  0, 0, 0; 
+        2000094,10,  0, 0, 0; 
         2000122,25,  0, 0, 0; 
         2000126,25,  0, 0, 0; 
         2000129,13,  0, 0, 0; 
@@ -536,8 +519,8 @@ if __name__ == "__main__":
         2000158,19,  0, 0, 0; 
         2000161, 4,  0, 0, 0; 
         2000162,25,  0, 0, 0; 
-        2000135, 0, 71,11, 4; 
-        2000196, 0,201, 0, 0  
+        2000196, 0,201, 0, 0;
+        2000135, 0, 71,11, 4 
         ]"""))
 
        
@@ -559,7 +542,7 @@ if __name__ == "__main__":
     print(runner.run_batch(appsched3, threads, updates=updates))
 
     
-    print(runner.generate_report())
+    #print(runner.generate_report())
 
 
 
