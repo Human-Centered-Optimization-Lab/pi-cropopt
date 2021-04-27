@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from cropopt import CropOpt
+from cropover import Cropover
 from sps import SPS
 from pymoo.algorithms.nsga3 import NSGA3
 from pymoo.factory import get_reference_directions
@@ -27,27 +28,27 @@ if __name__ == "__main__":
 
     year = int(sys.argv[1])
 
-    reps = 2
-    plant_date = 136
+    reps = 30
+    plant_date = 135
 
     total_nitro = 200
 
     # dssat parameters 
-    home_dir = "/Users/iankropp/"
+    home_dir = "/work/ian/"
 
     dssat_home = "%s/Projects/agovization/dhome" % home_dir
-    dssat_exe = "%s/Projects/agovization/dhome/dscsm047-macos" % home_dir
+    dssat_exe = "%s/Projects/agovization/dhome/dscsm047-linux" % home_dir
     dssat_inp = "%s/Projects/agovization/dhome/DSSAT47.INP" % home_dir
     output_dir = "%s/Projects/agovization/output/" % home_dir
 
     tmp_dir = "/tmp/"
 
     # Runtime optimization parameters
-    threads = 4
-    initial_sparsity = 0.1
+    threads = 20
+    initial_sparsity = 0.2
     pop_size = 100
     ref_dirs = get_reference_directions("energy", 3, 90, seed=1)
-    generations = 2
+    generations = 200
 
     ## Derived parameters 
 
@@ -115,9 +116,12 @@ if __name__ == "__main__":
 
         sps_sampler = SPS(initial_sparsity, sampled_mask=nutrient_inds)
 
+        cropover = Cropover(eta=30, prob=1.0)
+
         algorithm = NSGA3(pop_size=pop_size, 
                 ref_dirs=ref_dirs,
                 eliminate_duplicates=True,
+        #        crossover=cropover,
                 sampling=sps_sampler)
 
         res = minimize(prob,
