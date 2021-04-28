@@ -17,7 +17,7 @@ IRR_COL = 1
 
 raw_master_table = {'year':[], 'yield':[], 'leaching':[], 'irr_total':[], 'irr_app_count':[], 'non_dom':[], 'scheds':[]}
 
-print("year, plant date, irr period start, irr period end, nit period start, nit period end, max yield (kg/ha), mean I.A.C. (mm), median I.A.C. (mm), mean irr total (mm), median irr total (mm)")
+print("year, plant date, irr period start, irr period end, nit period start, nit period end, max yield (kg/ha), mean I.A.C. (mm), median I.A.C. (mm), mean irr total (mm), median irr total (mm), mean leaching, median leaching")
 
 for directory in directories:
 
@@ -87,12 +87,17 @@ for directory in directories:
     irr_total_mean = np.mean(run_record[run_record['non_dom']]['irr_total'])
     irr_total_median = np.median(run_record[run_record['non_dom']]['irr_total'])
 
+    # Calculate leaching statistics
+    leaching_mean = np.mean(run_record[run_record['non_dom']]['leaching'])
+    leaching_median = np.median(run_record[run_record['non_dom']]['leaching'])
+
+
 
     row_vals =  (year, plant_date, irr_start, irr_end, nit_start, nit_end, 
                     max_yield, irr_count_mean, irr_count_median,
-                    irr_total_mean, irr_total_median)
+                    irr_total_mean, irr_total_median, leaching_mean, leaching_median)
 
-    row_str = "%d, %d, %d, %d, %d, %d, %d, %f, %f, %f, %f" % row_vals
+    row_str = "%d, %d, %d, %d, %d, %d, %d, %f, %f, %f, %f, %f, %f" % row_vals
  
     print(row_str)
 
