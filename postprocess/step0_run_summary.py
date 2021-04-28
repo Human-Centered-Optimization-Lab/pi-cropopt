@@ -4,10 +4,18 @@ import numpy as np
 import tabloo
 import pickle
 from pymoo.util.nds.non_dominated_sorting import NonDominatedSorting
+import pandas as pd
+import os
 
 directories = sys.argv[1:]
 
+output_dir_seg = os.path.realpath(__file__).split("/")
+
+output_dir = "/".join(output_dir_seg[0:-1])
+
 IRR_COL = 1
+
+raw_master_table = {'year':[], 'yield':[], 'leaching':[], 'irr_total':[], 'irr_app_count':[], 'non_dom':[], 'scheds':[]}
 
 print("year, plant date, irr period start, irr period end, nit period start, nit period end, max yield (kg/ha), mean I.A.C. (mm), median I.A.C. (mm), mean irr total (mm), median irr total (mm)")
 
@@ -85,6 +93,24 @@ for directory in directories:
                     irr_total_mean, irr_total_median)
 
     row_str = "%d, %d, %d, %d, %d, %d, %d, %f, %f, %f, %f" % row_vals
-   
+ 
     print(row_str)
+
+    # Build out the master table
+    raw_master_table['year'] = raw_master_table['year'] + ([year] * record_count)
+
+    for key in raw_master_table.keys():
+        if key == 'year':
+            continue
+        raw_master_table[key] = raw_master_table[key] + run_record[key].tolist()
+
+
+master_run_record = pd.DataFrame(raw_master_table)
+
+
+
+output = open('%s/master_run_record.pkl' % output_dir, 'wb')
+pickle.dump(master_run_record, output)
+
+
 
