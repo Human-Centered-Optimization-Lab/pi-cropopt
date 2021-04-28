@@ -7,6 +7,10 @@ from pymoo.util.nds.non_dominated_sorting import NonDominatedSorting
 import pandas as pd
 import os
 
+# example command: 
+# python   postprocess/step0_run_summary.py  /Volumes/data/Gilgamesh/kroppian/agovization_results/*
+
+
 directories = sys.argv[1:]
 
 output_dir_seg = os.path.realpath(__file__).split("/")
@@ -15,7 +19,30 @@ output_dir = "/".join(output_dir_seg[0:-1])
 
 IRR_COL = 1
 
+YRLY_SUM_COLS = ["year", "plant date", "irr period start", "irr period end", 
+        "nit period start", "nit period end", "max yield (kg/ha)", 
+        "mean I.A.C. (mm)", "median I.A.C. (mm)", "mean irr total (mm)", 
+        "median irr total (mm)", "mean leaching", "median leaching"]
+
+
 raw_master_table = {'year':[], 'yield':[], 'leaching':[], 'irr_total':[], 'irr_app_count':[], 'non_dom':[], 'scheds':[]}
+
+raw_yrly_sum_tab = {
+    "year" : [],
+    "plant date" : [],
+    "irr period start" : [],
+    "irr period end": [],
+    "nit period start" : [],
+    "nit period end" : [],
+    "max yield (kg/ha)": [],
+    "mean I.A.C. (mm)" : [],
+    "median I.A.C. (mm)" : [],
+    "mean irr total (mm)" : [],
+    "median irr total (mm)" : [],
+    "mean leaching" : [],
+    "median leaching" : []}
+
+
 
 print("year, plant date, irr period start, irr period end, nit period start, nit period end, max yield (kg/ha), mean I.A.C. (mm), median I.A.C. (mm), mean irr total (mm), median irr total (mm), mean leaching, median leaching")
 
@@ -92,6 +119,20 @@ for directory in directories:
     leaching_median = np.median(run_record[run_record['non_dom']]['leaching'])
 
 
+    raw_yrly_sum_tab["year"] .append(year)
+    raw_yrly_sum_tab["plant date"] .append(plant_date)
+    raw_yrly_sum_tab["irr period start"] .append(irr_start)
+    raw_yrly_sum_tab["irr period end"] .append(irr_end)
+    raw_yrly_sum_tab["nit period start"] .append(nit_start)
+    raw_yrly_sum_tab["nit period end"] .append(nit_end)
+    raw_yrly_sum_tab["max yield (kg/ha)"] .append(max_yield)
+    raw_yrly_sum_tab["mean I.A.C. (mm)"] .append(irr_count_mean)
+    raw_yrly_sum_tab["median I.A.C. (mm)"] .append(irr_count_median)
+    raw_yrly_sum_tab["mean irr total (mm)"] .append(irr_total_mean)
+    raw_yrly_sum_tab["median irr total (mm)"] .append(irr_total_median)
+    raw_yrly_sum_tab["mean leaching"] .append(leaching_mean)
+    raw_yrly_sum_tab["median leaching"] .append(leaching_median)
+
 
     row_vals =  (year, plant_date, irr_start, irr_end, nit_start, nit_end, 
                     max_yield, irr_count_mean, irr_count_median,
@@ -111,11 +152,12 @@ for directory in directories:
 
 
 master_run_record = pd.DataFrame(raw_master_table)
-
-
+yrly_sum_tab = pd.DataFrame(raw_yrly_sum_tab)
 
 output = open('%s/master_run_record.pkl' % output_dir, 'wb')
 pickle.dump(master_run_record, output)
 
 
+output = open('%s/yearly_summary.pkl' % output_dir, 'wb')
+pickle.dump(yrly_sum_tab, output)
 
