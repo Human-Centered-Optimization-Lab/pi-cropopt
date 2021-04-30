@@ -4,6 +4,9 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
+# Example run: python   utilities/run_weather_plotter.py postprocess/master_run_record.pkl dhome/Weather/CASSREPR.WTH 1981 10738
+plot_all = False
+
 run_record_path = sys.argv[1]
 wth_file_path = sys.argv[2]
 year = int(sys.argv[3])
@@ -22,6 +25,13 @@ year_truncd = year % 100
 
 # Fetch weather data
 wth_tab = pd.read_fwf(wth_file_path, skiprows=4)
+
+    
+if plot_all:
+    num_sub_plots = np.size(matching_entries)
+else:
+    num_sub_plots = 1
+
 
 for (e, entry) in enumerate(matching_entries): 
 
@@ -74,24 +84,33 @@ for (e, entry) in enumerate(matching_entries):
     labels = [r[1] for r in raw_labels]
     label_locales = [r[0] for r in raw_labels]
 
-    ax = plt.subplot(int("%d1%d" % (np.size(matching_entries), e + 1)))
+    ax = plt.subplot(int("%d1%d" % (num_sub_plots, e + 1)))
     ax.set_title(year)
     ax.set_xticks(label_locales)
     ax.set_xticklabels(labels)
+    ax.set_xlabel("Day of year")
+    ax.set_ylabel("Log(Irrigation/Precipitation (mm))")
+    ax.set_yscale('log')
 
     ax2 = ax.twinx()
+    ax2.set_ylabel("Nitrogen applied (kg/ha)")
 
     width = 0.3
     
     x = np.array(range(len(rain_ts)))
     
-    ax.bar(x - width, rain_ts, color='royalblue', alpha=0.7, width=width)
-    ax.bar(x, np.array(irr_list), color='red', alpha=0.7, width=width)
-    ax2.bar(x + width, np.array(nit_list), color='black', alpha=0.7, width=width)
+    ax.bar(x - width, rain_ts, color='royalblue', alpha=0.7, width=width, label="Precipitation")
+    ax.bar(x, np.array(irr_list), color='red', alpha=0.7, width=width, label="Irrigation")
+    ax2.bar(x + width, np.array(nit_list), color='black', alpha=0.7, width=width, label="Nitrogen")
 
     ax.grid(color='#95a5a6', linestyle='--', linewidth=2, axis='y', alpha=0.7)
+    ax.legend(loc="upper right")
+    ax2.legend(loc="upper center")
 
+    if not plot_all: 
+        break
 
+#plt.legend()
 plt.show()
 
 
