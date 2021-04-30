@@ -51,10 +51,6 @@ if __name__ == "__main__":
     generations = 200
 
     ## Derived parameters 
-
-    if year % 4 == 0: 
-        plant_date += 1
-
     first_nut_app = plant_date
 
     # Calcualte irrigation bounds
@@ -73,6 +69,13 @@ if __name__ == "__main__":
     nitro_date_ub += int(year * 1e3)
     plant_date += int(year * 1e3)
 
+    if year % 4 == 0: 
+        plant_date += 1
+        irr_date_lb += 1
+        irr_date_ub += 1
+        nitro_date_lb += 1
+        nitro_date_ub += 1
+
     #
     # Irrigation type            Nutrient type
     # Col 1: Period begin date   Col 1: Period begin date  
@@ -82,7 +85,6 @@ if __name__ == "__main__":
     # Col 5: IRR max             Col 5: Phos amount        
     # Col 6: 0                   Col 6: Pot amount         
     #
-
     date_ranges = [
             [irr_date_lb,   irr_date_ub,    0,                     0, 10, 0], # Irrigation period 
             [nitro_date_lb, nitro_date_ub,  1, int(total_nitro*0.25),  0, 0]] # 
