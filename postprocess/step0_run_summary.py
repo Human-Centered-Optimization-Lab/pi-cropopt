@@ -10,7 +10,6 @@ import os
 # example command: 
 # python   postprocess/step0_run_summary.py  /Volumes/data/Gilgamesh/kroppian/agovization_results/*
 
-
 directories = sys.argv[1:]
 
 output_dir_seg = os.path.realpath(__file__).split("/")
@@ -18,12 +17,6 @@ output_dir_seg = os.path.realpath(__file__).split("/")
 output_dir = "/".join(output_dir_seg[0:-1])
 
 IRR_COL = 1
-
-YRLY_SUM_COLS = ["year", "plant date", "irr period start", "irr period end", 
-        "nit period start", "nit period end", "max yield (kg/ha)", 
-        "mean I.A.C. (mm)", "median I.A.C. (mm)", "mean irr total (mm)", 
-        "median irr total (mm)", "mean leaching", "median leaching"]
-
 
 raw_master_table = {'year':[], 'yield':[], 'leaching':[], 'irr_total':[], 'irr_app_count':[], 'non_dom':[], 'scheds':[]}
 
@@ -35,16 +28,16 @@ raw_yrly_sum_tab = {
     "nit period start" : [],
     "nit period end" : [],
     "max yield (kg/ha)": [],
-    "mean I.A.C. (mm)" : [],
-    "median I.A.C. (mm)" : [],
+    "mean I.A.C." : [],
+    "median I.A.C." : [],
     "mean irr total (mm)" : [],
     "median irr total (mm)" : [],
-    "mean leaching" : [],
-    "median leaching" : []}
+    "mean leaching (kg/ha)" : [],
+    "median leaching (kg/ha)" : [], 
+    "min leaching (kg/ha)": [], 
+    "max leaching (kg/ha)": []}
 
 
-
-print("year, plant date, irr period start, irr period end, nit period start, nit period end, max yield (kg/ha), mean I.A.C. (mm), median I.A.C. (mm), mean irr total (mm), median irr total (mm), mean leaching, median leaching")
 
 for directory in directories:
 
@@ -61,6 +54,8 @@ for directory in directories:
     # Year 
     path_segments = directory.split("/")
     year = int(path_segments[-1][5:9])
+
+    print("Processing year %d for folder %s" % (year, directory))
 
     # Plant date 
     plant_date = 135
@@ -117,7 +112,8 @@ for directory in directories:
     # Calculate leaching statistics
     leaching_mean = np.mean(run_record[run_record['non_dom']]['leaching'])
     leaching_median = np.median(run_record[run_record['non_dom']]['leaching'])
-
+    leaching_min = min(run_record[run_record['non_dom']]['leaching'])
+    leaching_max = max(run_record[run_record['non_dom']]['leaching'])
 
     raw_yrly_sum_tab["year"] .append(year)
     raw_yrly_sum_tab["plant date"] .append(plant_date)
@@ -126,21 +122,14 @@ for directory in directories:
     raw_yrly_sum_tab["nit period start"] .append(nit_start)
     raw_yrly_sum_tab["nit period end"] .append(nit_end)
     raw_yrly_sum_tab["max yield (kg/ha)"] .append(max_yield)
-    raw_yrly_sum_tab["mean I.A.C. (mm)"] .append(irr_count_mean)
-    raw_yrly_sum_tab["median I.A.C. (mm)"] .append(irr_count_median)
+    raw_yrly_sum_tab["mean I.A.C."] .append(irr_count_mean)
+    raw_yrly_sum_tab["median I.A.C."] .append(irr_count_median)
     raw_yrly_sum_tab["mean irr total (mm)"] .append(irr_total_mean)
     raw_yrly_sum_tab["median irr total (mm)"] .append(irr_total_median)
-    raw_yrly_sum_tab["mean leaching"] .append(leaching_mean)
-    raw_yrly_sum_tab["median leaching"] .append(leaching_median)
-
-
-    row_vals =  (year, plant_date, irr_start, irr_end, nit_start, nit_end, 
-                    max_yield, irr_count_mean, irr_count_median,
-                    irr_total_mean, irr_total_median, leaching_mean, leaching_median)
-
-    row_str = "%d, %d, %d, %d, %d, %d, %d, %f, %f, %f, %f, %f, %f" % row_vals
- 
-    print(row_str)
+    raw_yrly_sum_tab["mean leaching (kg/ha)"] .append(leaching_mean)
+    raw_yrly_sum_tab["median leaching (kg/ha)"] .append(leaching_median)
+    raw_yrly_sum_tab["min leaching (kg/ha)"] .append(leaching_min)
+    raw_yrly_sum_tab["max leaching (kg/ha)"] .append(leaching_max)
 
     # Build out the master table
     raw_master_table['year'] = raw_master_table['year'] + ([year] * record_count)
@@ -157,7 +146,17 @@ yrly_sum_tab = pd.DataFrame(raw_yrly_sum_tab)
 output = open('%s/master_run_record.pkl' % output_dir, 'wb')
 pickle.dump(master_run_record, output)
 
-
 output = open('%s/yearly_summary.pkl' % output_dir, 'wb')
 pickle.dump(yrly_sum_tab, output)
+
+# Creating XLSX output
+print("Saving to excel...")
+
+with pd.ExcelWriter('run_results.xlsx') as writer:  
+    master_run_record.to_excel(writer, sheet_name='RunRecord')
+    yrly_sum_tab.to_excel(writer, sheet_name='YearlySummary')
+
+
+print("Done")
+
 
