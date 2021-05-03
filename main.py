@@ -55,10 +55,10 @@ if __name__ == "__main__":
 
     # Calcualte irrigation bounds
     # (between the 30-year minimum of V6 and maximum of R2)
-    irr_date_lb = min(app_man[app_man.Year < 2010].V8)  # TODO change to V6 when data is available
+    irr_date_lb = min(app_man[app_man.Year < 2010].V8)  
     irr_date_ub = max(app_man[app_man.Year < 2010].R2)
 
-    nitro_date_lb = min(app_man[app_man.Year < 2010].V8)  # TODO change to V6 when data is available
+    nitro_date_lb = min(app_man[app_man.Year < 2010].V6)  
     nitro_date_ub = max(app_man[app_man.Year < 2010].V14)
 
     # Reformat the mins and maxes for the given year
@@ -86,7 +86,7 @@ if __name__ == "__main__":
     # Col 6: 0                   Col 6: Pot amount         
     #
     date_ranges = [
-            [irr_date_lb,   irr_date_ub,    0,                     0, 10, 0], # Irrigation period 
+            [irr_date_lb,   irr_date_ub,    0,                     0, 30, 0], # Irrigation period 
             [nitro_date_lb, nitro_date_ub,  1, int(total_nitro*0.25),  0, 0]] # 
 
     # Preplant incorporation 
