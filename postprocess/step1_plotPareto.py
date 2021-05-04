@@ -10,7 +10,7 @@ infile = open(file_name, 'rb')
 tab = pickle.load(infile)
 
 # Grab non-dominated solutions for this given year 
-selection_mask = np.logical_and(tab['non_dom'], tab['year'] == year)
+selection_mask = np.logical_and(tab['front'] == 0, tab['year'] == year)
 
 x = tab[selection_mask]['irr_total'] 
 y = tab[selection_mask]['leaching'] 
@@ -31,5 +31,6 @@ ax.set_xlabel('Total irrigation')
 ax.set_ylabel('Leaching')
 ax.set_zlabel('Yield')
 
+plt.title(year)
 plt.show()
 

@@ -18,7 +18,7 @@ output_dir = "/".join(output_dir_seg[0:-1])
 
 IRR_COL = 1
 
-raw_master_table = {'year':[], 'yield':[], 'leaching':[], 'irr_total':[], 'irr_app_count':[], 'non_dom':[], 'scheds':[]}
+raw_master_table = {'year':[], 'yield':[], 'leaching':[], 'irr_total':[], 'irr_app_count':[], 'front':[], 'scheds':[]}
 
 raw_yrly_sum_tab = {
     "year" : [],
@@ -95,25 +95,32 @@ for directory in directories:
     f3 = run_record['irr_total']
     F = np.column_stack((f1,f2,f3))
 
-    opt_front_i = NonDominatedSorting().do(F, only_non_dominated_front=True)
-
     record_count = np.shape(run_record)[0]
-    non_dom = [True if i in opt_front_i else False for i in range(record_count)]
 
-    run_record['non_dom'] = non_dom
+    opt_fronts = NonDominatedSorting().do(F)
+
+    #non_dom = [True if i in opt_front_i else False for i in range(record_count)]
+    #run_record['non_dom'] = non_dom
+     
+    sorted_fronts = np.array([-1 for i in range(record_count)])
+
+    for (f, front) in enumerate(opt_fronts):
+        sorted_fronts[front] = f
+
+    run_record['front'] = sorted_fronts.tolist()
 
     # make these only the optimal solutions
-    irr_count_mean = np.mean(run_record[run_record['non_dom']]['irr_app_count'])
-    irr_count_median = np.median(run_record[run_record['non_dom']]['irr_app_count'])
+    irr_count_mean = np.mean(run_record[run_record['front'] == 0]['irr_app_count'])
+    irr_count_median = np.median(run_record[run_record['front'] == 0]['irr_app_count'])
 
-    irr_total_mean = np.mean(run_record[run_record['non_dom']]['irr_total'])
-    irr_total_median = np.median(run_record[run_record['non_dom']]['irr_total'])
+    irr_total_mean = np.mean(run_record[run_record['front'] == 0]['irr_total'])
+    irr_total_median = np.median(run_record[run_record['front'] == 0]['irr_total'])
 
     # Calculate leaching statistics
-    leaching_mean = np.mean(run_record[run_record['non_dom']]['leaching'])
-    leaching_median = np.median(run_record[run_record['non_dom']]['leaching'])
-    leaching_min = min(run_record[run_record['non_dom']]['leaching'])
-    leaching_max = max(run_record[run_record['non_dom']]['leaching'])
+    leaching_mean = np.mean(run_record[run_record['front'] == 0]['leaching'])
+    leaching_median = np.median(run_record[run_record['front'] == 0]['leaching'])
+    leaching_min = min(run_record[run_record['front'] == 0]['leaching'])
+    leaching_max = max(run_record[run_record['front'] == 0]['leaching'])
 
     raw_yrly_sum_tab["year"] .append(year)
     raw_yrly_sum_tab["plant date"] .append(plant_date)
