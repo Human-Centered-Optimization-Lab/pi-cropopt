@@ -1,4 +1,3 @@
-from functools import reduce
 from multiprocessing import Pool
 import numpy as np
 from shutil import copytree, copy, rmtree
@@ -198,7 +197,8 @@ class Dssat4Dum():
         else:
             return "%sdssatrun%04d" % (temp_dir,runid) 
 
-    def formatIrrSched(self, appSched):
+    @staticmethod
+    def formatIrrSched(appSched):
 
         # Filter out the non-irrigation rows
         irr_rows = appSched[:,1] != 0
@@ -213,7 +213,8 @@ class Dssat4Dum():
 
         return formatted_irr + "\n"
 
-    def formatNutSched(self, appSched):
+    @staticmethod
+    def formatNutSched(appSched):
 
         # Build lines of nutrient applications
         formatStr = "   %d FE001 AP001   10. % 4d. % 4d. % 4d.    0.    0.   -99"
