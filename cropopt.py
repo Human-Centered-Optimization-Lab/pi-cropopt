@@ -2,7 +2,7 @@ import numpy as np
 from pymoo.model.problem import Problem
 import sys
 
-from dssat4dum import Dssat4Dum
+from dssatmod.dssat4dum import Dssat4Dum
 
 class CropOpt(Problem):
 
