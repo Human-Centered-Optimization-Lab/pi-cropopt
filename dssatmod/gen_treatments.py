@@ -18,6 +18,10 @@ NIT_FORMAT_STR = "%2d %05d FE001 AP002 %5d     0   -99   -99   -99   -99   -99 -
 
 IRR_FORMAT_STR = "%2d %05d IR001 %5d"
 
+
+TREAT_FORMAT_STR = "%2d 1 0 0 %25s  1  1  0  1 %2d %2d %2d  0  0  0  0  0  1"
+
+
 IRR_TREATMENTS = [
         {'amount': 10, 'interval': 3, 'start': 'V8', 'end': 'R2'},
         {'amount': 20, 'interval': 3, 'start': 'V8' , 'end': 'R2'},
@@ -97,12 +101,24 @@ for (i,(irr, nit)) in enumerate(it.product(IRR_TREATMENTS, NIT_APP)):
      
     nit_lines = [NIT_FORMAT_STR % (treat_no, app[0], app[2]) for app in nit_apps.tolist()] 
 
+    # Format treatment section 
     fertilizer_arr = fertilizer_arr + nit_lines 
 
+
+    #   {'proportion1':  1    , 'date1': 'P', 'proportion2': 0.0,  'date2': 'P'  }
+
+    run_description = "a%di%ds%se%s|%0.2f/%0.2f" % (irr['amount'], irr['interval'], irr['start'], irr['end'], nit['proportion1'], nit['proportion2'])
+
+    treat_line = TREAT_FORMAT_STR % (treat_no, run_description, treat_no, treat_no, treat_no)
+    treatment_summary_arr.append(treat_line)
+
+
+treat_section = "\n".join(treatment_summary_arr)
 irr_section = "\n".join(irrigation_arr)
 nut_section = "\n".join(fertilizer_arr)
 
 
+template = re.sub(r'TREAT_HERE', treat_section, template)
 template = re.sub(r'IRR_HERE', irr_section, template)
 template = re.sub(r'FERT_HERE', nut_section, template)
 
@@ -118,9 +134,7 @@ template = re.sub(r'ZZ', str(trunc_year), template)
 template = re.sub(r'QQQ', plant_date, template)
 
 
+
 print(template)
-
-
-
 
 
