@@ -5,6 +5,18 @@ import math
 import numpy as np
 from dssat4dum import Dssat4Dum
 import os
+import re
+
+IRR_PREAMBLE = """@I  EFIR  IDEP  ITHR  IEPT  IOFF  IAME  IAMT IRNAME
+%2d     1   -99   -99   -99   -99   -99   -99 -99
+@I IDATE  IROP IRVAL"""
+
+
+NIT_PREAMBLE = "@F FDATE  FMCD  FACD  FDEP  FAMN  FAMP  FAMK  FAMC  FAMO  FOCD FERNAME"
+
+NIT_FORMAT_STR = "%2d %05d FE001 AP002 %5d     0   -99   -99   -99   -99   -99 -99"
+
+IRR_FORMAT_STR = "%2d %05d IR001 %5d"
 
 IRR_TREATMENTS = [
         {'amount': 10, 'interval': 3, 'start': 'V8', 'end': 'R2'},
@@ -26,15 +38,28 @@ NIT_APP = [
 
 NIT_TOTAL = 200
 
-
 year = int(sys.argv[1])
+temp_file = sys.argv[2]
+
+#open text file in read mode
+template_file = open(temp_file, "r")
+
+#read whole file to a string
+template = template_file.read()
+
+#close file
+template_file.close()
+
 app_man_csv = "management_dates.csv"
 app_man = pd.read_csv(app_man_csv)
 year_mgt_practices = app_man[app_man['Year'] == year].loc[0]
 
+treatment_summary_arr = []
+irrigation_arr = []
+fertilizer_arr = []
 
-for (irr, nit) in it.product(IRR_TREATMENTS, NIT_APP):
-   
+for (i,(irr, nit)) in enumerate(it.product(IRR_TREATMENTS, NIT_APP)):
+
     ## Generate irrigation applications
     start_day = year_mgt_practices[irr['start']]
     end_day = year_mgt_practices[irr['end']]
@@ -49,7 +74,6 @@ for (irr, nit) in it.product(IRR_TREATMENTS, NIT_APP):
     # Add the irrigation amount
     irr_apps[:,1] = irr['amount']
 
-
     ## Generate nitrogen application
     
     # application one
@@ -58,10 +82,45 @@ for (irr, nit) in it.product(IRR_TREATMENTS, NIT_APP):
 
     nit_apps[:,0] = nit_apps[:,0] + year*1e3
 
-    apps = np.concatenate((irr_apps, nit_apps))
+    treat_no = i + 1
 
-    print(Dssat4Dum.formatIrrSched(apps))
-    print(Dssat4Dum.formatNutSched(apps))
+    # Format irrigation
+    irr_apps[:,0] = irr_apps[:,0] % 1e5
+
+    irr_lines = [IRR_FORMAT_STR % (treat_no, app[0], app[1]) for app in irr_apps.tolist()] 
+
+    irrigation_arr.append(IRR_PREAMBLE % treat_no)
+    irrigation_arr = irrigation_arr + irr_lines
+
+    # Format nitrogen
+    nit_apps[:,0] = nit_apps[:,0] % 1e5
+     
+    nit_lines = [NIT_FORMAT_STR % (treat_no, app[0], app[2]) for app in nit_apps.tolist()] 
+
+    fertilizer_arr = fertilizer_arr + nit_lines 
+
+irr_section = "\n".join(irrigation_arr)
+nut_section = "\n".join(fertilizer_arr)
+
+
+template = re.sub(r'IRR_HERE', irr_section, template)
+template = re.sub(r'FERT_HERE', nut_section, template)
+
+trunc_year = int(year % 1e2)
+
+if year % 4 == 0:
+    plant_date = "136"
+else: 
+    plant_date = "135"
+
+
+template = re.sub(r'ZZ', str(trunc_year), template)
+template = re.sub(r'QQQ', plant_date, template)
+
+
+print(template)
+
+
 
 
 
