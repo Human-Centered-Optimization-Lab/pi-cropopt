@@ -70,9 +70,9 @@ for (i,(irr, nit)) in enumerate(it.product(IRR_TREATMENTS, NIT_APP)):
     start_day = year_mgt_practices[irr['start']]
     end_day = year_mgt_practices[irr['end']]
 
-    app_count = math.floor((end_day - start_day)/irr['interval'])
+    app_count = (math.floor((end_day - start_day)/irr['interval']))+1
   
-    irr_apps = np.array([(year_mgt_practices['P']+a*irr['interval'], 0, 0, 0, 0) for a in range(app_count)])
+    irr_apps = np.array([(start_day+a*irr['interval'], 0, 0, 0, 0) for a in range(app_count)])
 
     # Add the year 
     irr_apps[:,0] = irr_apps[:,0] + year*1e3
@@ -109,10 +109,9 @@ for (i,(irr, nit)) in enumerate(it.product(IRR_TREATMENTS, NIT_APP)):
     # Format treatment section 
     fertilizer_arr = fertilizer_arr + nit_lines 
 
-    run_description = "%da%di%ds%se%s|%0.2f" % (year,irr['amount'], irr['interval'], irr['start'], irr['end'], nit['proportion1'])
+    run_description = "%da%di%ds%se%s|%s:%0.2f" % (year,irr['amount'], irr['interval'], irr['start'], irr['end'],nit['date2'], nit['proportion1'])
 
     run_description = run_description.ljust(25, ' ')
-
 
     treat_line = TREAT_FORMAT_STR % (treat_no, run_description, treat_no, treat_no)
     treatment_summary_arr.append(treat_line)
