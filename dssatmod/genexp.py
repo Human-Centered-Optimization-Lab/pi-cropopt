@@ -18,8 +18,7 @@ NIT_FORMAT_STR = "%2d %05d FE001 AP002 %5d     0   -99   -99   -99   -99   -99 -
 
 IRR_FORMAT_STR = "%2d %05d IR001 %5d"
 
-
-TREAT_FORMAT_STR = "%2d 1 0 0 %25s  1  1  0  1 %2d %2d %2d  0  0  0  0  0  1"
+TREAT_FORMAT_STR = "%2d 1 0 0 %25s  1  1  0  1  1 %2d %2d  0  0  0  0  0  1"
 
 
 IRR_TREATMENTS = [
@@ -37,7 +36,7 @@ NIT_APP = [
         {'proportion1':  0.75 , 'date1': 'P', 'proportion2': 0.25, 'date2': 'V6' },
         {'proportion1':  0.75 , 'date1': 'P', 'proportion2': 0.25, 'date2': 'V8' },
         {'proportion1':  0.75 , 'date1': 'P', 'proportion2': 0.25, 'date2': 'V10'},
-        {'proportion1':  1    , 'date1': 'P', 'proportion2': 0.0,  'date2': 'P'  }
+        {'proportion1':  1    , 'date1': 'P', 'proportion2': 0.0,  'date2': 'V6'  }
     ]
 
 NIT_TOTAL = 200
@@ -60,7 +59,7 @@ year_mgt_practices = app_man[app_man['Year'] == year].loc[0]
 
 treatment_summary_arr = []
 irrigation_arr = []
-fertilizer_arr = []
+fertilizer_arr = [NIT_PREAMBLE]
 
 for (i,(irr, nit)) in enumerate(it.product(IRR_TREATMENTS, NIT_APP)):
 
@@ -84,6 +83,9 @@ for (i,(irr, nit)) in enumerate(it.product(IRR_TREATMENTS, NIT_APP)):
     nit_apps = np.array([[year_mgt_practices[nit['date1']], 0, nit['proportion1']*NIT_TOTAL, 0, 0],
                          [year_mgt_practices[nit['date2']], 0, nit['proportion2']*NIT_TOTAL, 0, 0]])
 
+    # Filter out zero values 
+    nit_apps = nit_apps[nit_apps[:,2] != 0]
+
     nit_apps[:,0] = nit_apps[:,0] + year*1e3
 
     treat_no = i + 1
@@ -104,12 +106,9 @@ for (i,(irr, nit)) in enumerate(it.product(IRR_TREATMENTS, NIT_APP)):
     # Format treatment section 
     fertilizer_arr = fertilizer_arr + nit_lines 
 
-
-    #   {'proportion1':  1    , 'date1': 'P', 'proportion2': 0.0,  'date2': 'P'  }
-
     run_description = "a%di%ds%se%s|%0.2f/%0.2f" % (irr['amount'], irr['interval'], irr['start'], irr['end'], nit['proportion1'], nit['proportion2'])
 
-    treat_line = TREAT_FORMAT_STR % (treat_no, run_description, treat_no, treat_no, treat_no)
+    treat_line = TREAT_FORMAT_STR % (treat_no, run_description, treat_no, treat_no)
     treatment_summary_arr.append(treat_line)
 
 
