@@ -55,11 +55,14 @@ template_file.close()
 
 app_man_csv = "management_dates.csv"
 app_man = pd.read_csv(app_man_csv)
-year_mgt_practices = app_man[app_man['Year'] == year].loc[0]
+year_mgt_practices = app_man[app_man['Year'] == year].iloc[0]
 
 treatment_summary_arr = []
 irrigation_arr = []
 fertilizer_arr = [NIT_PREAMBLE]
+
+trunc_year = int(year % 1e2)
+trunc_year = "%02d" % trunc_year
 
 for (i,(irr, nit)) in enumerate(it.product(IRR_TREATMENTS, NIT_APP)):
 
@@ -106,7 +109,10 @@ for (i,(irr, nit)) in enumerate(it.product(IRR_TREATMENTS, NIT_APP)):
     # Format treatment section 
     fertilizer_arr = fertilizer_arr + nit_lines 
 
-    run_description = "a%di%ds%se%s|%0.2f/%0.2f" % (irr['amount'], irr['interval'], irr['start'], irr['end'], nit['proportion1'], nit['proportion2'])
+    run_description = "%da%di%ds%se%s|%0.2f" % (year,irr['amount'], irr['interval'], irr['start'], irr['end'], nit['proportion1'])
+
+    run_description = run_description.ljust(25, ' ')
+
 
     treat_line = TREAT_FORMAT_STR % (treat_no, run_description, treat_no, treat_no)
     treatment_summary_arr.append(treat_line)
@@ -121,7 +127,6 @@ template = re.sub(r'TREAT_HERE', treat_section, template)
 template = re.sub(r'IRR_HERE', irr_section, template)
 template = re.sub(r'FERT_HERE', nut_section, template)
 
-trunc_year = int(year % 1e2)
 
 if year % 4 == 0:
     plant_date = "136"
@@ -129,7 +134,7 @@ else:
     plant_date = "135"
 
 
-template = re.sub(r'ZZ', str(trunc_year), template)
+template = re.sub(r'ZZ', trunc_year, template)
 template = re.sub(r'QQQ', plant_date, template)
 
 
