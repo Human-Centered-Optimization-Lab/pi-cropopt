@@ -2,7 +2,7 @@ import numpy as np
 from pymoo.model.problem import Problem
 import sys
 
-from dssat4dum import Dssat4Dum
+from dssatmod.dssat4dum import Dssat4Dum
 
 class CropOpt(Problem):
 
@@ -32,18 +32,19 @@ class CropOpt(Problem):
     #                   minimums, and period maximums
     # 
     def __init__(self, threads, dssat_home, dssat_exe, dssat_inp, 
-            tmp_dir, date_ranges, output_dir, run, seed=0, constant_apps=None):
+            tmp_dir, date_ranges, output_dir, run, seed=0, updates={}, constant_apps=None):
 
-        self.threads     = threads
-        self.dssat_home  = dssat_home
-        self.dssat_inp   = dssat_inp
-        self.tmp_dir     = tmp_dir
-        self.date_ranges = date_ranges
-        self.output_dir  = output_dir
-        self.dssat_exe   = dssat_exe
-        self.run         = run
-        self.generation  = 0
+        self.threads       = threads
+        self.dssat_home    = dssat_home
+        self.dssat_inp     = dssat_inp
+        self.tmp_dir       = tmp_dir
+        self.date_ranges   = date_ranges
+        self.output_dir    = output_dir
+        self.dssat_exe     = dssat_exe
+        self.run           = run
+        self.generation    = 0
         self.constant_apps = constant_apps
+        self.updates       = updates
 
         # Separate the nutrient apps from the irrigation apps
         irrigation_ranges = date_ranges[date_ranges[:,2] == self.IRR_APP_TYPE]
@@ -80,6 +81,9 @@ class CropOpt(Problem):
             mins[indx] = date_ranges[periodInd, self.MIN_DATE]
             maxs[indx] = date_ranges[periodInd, self.MAX_DATE]
 
+        # Set up a dssat runner that will handle the batch
+        self.runner = Dssat4Dum(self.dssat_home, self.dssat_inp, self.dssat_exe, 
+                self.tmp_dir, constant_apps=self.constant_apps)
 
         # TODO constraints? 
         super().__init__(n_var=day_count,
@@ -96,11 +100,10 @@ class CropOpt(Problem):
         # Put into application format
         irrapps = self._build_applications(x_rounded, self.date_ranges)
 
-        # Set up a dssat runner that will handle the batch
-        runner = Dssat4Dum(self.dssat_home, self.dssat_inp, self.dssat_exe, self.tmp_dir, constant_apps=self.constant_apps)
     
         # Run batch 
-        yield_and_leaching = runner.run_batch(irrapps, self.threads)
+        self.runner.clean_workspace()
+        yield_and_leaching = self.runner.run_batch(irrapps, self.threads, updates=self.updates)
  
         yld = yield_and_leaching[:,0][np.newaxis]
 
@@ -125,21 +128,31 @@ class CropOpt(Problem):
 
         x_rounded[x_rounded != 0] = 1
 
-        app_count = np.sum(x_rounded[:,irr_indices],1)[np.newaxis]
-
         # First column of results are yield, second is leaching
-        objectives = np.concatenate((-yld, app_count, irr_totals), axis=0).T
+        objectives = np.concatenate((-yld, leaching, irr_totals), axis=0).T
         
         self.generation = self.generation + 1
 
         out["F"] = objectives
 
+    def get_report(self):
 
-    # Returns (a, b, c)
+        return self.runner.generate_report()
+
+    
+    # 
+    # Returns (irr_periods, nut_periods)
     #
-    # a -> original date range index
-    # b -> Beginning of range in genome
-    # c -> End of range in genome
+    # irr_periods = [(a_1, b_1, c_1), (a_2, b_2, c_2), ...]
+    #
+    # a_n -> period index 
+    # b_n -> Beginning of range in genome
+    # c_n -> End of range in genome 
+    #
+    # nut_periods = [(a_1, b_1), (a_2, b_2)]
+    #
+    # a_n -> period index
+    # b_n -> index in genome
     #
     def calc_period_indices(self, date_ranges):
         
