@@ -1,12 +1,14 @@
 import sys
 import pandas as pd
 import numpy as np
+import pickle
 
 # SDAT -- Simulation date Simulation start date (YrDoy) 
 # HWAH -- Harvested yield (kg [dm]/ha)
 # NLCM -- N leached during season (kg [N]/ha)
 
 file_path = sys.argv[1]
+output_dir = sys.argv[2]
 
 summary = pd.read_fwf(file_path, skiprows=3)
 
@@ -39,5 +41,6 @@ for year in available_years:
 
 tab = pd.DataFrame(raw_table)
 
-
+output = open('%s/bmp_summary.pkl' % output_dir, 'wb')
+pickle.dump(tab, output)
 
