@@ -89,8 +89,9 @@ for (e, entry) in enumerate(matching_entries):
     ax.set_xticks(label_locales)
     ax.set_xticklabels(labels)
     ax.set_xlabel("Day of year")
-    ax.set_ylabel("Log(Irrigation/Precipitation (mm))")
-    ax.set_yscale('log')
+    #ax.set_ylabel("Log(Irrigation/Precipitation (mm))")
+    #ax.set_yscale('log')
+    ax.set_ylabel("Irrigation/Precipitation (mm)")
 
     ax2 = ax.twinx()
     ax2.set_ylabel("Nitrogen applied (kg/ha)")
@@ -99,9 +100,9 @@ for (e, entry) in enumerate(matching_entries):
     
     x = np.array(range(len(rain_ts)))
     
-    ax.bar(x - width, rain_ts, color='royalblue', alpha=0.7, width=width, label="Precipitation")
-    ax.bar(x, np.array(irr_list), color='red', alpha=0.7, width=width, label="Irrigation")
-    ax2.bar(x + width, np.array(nit_list), color='black', alpha=0.7, width=width, label="Nitrogen")
+    ax.bar(x - width, rain_ts, color='royalblue', alpha=0.7, width=width, label="Precipitation event")
+    ax.bar(x, np.array(irr_list), color='red', alpha=0.7, width=width, label="Irrigation application")
+    ax2.bar(x + width, np.array(nit_list), color='black', alpha=0.7, width=width, label="Nitrogen application")
 
     ax.grid(color='#95a5a6', linestyle='--', linewidth=2, axis='y', alpha=0.7)
     ax.legend(loc="upper right")
