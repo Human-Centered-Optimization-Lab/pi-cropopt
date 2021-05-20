@@ -14,14 +14,10 @@ import numpy as np
 # Functions
 def process_year(arg):
 
-    print("Starting year processor")
-
     # unpack the argument
     (tab, att_functs, year) = arg
 
     results = []
-
-    years_rows = tab[tab['year'] == year]
 
     # For every attribute function 
     result_count = -1
@@ -30,7 +26,7 @@ def process_year(arg):
 
         func = getattr(AttProcessors, 'application_count')
 
-        att_results = [func(row) for i, row in years_rows.iterrows()]
+        att_results = [func(row) for i, row in tab.iterrows()]
 
         results.append(att_results)
 
@@ -42,8 +38,7 @@ def process_year(arg):
 
 if __name__ == "__main__":
 
-    #threads = 8
-    threads = 4
+    threads = 8
 
     # Read in the master record
     file_name = sys.argv[1]
@@ -64,15 +59,14 @@ if __name__ == "__main__":
 
     run_results = {}
 
-    # Make a multiprocessing manager to hold the shared data frame
-    #mgr = Manager()
-    #ns = mgr.Namespace()
-    #ns.tab = my_dataframe 
 
-    # pack up arguments
-    argz = [(tab, att_functs, year) for year in years]
-
-    print(argz)
+    # Split up the data by year
+    tab_by_years = {}
+    for year in years: 
+        tab_by_years[year] = (tab[tab['year'] == year])
+    
+    # Pack up arguments
+    argz = [(tab_by_years[year], att_functs, year) for year in years]
 
     if threads == 1: 
         # Eschew multiprocessing for debugging ease
@@ -105,5 +99,5 @@ if __name__ == "__main__":
 
     attribute_table = pd.DataFrame(raw_table)
 
-    tabloo.show(attribute_table)
+    #tabloo.show(attribute_table)
 
