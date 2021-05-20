@@ -7,17 +7,29 @@ import numpy as np
 
 class AttProcessors: 
 
-
+    # Internal methods 
+    @staticmethod
+    def _filter_out_n_app(raw_schedule):
+        return raw_schedule[raw_schedule[:,1] != 0]
 
     @staticmethod
+    def _filter_out_irr_app(raw_schedule):
+        return raw_schedule[raw_schedule[:,1] == 0]
+
+    # Processors 
+    @staticmethod
     def application_count(row):
-        sched = row['scheds']
+        sched = AttProcessors._filter_out_n_app(row['scheds'])
         app_count = np.shape(sched)[0]
 
         return app_count
 
+    @staticmethod
+    def total_irrigation(row):
+        return 42
 
-
+    def growth_period_of_second_N_app(row):
+        return 42
 
 
 if __name__ == "__main__":
