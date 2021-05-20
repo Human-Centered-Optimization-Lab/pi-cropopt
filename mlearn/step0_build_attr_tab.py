@@ -38,7 +38,14 @@ def process_year(arg):
 
 if __name__ == "__main__":
 
+
     threads = 8
+
+    if threads != 1:
+        # This somehow prevents this weird error while using multiprocessing
+        # AttributeError: module '__main__' has no attribute '__spec__'
+        __spec__ = None
+
 
     # Read in the master record
     file_name = sys.argv[1]
@@ -48,8 +55,11 @@ if __name__ == "__main__":
 
     years = set(tab['year'])
 
-    att_functs = ['application_count', 'total_irrigation']
-    #att_functs = ['application_count']
+    att_functs = [  'application_count', 
+                    'total_irrigation', 
+                    'yield_', 
+                    'front',
+                    'leaching']
 
     raw_table = {'year': []}
 
@@ -57,10 +67,7 @@ if __name__ == "__main__":
     for att_funct in att_functs: 
         raw_table[att_funct] = []
 
-    run_results = {}
-
-
-    # Split up the data by year
+    # Split up the data by year, with each thread focusing on a single year
     tab_by_years = {}
     for year in years: 
         tab_by_years[year] = (tab[tab['year'] == year])
@@ -71,12 +78,13 @@ if __name__ == "__main__":
     if threads == 1: 
         # Eschew multiprocessing for debugging ease
         results = [process_year(arg) for arg in argz]
-        #results = [process_year(arg) for arg in [argz[0]]]
     else: 
         with Pool(threads) as p: 
             results = p.map(process_year, argz)
 
-    # unpack results
+
+    # unpack results by year
+    run_results = {}
     for result_by_year in results:
         (year, attrs) = result_by_year
         run_results[year] = attrs
@@ -96,9 +104,9 @@ if __name__ == "__main__":
 
         raw_table['year'] = raw_table['year'] +  [year] * result_count
 
-
-
+    # Build the attribute table    
     attribute_table = pd.DataFrame(raw_table)
+
 
     tabloo.show(attribute_table)
 
