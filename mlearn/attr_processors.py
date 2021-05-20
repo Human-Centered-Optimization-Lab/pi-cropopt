@@ -26,7 +26,9 @@ class AttProcessors:
 
     @staticmethod
     def total_irrigation(row):
-        return 42
+        sched = AttProcessors._filter_out_n_app(row['scheds']) 
+
+        return np.sum(sched[:,1])
 
     def growth_period_of_second_N_app(row):
         return 42

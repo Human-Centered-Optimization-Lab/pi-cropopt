@@ -24,14 +24,14 @@ def process_year(arg):
 
     for att_funct in att_functs:
 
-        func = getattr(AttProcessors, 'application_count')
+        func = getattr(AttProcessors, att_funct)
 
         att_results = [func(row) for i, row in tab.iterrows()]
 
         results.append(att_results)
 
     print("Completed year %d" % year)
-    return (year, np.array(results))
+    return (year, np.transpose(np.array(results)))
 
 
 # Main
@@ -48,8 +48,8 @@ if __name__ == "__main__":
 
     years = set(tab['year'])
 
-    #att_functs = ['application_count', 'total_irrigation']
-    att_functs = ['application_count']
+    att_functs = ['application_count', 'total_irrigation']
+    #att_functs = ['application_count']
 
     raw_table = {'year': []}
 
@@ -71,6 +71,7 @@ if __name__ == "__main__":
     if threads == 1: 
         # Eschew multiprocessing for debugging ease
         results = [process_year(arg) for arg in argz]
+        #results = [process_year(arg) for arg in [argz[0]]]
     else: 
         with Pool(threads) as p: 
             results = p.map(process_year, argz)
@@ -99,5 +100,5 @@ if __name__ == "__main__":
 
     attribute_table = pd.DataFrame(raw_table)
 
-    #tabloo.show(attribute_table)
+    tabloo.show(attribute_table)
 
