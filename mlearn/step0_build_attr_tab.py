@@ -15,7 +15,7 @@ import numpy as np
 def process_year(arg):
 
     # unpack the argument
-    (tab, att_functs, year) = arg
+    (tab, att_functs, year, procr) = arg
 
     results = []
 
@@ -24,7 +24,7 @@ def process_year(arg):
 
     for att_funct in att_functs:
 
-        func = getattr(AttProcessors, att_funct)
+        func = getattr(procr, att_funct)
 
         att_results = tab.apply(func, axis=1)
 
@@ -39,7 +39,7 @@ def process_year(arg):
 if __name__ == "__main__":
 
 
-    threads = 8
+    threads = 1
 
     if threads != 1:
         # This somehow prevents this weird error while using multiprocessing
@@ -52,6 +52,9 @@ if __name__ == "__main__":
 
     infile = open(file_name, 'rb')
     tab = pickle.load(infile)
+
+    # Set up the processing agent 
+    procr = AttProcessors(42, 42)
 
     years = set(tab['year'])
 
@@ -76,7 +79,7 @@ if __name__ == "__main__":
         tab_by_years[year] = (tab[tab['year'] == year])
     
     # Pack up arguments
-    argz = [(tab_by_years[year], att_functs, year) for year in years]
+    argz = [(tab_by_years[year], att_functs, year, procr) for year in years]
 
     if threads == 1: 
         # Eschew multiprocessing for debugging ease

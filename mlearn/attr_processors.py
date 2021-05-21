@@ -12,6 +12,11 @@ class AttProcessors:
     IRR_COL = 1
     N_ROW = 2
 
+    # --- Constructor ---
+    def __init__(self, weather_tab, gdd_tab):
+        self.weather_tab = weather_tab
+
+
     # --- Internal methods ---
     @staticmethod
     def _filter_out_n_app(raw_schedule):
@@ -23,30 +28,24 @@ class AttProcessors:
 
     # --- Transfered attributes ---
     # Or attributes that we're just copying from the main table
-    @staticmethod
-    def application_count(row):
+    def application_count(self, row):
         return row['irr_app_count']
 
-    @staticmethod
-    def total_irrigation(row):
+    def total_irrigation(self, row):
         return row['irr_total']
 
-    @staticmethod
-    def yield_(row):
+    def yield_(self, row):
         return row['yield']
 
-    @staticmethod
-    def front(row):
+    def front(self, row):
         return row['front']
 
-    @staticmethod
-    def leaching(row):
+    def leaching(self, row):
         return row['leaching']
 
     # --- Processed attributes ---
 
-    @staticmethod
-    def minimum_irr(row):
+    def minimum_irr(self, row):
         irr_sched = AttProcessors._filter_out_n_app(row['scheds'])
         
         if np.size(irr_sched[:,AttProcessors.IRR_COL]) == 0:
@@ -56,8 +55,7 @@ class AttProcessors:
 
         return response
 
-    @staticmethod
-    def maximum_irr(row):
+    def maximum_irr(self, row):
         irr_sched = AttProcessors._filter_out_n_app(row['scheds'])
 
         if np.size(irr_sched[:,AttProcessors.IRR_COL]) == 0:
@@ -67,8 +65,7 @@ class AttProcessors:
 
         return response
 
-    @staticmethod
-    def growth_period_of_second_N_app(row):
+    def growth_period_of_second_N_app(self, row):
         # TODO implement
         return 42
 
