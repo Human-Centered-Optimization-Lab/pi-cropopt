@@ -7,16 +7,22 @@ import numpy as np
 
 class AttProcessors: 
 
+    # --- Constants ---
+    DATE_COL = 0
+    IRR_COL = 1
+    N_ROW = 2
+
     # --- Internal methods ---
     @staticmethod
     def _filter_out_n_app(raw_schedule):
-        return raw_schedule[raw_schedule[:,1] != 0]
+        return raw_schedule[raw_schedule[:,AttProcessors.IRR_COL] != 0]
 
     @staticmethod
     def _filter_out_irr_app(raw_schedule):
-        return raw_schedule[raw_schedule[:,1] == 0]
+        return raw_schedule[raw_schedule[:,AttProcessors.IRR_COL] == 0]
 
-    # --- Processors ---
+    # --- Transfered attributes ---
+    # Or attributes that we're just copying from the main table
     @staticmethod
     def application_count(row):
         return row['irr_app_count']
@@ -37,9 +43,22 @@ class AttProcessors:
     def leaching(row):
         return row['leaching']
 
+    # --- Processed attributes ---
+    @staticmethod
+    def minimum_irr(row):
+        irr_sched = AttProcessors._filter_out_n_app(row['scheds'])
+        return np.min(irr_sched[:,AttProcessors.IRR_COL])
 
     @staticmethod
+    def maximum_irr(row):
+        irr_sched = AttProcessors._filter_out_n_app(row['scheds'])
+        return np.max(irr_sched[:,AttProcessors.IRR_COL])
+
+
+    
+    @staticmethod
     def growth_period_of_second_N_app(row):
+        # TODO implement
         return 42
 
 
