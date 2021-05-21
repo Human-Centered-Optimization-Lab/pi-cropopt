@@ -39,7 +39,7 @@ def process_year(arg):
 if __name__ == "__main__":
 
 
-    threads = 1
+    threads = 8
 
     if threads != 1:
         # This somehow prevents this weird error while using multiprocessing
@@ -55,19 +55,14 @@ if __name__ == "__main__":
 
     years = set(tab['year'])
 
-    #att_functs = [  'application_count', 
-    #                'total_irrigation', 
-    #                'yield_', 
-    #                'front',
-    #                'leaching',
-    #                'minimum_irr',
-    #                'maximum_irr'
-    #                ]
-
-    att_functs = [  'application_count',
+    att_functs = [  'application_count', 
                     'total_irrigation', 
                     'yield_', 
-                    'front'
+                    'front',
+                    'leaching',
+                    'minimum_irr',
+                    'maximum_irr']
+
 
     raw_table = {'year': []}
 

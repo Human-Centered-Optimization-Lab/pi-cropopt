@@ -44,18 +44,29 @@ class AttProcessors:
         return row['leaching']
 
     # --- Processed attributes ---
+
     @staticmethod
     def minimum_irr(row):
         irr_sched = AttProcessors._filter_out_n_app(row['scheds'])
-        return np.min(irr_sched[:,AttProcessors.IRR_COL])
+        
+        if np.size(irr_sched[:,AttProcessors.IRR_COL]) == 0:
+            response = None
+        else:
+            response = np.min(irr_sched[:,AttProcessors.IRR_COL])
+
+        return response
 
     @staticmethod
     def maximum_irr(row):
         irr_sched = AttProcessors._filter_out_n_app(row['scheds'])
-        return np.max(irr_sched[:,AttProcessors.IRR_COL])
 
+        if np.size(irr_sched[:,AttProcessors.IRR_COL]) == 0:
+            response = None
+        else:
+            response = np.min(irr_sched[:,AttProcessors.IRR_COL])
 
-    
+        return response
+
     @staticmethod
     def growth_period_of_second_N_app(row):
         # TODO implement
