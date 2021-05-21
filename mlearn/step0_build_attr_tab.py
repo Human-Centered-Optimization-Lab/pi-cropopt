@@ -39,7 +39,7 @@ def process_year(arg):
 if __name__ == "__main__":
 
 
-    threads = 1
+    threads = 8
 
     if threads != 1:
         # This somehow prevents this weird error while using multiprocessing
@@ -50,11 +50,20 @@ if __name__ == "__main__":
     # Read in the master record
     file_name = sys.argv[1]
 
+    # Read the GDD table
+    gdd_tab_csv = "management_dates.csv"
+    gdd_tab = pd.read_csv(gdd_tab_csv)
+   
+    # Read the weather table
+    wth_file_path = "dhome/Weather/CASSREPR.WTH"
+    wth_tab = pd.read_fwf(wth_file_path, skiprows=4)
+
+
     infile = open(file_name, 'rb')
     tab = pickle.load(infile)
 
     # Set up the processing agent 
-    procr = AttProcessors(42, 42)
+    procr = AttProcessors(wth_tab, gdd_tab)
 
     years = set(tab['year'])
 
