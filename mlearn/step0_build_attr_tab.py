@@ -15,18 +15,26 @@ import numpy as np
 def process_year(arg):
 
     # unpack the argument
-    (tab, att_functs, year, procr) = arg
+    (tab, att_functs, year, procr, single_val_per_year) = arg
+
+    rows = np.shape(tab)[0]
 
     results = []
 
     # For every attribute function 
     result_count = -1
 
-    for att_funct in att_functs:
+    for (a, att_funct) in enumerate(att_functs):
+
+        svpy = single_val_per_year[a]
 
         func = getattr(procr, att_funct)
 
-        att_results = tab.apply(func, axis=1)
+        if svpy: 
+            single_res = func(tab.iloc[0,:])
+            att_results = [single_res] * rows
+        else:
+            att_results = tab.apply(func, axis=1)
 
         results.append(att_results)
     
@@ -39,7 +47,7 @@ def process_year(arg):
 if __name__ == "__main__":
 
 
-    threads = 8
+    threads = 1
 
     if threads != 1:
         # This somehow prevents this weird error while using multiprocessing
@@ -62,8 +70,6 @@ if __name__ == "__main__":
     infile = open(file_name, 'rb')
     tab = pickle.load(infile)
 
-    # Set up the processing agent 
-    procr = AttProcessors(wth_tab, gdd_tab)
 
     years = set(tab['year'])
 
@@ -73,8 +79,10 @@ if __name__ == "__main__":
                     'front',
                     'leaching',
                     'minimum_irr',
-                    'maximum_irr']
+                    'maximum_irr', 
+                    'number_of_precipitation_events']
 
+    single_val_per_year = [False, False, False, False, False, False, False, True]
 
     raw_table = {'year': []}
 
@@ -84,11 +92,24 @@ if __name__ == "__main__":
 
     # Split up the data by year, with each thread focusing on a single year
     tab_by_years = {}
+    procr_by_years = {}
+
     for year in years: 
         tab_by_years[year] = (tab[tab['year'] == year])
+
+        # Set up the processing agent 
+        year_modded = int((year  % 1e2) * 1e3)
+        wth_year_mask = np.logical_and(wth_tab['@DATE'] > year_modded, wth_tab['@DATE'] <= (year_modded + 366))
+        specific_wth_tab = wth_tab[wth_year_mask]
+
+        specific_gdd_tab = gdd_tab[gdd_tab['Year'] == year]
+
+        procr_by_years[year] = AttProcessors(specific_wth_tab, specific_gdd_tab)
+
     
+
     # Pack up arguments
-    argz = [(tab_by_years[year], att_functs, year, procr) for year in years]
+    argz = [(tab_by_years[year], att_functs, year, procr_by_years[year], single_val_per_year) for year in years]
 
     if threads == 1: 
         # Eschew multiprocessing for debugging ease
@@ -122,6 +143,9 @@ if __name__ == "__main__":
     # Build the attribute table    
     attribute_table = pd.DataFrame(raw_table)
 
+    output_dir = "/".join(sys.argv[0].split("/")[0:-1])
 
-    #tabloo.show(attribute_table)
+    output = open('%s/attr_tab.pkl' % output_dir, 'wb')
+    pickle.dump(attribute_table, output)
+
 
