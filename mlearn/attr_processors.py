@@ -10,7 +10,10 @@ class AttProcessors:
     # --- Constants ---
     DATE_COL = 0
     IRR_COL = 1
-    N_ROW = 2
+    N_COL = 2
+    GROWTH_STAGES = ['P', 'V6', 'V7', 'V8', 'V9', 'V10', 'V11', 'V12', 
+                        'V13', 'V14', 'R1', 'R2', 'R3', 'R4', 'R5', 'R6']
+    
 
     # --- Constructor ---
     def __init__(self, weather_tab, gdd_tab):
@@ -90,8 +93,26 @@ class AttProcessors:
         return np.sum(rain != 0.0)
 
     def growth_period_of_second_N_app(self, row):
-        # TODO implement
-        return 42
+
+        n_app = AttProcessors._filter_out_irr_app(row['scheds'])
+        
+        second_app_date = max(n_app[:, AttProcessors.DATE_COL])
+
+        second_app_doy = second_app_date % 1000
+
+        result = None 
+
+        for (s, this_stage) in enumerate(AttProcessors.GROWTH_STAGES[0:-1]): 
+
+            next_stage = AttProcessors.GROWTH_STAGES[s+1]
+
+            this_stage_date = self.gdd_tab[this_stage]
+            next_stage_date = self.gdd_tab[next_stage]
+
+            if np.logical_and(second_app_doy >= this_stage_date, second_app_doy <= next_stage_date).any():
+                result = this_stage
+
+        return result
 
 
 if __name__ == "__main__":

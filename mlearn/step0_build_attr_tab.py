@@ -29,7 +29,8 @@ def process_year(arg):
         svpy = single_val_per_year[a]
 
         func = getattr(procr, att_funct)
-
+        
+        # Do we need to run this for every row? Or just once for the whole year
         if svpy: 
             single_res = func(tab.iloc[0,:])
             att_results = [single_res] * rows
@@ -47,7 +48,7 @@ def process_year(arg):
 if __name__ == "__main__":
 
 
-    threads = 1
+    threads = 8
 
     if threads != 1:
         # This somehow prevents this weird error while using multiprocessing
@@ -80,9 +81,13 @@ if __name__ == "__main__":
                     'leaching',
                     'minimum_irr',
                     'maximum_irr', 
-                    'number_of_precipitation_events']
+                    'number_of_precipitation_events', 
+                    'growth_period_of_second_N_app'
+                    ]
 
-    single_val_per_year = [False, False, False, False, False, False, False, True]
+    # Do we calculate this term for every row, or just once per year? 
+    single_val_per_year = [False, False, False, False, False, False, False, 
+                            True, False]
 
     raw_table = {'year': []}
 
