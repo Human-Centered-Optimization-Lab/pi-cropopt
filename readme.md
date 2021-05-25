@@ -13,3 +13,9 @@
 * **runPy.py** Test file for running dssat4dum
 * **main.py** The main file for the optimization portion of agricultural innovization
 
+## Installing
+
+```
+conda create --name my_project_env
+pip install -r requirements.txt
+```
