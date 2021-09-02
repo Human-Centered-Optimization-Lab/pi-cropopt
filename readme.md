@@ -58,7 +58,10 @@ This project contains an innovization framework, which entails:
 ## Installing
 
 ```
-conda create --name my_project_env
-pip install -r requirements.txt
+conda config --set channel_priority strict 
+# conda config --append channels conda-forge # I don't think this is needed
+conda create -c conda-forge -n agovization pypy
+conda activate agovization
+conda install --file requirements.txt
 ```
 
