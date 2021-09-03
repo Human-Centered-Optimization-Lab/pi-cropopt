@@ -30,14 +30,48 @@ class AttProcessors:
         return raw_schedule[raw_schedule[:,AttProcessors.IRR_COL] == 0]
 
     @staticmethod
-    def _add_year_to_doy(doy, year):
+    def _add_year_to_doy_2dig(doy, year):
         return int((year % 1e2)*1e3 + doy)
+
+    @staticmethod
+    def _add_year_to_doy_4dig(doy, year):
+        return int(year*1e3 + doy)
 
     @staticmethod
     def _get_rain_within_period(weather_tab, start, end):
         period_mask = np.logical_and(weather_tab['@DATE'] >= start, weather_tab['@DATE'] <= end)
         rain = weather_tab[period_mask]['RAIN']
         return rain
+
+
+    @staticmethod
+    def _get_period_doys(period, year, gdd_tab):
+        end_of_period_ind = AttProcessors.GROWTH_STAGES.index(period) + 1
+        end_of_period = AttProcessors.GROWTH_STAGES[end_of_period_ind]
+  
+        gdds = gdd_tab[gdd_tab['Year'] == year]
+
+        start_date_doy = gdds[period]
+        end_date_doy = gdds[end_of_period]
+
+        return (int(start_date_doy), int(end_date_doy))
+
+    @staticmethod
+    def _calc_total_irr_per_period(period, year, gdd_tab, sched):
+
+        sched = AttProcessors._filter_out_n_app(sched)
+
+        # Get the DOY of the period in question
+        (start_doy, end_doy) = AttProcessors._get_period_doys(period,  year, gdd_tab)
+
+        start_doy = AttProcessors._add_year_to_doy_4dig(start_doy, year)
+        end_doy = AttProcessors._add_year_to_doy_4dig(end_doy, year)
+
+        # filter out the irrigation during the period
+        irr_mask = np.logical_and(sched[:,0] >= start_doy, sched[:,0] < end_doy)
+        total_irr = np.sum(sched[irr_mask, AttProcessors.IRR_COL])
+
+        return total_irr
 
     # --- Transfered attributes ---
     # Or attributes that we're just copying from the main table
@@ -85,8 +119,8 @@ class AttProcessors:
         plant_doy = gdds['P']
         maturity_doy = gdds['R6']
 
-        plant_date = AttProcessors._add_year_to_doy(plant_doy, year)
-        maturity_date = AttProcessors._add_year_to_doy(maturity_doy, year)
+        plant_date = AttProcessors._add_year_to_doy_2dig(plant_doy, year)
+        maturity_date = AttProcessors._add_year_to_doy_2dig(maturity_doy, year)
 
         rain = AttProcessors._get_rain_within_period(self.weather_tab, plant_date, maturity_date)
 
@@ -113,6 +147,74 @@ class AttProcessors:
                 result = this_stage
 
         return result
+
+    # Physiological properties
+
+    def total_irr_during_v6(self, row):
+        total_irr = AttProcessors._calc_total_irr_per_period('V6', row['year'], self.gdd_tab, row['scheds'])
+        return total_irr
+
+    def total_irr_during_v7(self, row):
+        total_irr = AttProcessors._calc_total_irr_per_period('V7', row['year'], self.gdd_tab, row['scheds'])
+        return total_irr
+
+    def total_irr_during_v8(self, row):
+        total_irr = AttProcessors._calc_total_irr_per_period('V8', row['year'], self.gdd_tab, row['scheds'])
+        return total_irr
+
+    def total_irr_during_v9(self, row):
+        total_irr = AttProcessors._calc_total_irr_per_period('V9', row['year'], self.gdd_tab, row['scheds'])
+        return total_irr
+
+    def total_irr_during_v10(self, row):
+        total_irr = AttProcessors._calc_total_irr_per_period('V10', row['year'], self.gdd_tab, row['scheds'])
+        return total_irr
+
+    def total_irr_during_v11(self, row):
+        total_irr = AttProcessors._calc_total_irr_per_period('V11', row['year'], self.gdd_tab, row['scheds'])
+        return total_irr
+
+    def total_irr_during_v12(self, row):
+        total_irr = AttProcessors._calc_total_irr_per_period('V12', row['year'], self.gdd_tab, row['scheds'])
+        return total_irr
+
+    def total_irr_during_v13(self, row):
+        total_irr = AttProcessors._calc_total_irr_per_period('V13', row['year'], self.gdd_tab, row['scheds'])
+        return total_irr
+
+    def total_irr_during_v14(self, row):
+        total_irr = AttProcessors._calc_total_irr_per_period('V14', row['year'], self.gdd_tab, row['scheds'])
+        return total_irr
+
+    def total_precip_during_v6(self, row):
+        return "implement me"
+
+    def total_precip_during_v7(self, row):
+        return "implement me"
+
+    def total_precip_during_v8(self, row):
+        return "implement me"
+
+    def total_precip_during_v9(self, row):
+        return "implement me"
+
+    def total_precip_during_v10(self, row):
+        return "implement me"
+
+    def total_precip_during_v11(self, row):
+        return "implement me"
+
+    def total_precip_during_v12(self, row):
+        return "implement me"
+
+    def total_precip_during_v13(self, row):
+        return "implement me"
+
+    def total_precip_during_v14(self, row):
+        return "implement me"
+
+
+
 
 
 if __name__ == "__main__":

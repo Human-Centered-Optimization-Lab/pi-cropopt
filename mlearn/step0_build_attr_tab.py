@@ -8,14 +8,17 @@ import tabloo
 import numpy as np
 
 
-# Example
-# python -m pdb   mlearn/step0_build_attr_tab.py postprocess/master_run_record.pkl
+
+if len(sys.argv) != 2:
+    print("Usage: python %s RUNRECORD.pkl" % sys.print)
+    print("Example: python mlearn/step0_build_attr_tab.py postprocess/master_run_record.pkl")
+    sys.exit(1)
 
 # Functions
 def process_year(arg):
 
     # unpack the argument
-    (tab, att_functs, year, procr, single_val_per_year) = arg
+    (tab, att_functs, year, attribProcr, single_val_per_year) = arg
 
     rows = np.shape(tab)[0]
 
@@ -26,9 +29,9 @@ def process_year(arg):
 
     for (a, att_funct) in enumerate(att_functs):
 
-        svpy = single_val_per_year[a]
+        svpy = single_val_per_year[a]                   
 
-        func = getattr(procr, att_funct)
+        func = getattr(attribProcr, att_funct)
         
         # Do we need to run this for every row? Or just once for the whole year
         if svpy: 
@@ -48,7 +51,7 @@ def process_year(arg):
 if __name__ == "__main__":
 
 
-    threads = 8
+    threads = 23
 
     if threads != 1:
         # This somehow prevents this weird error while using multiprocessing
@@ -82,12 +85,22 @@ if __name__ == "__main__":
                     'minimum_irr',
                     'maximum_irr', 
                     'number_of_precipitation_events', 
-                    'growth_period_of_second_N_app'
-                    ]
+                    'growth_period_of_second_N_app' ,
+                    'total_irr_during_v6', 
+                    'total_irr_during_v7',
+                    'total_irr_during_v8',
+                    'total_irr_during_v9',
+                    'total_irr_during_v10', 
+                    'total_irr_during_v11',
+                    'total_irr_during_v12',
+                    'total_irr_during_v13',
+                    'total_irr_during_v14']
+
 
     # Do we calculate this term for every row, or just once per year? 
     single_val_per_year = [False, False, False, False, False, False, False, 
-                            True, False]
+                            True, False, False, False, False, False, False, 
+                            False, False, False, False ]
 
     raw_table = {'year': []}
 
@@ -96,9 +109,11 @@ if __name__ == "__main__":
         raw_table[att_funct] = []
 
     # Split up the data by year, with each thread focusing on a single year
+    # preventing race conditions while using shared tables
     tab_by_years = {}
     procr_by_years = {}
 
+    print("Splitting parameters and input tables")
     for year in years: 
         tab_by_years[year] = (tab[tab['year'] == year])
 
@@ -111,11 +126,13 @@ if __name__ == "__main__":
 
         procr_by_years[year] = AttProcessors(specific_wth_tab, specific_gdd_tab)
 
-    
+    print("Done.")
+
 
     # Pack up arguments
     argz = [(tab_by_years[year], att_functs, year, procr_by_years[year], single_val_per_year) for year in years]
 
+    print("Starting attribute processing")
     if threads == 1: 
         # Eschew multiprocessing for debugging ease
         results = [process_year(arg) for arg in argz]
