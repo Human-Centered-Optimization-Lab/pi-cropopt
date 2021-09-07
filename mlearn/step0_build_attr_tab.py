@@ -10,7 +10,7 @@ import numpy as np
 
 
 if len(sys.argv) != 2:
-    print("Usage: python %s RUNRECORD.pkl" % sys.print)
+    print("Usage: python %s RUNRECORD.pkl" % sys.argv[0])
     print("Example: python mlearn/step0_build_attr_tab.py postprocess/master_run_record.pkl")
     sys.exit(1)
 
@@ -77,7 +77,8 @@ if __name__ == "__main__":
 
     years = set(tab['year'])
 
-    att_functs = [  'application_count', 
+    att_functs = [ 
+                    'application_count', 
                     'total_irrigation', 
                     'yield_', 
                     'front',
@@ -94,13 +95,64 @@ if __name__ == "__main__":
                     'total_irr_during_v11',
                     'total_irr_during_v12',
                     'total_irr_during_v13',
-                    'total_irr_during_v14']
+                    'total_irr_during_v14',
+                    'total_irr_during_R1', 
+                    'total_irr_during_R2', 
+                    'total_irr_during_R3', 
+                    'total_irr_during_R4',
+                    'total_precip_during_v6',
+                    'total_precip_during_v7',
+                    'total_precip_during_v8',
+                    'total_precip_during_v9',
+                    'total_precip_during_v10',
+                    'total_precip_during_v11',
+                    'total_precip_during_v12',
+                    'total_precip_during_v13',
+                    'total_precip_during_v14',
+                    'total_precip_during_R1', 
+                    'total_precip_during_R2',
+                    'total_precip_during_R3',
+                    'total_precip_during_R4']
 
+
+    
 
     # Do we calculate this term for every row, or just once per year? 
-    single_val_per_year = [False, False, False, False, False, False, False, 
-                            True, False, False, False, False, False, False, 
-                            False, False, False, False ]
+    single_val_per_year = [ False,  #  application_count
+                            False,  #  total_irrigation
+                            False,  #  yield_
+                            False,  #  front
+                            False,  #  leaching
+                            False,  #  minimum_irr
+                            False,  #  maximum_irr
+                            False,  #  number_of_precipitation_events
+                            True,   #  growth_period_of_second_N_app 
+                            False,  #  total_irr_during_v6
+                            False,  #  total_irr_during_v7
+                            False,  #  total_irr_during_v8
+                            False,  #  total_irr_during_v9
+                            False,  #  total_irr_during_v10
+                            False,  #  total_irr_during_v11
+                            False,  #  total_irr_during_v12
+                            False,  #  total_irr_during_v13
+                            False,  #  total_irr_during_v14
+                            False,  #  total_irr_during_R1
+                            False,  #  total_irr_during_R2
+                            False,  #  total_irr_during_R3
+                            False,  #  total_irr_during_R4
+                            False,  # total_precip_during_v6
+                            False,  # total_precip_during_v7
+                            False,  # total_precip_during_v8
+                            False,  # total_precip_during_v9
+                            False,  # total_precip_during_v10
+                            False,  # total_precip_during_v11
+                            False,  # total_precip_during_v12
+                            False,  # total_precip_during_v13
+                            False,  # total_precip_during_v14
+                            False,  # total_precip_during_R1
+                            False,  # total_precip_during_R2
+                            False,  # total_precip_during_R3
+                            False ] # total_precip_during_R4
 
     raw_table = {'year': []}
 
