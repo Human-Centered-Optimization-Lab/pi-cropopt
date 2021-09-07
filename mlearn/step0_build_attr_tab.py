@@ -167,14 +167,14 @@ if __name__ == "__main__":
 
     print("Splitting parameters and input tables")
     for year in years: 
-        tab_by_years[year] = (tab[tab['year'] == year])
+        tab_by_years[year] = (tab[tab['year'] == year]).copy()
 
         # Set up the processing agent 
         year_modded = int((year  % 1e2) * 1e3)
-        wth_year_mask = np.logical_and(wth_tab['@DATE'] > year_modded, wth_tab['@DATE'] <= (year_modded + 366))
-        specific_wth_tab = wth_tab[wth_year_mask]
 
-        specific_gdd_tab = gdd_tab[gdd_tab['Year'] == year]
+        wth_year_mask = np.logical_and(wth_tab['@DATE'] > year_modded, wth_tab['@DATE'] <= (year_modded + 366))
+        specific_wth_tab = wth_tab[wth_year_mask].copy()
+        specific_gdd_tab = gdd_tab[gdd_tab['Year'] == year].copy()
 
         procr_by_years[year] = AttProcessors(specific_wth_tab, specific_gdd_tab)
 
