@@ -4,15 +4,9 @@ import sys
 import pickle
 from attr_processors import AttProcessors
 import pandas as pd
-import tabloo
 import numpy as np
 
 
-
-if len(sys.argv) != 2:
-    print("Usage: python %s RUNRECORD.pkl" % sys.argv[0])
-    print("Example: python mlearn/step0_build_attr_tab.py postprocess/master_run_record.pkl")
-    sys.exit(1)
 
 # Functions
 def process_year(arg):
@@ -59,8 +53,23 @@ if __name__ == "__main__":
         __spec__ = None
 
 
+    if len(sys.argv) != 2 and len(sys.argv) != 4:
+        print("Usage: %s /PATH/TO/MASTER_RECORD.PKL [/PATH/TO/ATTRIB_TAB.PKL /PATH/TO/NEW/TAB.PKL]" % sys.argv[0])
+        sys.exit(1)
+
+    if len(sys.argv) == 4: 
+        append_mode = True
+        tab_to_append_path = sys.argv[2]
+        new_tab_path = sys.argv[3]
+
+        print('Append mode on to file %s' % tab_to_append_path)
+    else:
+        append_mode = False
+
     # Read in the master record
     file_name = sys.argv[1]
+
+    
 
     # Read the GDD table
     gdd_tab_csv = "management_dates.csv"
@@ -113,8 +122,6 @@ if __name__ == "__main__":
                     'total_precip_during_R2',
                     'total_precip_during_R3',
                     'total_precip_during_R4']
-
-
     
 
     # Do we calculate this term for every row, or just once per year? 
@@ -152,7 +159,23 @@ if __name__ == "__main__":
                             False,  # total_precip_during_R1
                             False,  # total_precip_during_R2
                             False,  # total_precip_during_R3
-                            False ] # total_precip_during_R4
+                            False]  # total_precip_during_R4
+
+
+    # Take data from previous runs into consideration
+    if append_mode:
+        infile = open(tab_to_append_path, 'rb')           
+        print('Loading output file...')
+        tab_to_append = pickle.load(infile) 
+        print('Done')
+        cols_calculated = tab_to_append.columns.values.tolist()
+        to_skip = {att_functs.index(col) for col in cols_calculated[1:]}
+
+        att_functs = [col for (i, col) in enumerate(att_functs) if i not in to_skip ]
+        single_val_per_year = [col for (i, col) in enumerate(single_val_per_year) if i not in to_skip ]
+
+        print("Calculating the following attributes")
+        print(att_functs)
 
     raw_table = {'year': []}
 
@@ -214,12 +237,28 @@ if __name__ == "__main__":
 
         raw_table['year'] = raw_table['year'] +  [year] * result_count
 
-    # Build the attribute table    
-    attribute_table = pd.DataFrame(raw_table)
 
-    output_dir = "/".join(sys.argv[0].split("/")[0:-1])
+    if append_mode:
 
-    output = open('%s/attr_tab.pkl' % output_dir, 'wb')
-    pickle.dump(attribute_table, output)
+        print("Appending to existing table...")
+        for key in raw_table.keys():
+            if key == "year": 
+                continue
+            else: 
+                tab_to_append[key] = raw_table[key]
+       
+        new_tab_file = open(new_tab_path, 'wb')
+
+        pickle.dump(tab_to_append, new_tab_file) 
+                        
+
+    else:
+        # Build the attribute table    
+        attribute_table = pd.DataFrame(raw_table)
+
+        output_dir = "/".join(sys.argv[0].split("/")[0:-1])
+
+        output = open('%s/attr_tab.pkl' % output_dir, 'wb')
+        pickle.dump(attribute_table, output)
 
 
