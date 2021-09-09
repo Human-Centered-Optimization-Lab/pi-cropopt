@@ -56,7 +56,7 @@ class AttProcessors:
         return (int(start_date_doy), int(end_date_doy))
 
     @staticmethod
-    def _calc_total_irr_per_period(period, year, gdd_tab, sched):
+    def _get_irr_period(period, year, gdd_tab, sched):
 
         sched = AttProcessors._filter_out_n_app(sched)
 
@@ -68,12 +68,20 @@ class AttProcessors:
 
         # filter out the irrigation during the period
         irr_mask = np.logical_and(sched[:,0] >= start_doy, sched[:,0] < end_doy)
-        total_irr = np.sum(sched[irr_mask, AttProcessors.IRR_COL])
+        return sched[irr_mask, AttProcessors.IRR_COL]
 
-        return total_irr
 
     @staticmethod
-    def _calc_total_precip_per_period(period, year, gdd_tab, weather):
+    def _calc_total_irr_per_period(period, year, gdd_tab, sched):
+        return np.sum(AttProcessors._get_irr_period(period, year, gdd_tab, sched))
+
+    @staticmethod
+    def _calc_freq_irr_per_period(period, year, gdd_tab, sched):
+        result = AttProcessors._get_irr_period(period, year, gdd_tab, sched)
+        return len(result)
+
+    @staticmethod
+    def _get_precip_period(period, year, gdd_tab, weather):
 
         # Get the DOY of the period in question
         (start_doy, end_doy) = AttProcessors._get_period_doys(period,  year, gdd_tab)
@@ -83,10 +91,16 @@ class AttProcessors:
 
         # filter out the irrigation during the period
         p_mask = np.logical_and(weather['@DATE'] >= start_doy, weather['@DATE'] < end_doy)
-        total_p = np.sum(weather['RAIN'][p_mask])
 
-        return total_p
+        return weather['RAIN'][p_mask]
 
+    @staticmethod
+    def _calc_total_precip_per_period(period, year, gdd_tab, weather):
+        return np.sum(AttProcessors._get_precip_period(period, year, gdd_tab, weather))
+
+    @staticmethod
+    def _calc_freq_precip_per_period(period, year, gdd_tab, weather):
+        return len(AttProcessors._get_precip_period(period, year, gdd_tab, weather))
 
 
     # --- Transfered attributes ---
@@ -270,9 +284,89 @@ class AttProcessors:
         total_precip = AttProcessors._calc_total_precip_per_period('R4', row['year'], self.gdd_tab, self.weather_tab)
         return total_precip
 
+    def freq_irr_during_v6(self, row):
+        return AttProcessors._calc_freq_irr_per_period('V6', row['year'], self.gdd_tab, row['scheds']) 
+    
+    def freq_irr_during_v7(self, row):
+        return AttProcessors._calc_freq_irr_per_period('V7', row['year'], self.gdd_tab, row['scheds']) 
+    
+    def freq_irr_during_v8(self, row):
+        return AttProcessors._calc_freq_irr_per_period('V8', row['year'], self.gdd_tab, row['scheds']) 
+
+    def freq_irr_during_v9(self, row):
+        return AttProcessors._calc_freq_irr_per_period('V9', row['year'], self.gdd_tab, row['scheds']) 
+
+    def freq_irr_during_v10(self, row):
+        return AttProcessors._calc_freq_irr_per_period('V10', row['year'], self.gdd_tab, row['scheds']) 
+
+    def freq_irr_during_v11(self, row):
+        return AttProcessors._calc_freq_irr_per_period('V11', row['year'], self.gdd_tab, row['scheds']) 
+
+    def freq_irr_during_v12(self, row):
+        return AttProcessors._calc_freq_irr_per_period('V12', row['year'], self.gdd_tab, row['scheds']) 
+
+    def freq_irr_during_v13(self, row):
+        return AttProcessors._calc_freq_irr_per_period('V13', row['year'], self.gdd_tab, row['scheds']) 
+
+    def freq_irr_during_v14(self, row):
+        return AttProcessors._calc_freq_irr_per_period('V14', row['year'], self.gdd_tab, row['scheds']) 
+
+    def freq_irr_during_R1(self, row):
+        return AttProcessors._calc_freq_irr_per_period('R1', row['year'], self.gdd_tab, row['scheds']) 
+
+    def freq_irr_during_R2(self, row):
+        return AttProcessors._calc_freq_irr_per_period('R2', row['year'], self.gdd_tab, row['scheds']) 
+
+    def freq_irr_during_R3(self, row):
+        return AttProcessors._calc_freq_irr_per_period('R3', row['year'], self.gdd_tab, row['scheds']) 
+
+    def freq_irr_during_R4(self, row):
+        return AttProcessors._calc_freq_irr_per_period('R4', row['year'], self.gdd_tab, row['scheds']) 
+
+    def freq_precip_during_v6(self, row):
+        return AttProcessors._calc_freq_precip_per_period('V6', row['year'], self.gdd_tab, self.weather_tab) 
+    
+    def freq_precip_during_v7(self, row):
+        return AttProcessors._calc_freq_precip_per_period('V7', row['year'], self.gdd_tab, self.weather_tab) 
+    
+    def freq_precip_during_v8(self, row):
+        return AttProcessors._calc_freq_precip_per_period('V8', row['year'], self.gdd_tab, self.weather_tab) 
+
+    def freq_precip_during_v9(self, row):
+        return AttProcessors._calc_freq_precip_per_period('V9', row['year'], self.gdd_tab, self.weather_tab) 
+
+    def freq_precip_during_v10(self, row):
+        return AttProcessors._calc_freq_precip_per_period('V10', row['year'], self.gdd_tab, self.weather_tab) 
+
+    def freq_precip_during_v11(self, row):
+        return AttProcessors._calc_freq_precip_per_period('V11', row['year'], self.gdd_tab, self.weather_tab) 
+
+    def freq_precip_during_v12(self, row):
+        return AttProcessors._calc_freq_precip_per_period('V12', row['year'], self.gdd_tab, self.weather_tab) 
+
+    def freq_precip_during_v13(self, row):
+        return AttProcessors._calc_freq_precip_per_period('V13', row['year'], self.gdd_tab, self.weather_tab) 
+
+    def freq_precip_during_v14(self, row):
+        return AttProcessors._calc_freq_precip_per_period('V14', row['year'], self.gdd_tab, self.weather_tab) 
+
+    def freq_precip_during_R1(self, row):
+        return AttProcessors._calc_freq_precip_per_period('R1', row['year'], self.gdd_tab, self.weather_tab) 
+
+    def freq_precip_during_R2(self, row):
+        return AttProcessors._calc_freq_precip_per_period('R2', row['year'], self.gdd_tab, self.weather_tab) 
+
+    def freq_precip_during_R3(self, row):
+        return AttProcessors._calc_freq_precip_per_period('R3', row['year'], self.gdd_tab, self.weather_tab) 
+
+    def freq_precip_during_R4(self, row):
+        return AttProcessors._calc_freq_precip_per_period('R4', row['year'], self.gdd_tab, self.weather_tab) 
+
+
+
+
 if __name__ == "__main__":
     AttProcessors.foobar(blah)
-
 
 
 

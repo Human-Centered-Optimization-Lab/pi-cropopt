@@ -86,8 +86,7 @@ if __name__ == "__main__":
 
     years = set(tab['year'])
 
-    att_functs = [ 
-                    'application_count', 
+    att_functs = [ 'application_count', 
                     'total_irrigation', 
                     'yield_', 
                     'front',
@@ -121,45 +120,107 @@ if __name__ == "__main__":
                     'total_precip_during_R1', 
                     'total_precip_during_R2',
                     'total_precip_during_R3',
-                    'total_precip_during_R4']
+                    'total_precip_during_R4',
+                    'freq_irr_during_v6',
+                    'freq_irr_during_v7',
+                    'freq_irr_during_v8',
+                    'freq_irr_during_v9',
+                    'freq_irr_during_v10',
+                    'freq_irr_during_v11',
+                    'freq_irr_during_v12',
+                    'freq_irr_during_v13',
+                    'freq_irr_during_v14',
+                    'freq_irr_during_R1',
+                    'freq_irr_during_R2',
+                    'freq_irr_during_R3',
+                    'freq_irr_during_R4',
+                    'freq_precip_during_v6',
+                    'freq_precip_during_v7',
+                    'freq_precip_during_v8',
+                    'freq_precip_during_v9',
+                    'freq_precip_during_v10',
+                    'freq_precip_during_v11',
+                    'freq_precip_during_v12',
+                    'freq_precip_during_v13',
+                    'freq_precip_during_v14',
+                    'freq_precip_during_R1',
+                    'freq_precip_during_R2',
+                    'freq_precip_during_R3',
+                    'freq_precip_during_R4' ]
     
 
     # Do we calculate this term for every row, or just once per year? 
-    single_val_per_year = [ False,  #  application_count
-                            False,  #  total_irrigation
-                            False,  #  yield_
-                            False,  #  front
-                            False,  #  leaching
-                            False,  #  minimum_irr
-                            False,  #  maximum_irr
-                            False,  #  number_of_precipitation_events
-                            True,   #  growth_period_of_second_N_app 
-                            False,  #  total_irr_during_v6
-                            False,  #  total_irr_during_v7
-                            False,  #  total_irr_during_v8
-                            False,  #  total_irr_during_v9
-                            False,  #  total_irr_during_v10
-                            False,  #  total_irr_during_v11
-                            False,  #  total_irr_during_v12
-                            False,  #  total_irr_during_v13
-                            False,  #  total_irr_during_v14
-                            False,  #  total_irr_during_R1
-                            False,  #  total_irr_during_R2
-                            False,  #  total_irr_during_R3
-                            False,  #  total_irr_during_R4
-                            False,  # total_precip_during_v6
-                            False,  # total_precip_during_v7
-                            False,  # total_precip_during_v8
-                            False,  # total_precip_during_v9
-                            False,  # total_precip_during_v10
-                            False,  # total_precip_during_v11
-                            False,  # total_precip_during_v12
-                            False,  # total_precip_during_v13
-                            False,  # total_precip_during_v14
-                            False,  # total_precip_during_R1
-                            False,  # total_precip_during_R2
-                            False,  # total_precip_during_R3
-                            False]  # total_precip_during_R4
+    single_val_per_year = [ False, # application_count', 
+                            False, # total_irrigation', 
+                            False, # yield_', 
+                            False, # front',
+                            False, # leaching',
+                            False, # minimum_irr',
+                            False, # maximum_irr', 
+                            True,  # number_of_precipitation_events', 
+                            False, # growth_period_of_second_N_app' ,
+                            False, # total_irr_during_v6', 
+                            False, # total_irr_during_v7',
+                            False, # total_irr_during_v8',
+                            False, # total_irr_during_v9',
+                            False, # total_irr_during_v10', 
+                            False, # total_irr_during_v11',
+                            False, # total_irr_during_v12',
+                            False, # total_irr_during_v13',
+                            False, # total_irr_during_v14',
+                            False, # total_irr_during_R1', 
+                            False, # total_irr_during_R2', 
+                            False, # total_irr_during_R3', 
+                            False, # total_irr_during_R4',
+                            True,  # total_precip_during_v6',
+                            True,  # total_precip_during_v7',
+                            True,  # total_precip_during_v8',
+                            True,  # total_precip_during_v9',
+                            True,  # total_precip_during_v10',
+                            True,  # total_precip_during_v11',
+                            True,  # total_precip_during_v12',
+                            True,  # total_precip_during_v13',
+                            True,  # total_precip_during_v14',
+                            True,  # total_precip_during_R1', 
+                            True,  # total_precip_during_R2',
+                            True,  # total_precip_during_R3',
+                            True,  # total_precip_during_R4',
+                            False, # freq_irr_during_v6',
+                            False, # freq_irr_during_v7',
+                            False, # freq_irr_during_v8',
+                            False, # freq_irr_during_v9',
+                            False, # freq_irr_during_v10',
+                            False, # freq_irr_during_v11',
+                            False, # freq_irr_during_v12',
+                            False, # freq_irr_during_v13',
+                            False, # freq_irr_during_v14',
+                            False, # freq_irr_during_R1',
+                            False, # freq_irr_during_R2',
+                            False, # freq_irr_during_R3',
+                            False, # freq_irr_during_R4',
+                            True,  # freq_precip_during_v6',
+                            True,  # freq_precip_during_v7',
+                            True,  # freq_precip_during_v8',
+                            True,  # freq_precip_during_v9',
+                            True,  # freq_precip_during_v10',
+                            True,  # freq_precip_during_v11',
+                            True,  # freq_precip_during_v12',
+                            True,  # freq_precip_during_v13',
+                            True,  # freq_precip_during_v14',
+                            True,  # freq_precip_during_R1',
+                            True,  # freq_precip_during_R2',
+                            True,  # freq_precip_during_R3',
+                            True]  # freq_precip_during_R4',
+
+
+    # Sanity checks
+    if len(single_val_per_year) != len(att_functs):
+        print("Error: attribute function list and single-val-per-year different sizes")
+        sys.exit(1)
+
+    if len(set(att_functs)) != len(att_functs):
+        print("Error: duplicate attributes found. Please fix")
+        sys.exit(1)
 
 
     # Take data from previous runs into consideration
@@ -173,6 +234,11 @@ if __name__ == "__main__":
 
         att_functs = [col for (i, col) in enumerate(att_functs) if i not in to_skip ]
         single_val_per_year = [col for (i, col) in enumerate(single_val_per_year) if i not in to_skip ]
+
+
+        if len(att_functs) == 0: 
+            print("Nothing to do. All attributes already calculated")
+            sys.exit(1)
 
         print("Calculating the following attributes")
         print(att_functs)
