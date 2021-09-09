@@ -58,8 +58,10 @@ This project contains an innovization framework, which entails:
 ## Installing
 
 ```
-conda create -c conda-forge -n agovization pypy
+conda create --name agovization python=3.8 -y
 conda activate agovization
-pip install -r .\requirements.txt
+conda install --file requirements.txt
+pip install -r indie-requirements.txt
+
 ```
 
