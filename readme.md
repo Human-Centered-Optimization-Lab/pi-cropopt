@@ -60,6 +60,7 @@ This project contains an innovization framework, which entails:
 ```
 conda create -c conda-forge --name agovization python=3.8 -y
 conda activate agovization
+conda install -c conda-forge pyarrow==0.17.0
 conda install -c conda-forge --file requirements.txt
 pip install -r indie-requirements.txt
 
