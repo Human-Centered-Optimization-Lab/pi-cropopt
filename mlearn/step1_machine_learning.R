@@ -12,8 +12,8 @@ library(dplyr)
 
 
 ## Constants
-#TAB_PATH = "Z:\\Gilgamesh\\kroppian\\agovization_results\\mlearning\\2021-09-10_13-31_attr_tab.feather"
-TAB_PATH = "/Users/iankropp/Projects/agovization/mlearn/2021-09-10_13-31_attr_tab.feather"
+TAB_PATH = "Z:\\Gilgamesh\\kroppian\\agovization_results\\mlearning\\2021-09-10_13-31_attr_tab.feather"
+#TAB_PATH = "/Users/iankropp/Projects/agovization/mlearn/2021-09-10_13-31_attr_tab.feather"
 STAGES <- c("P","V6",  "V7", "V8", "V9", "V10",  "V11", "V12", "V13", "V14", "R1", "R2", "R3", "R4")
 PREDICTOR_COLS = c()
 
@@ -118,17 +118,27 @@ targets <-
   attribute_tab %>%
   select(all_of(targets))
 
-## Correlation analysi
+## Correlation analysis
 print("Done. Running correlation analysis...")
 # TODO remove this once we've figured out the proper reason there's NA in the data
 nanVals <- which(!is.finite(features$minimum_irr))
 features <- features[-nanVals,]
-nanVals <- which(!is.finite(features$maximum_irr))
-features <- features[-nanVals,]
+targets <- targets[-nanVals,]
+
+corrMat <- cor(features)
+corrs <- findCorrelation(corrMat, cutoff=0.75)
+
+non_corr_features = features[-corrs]
+
+# TODO Should I center and scale? 
+# print("Done. Scaling and centering ")
+# features <- preProcess(features, method = c("center", "scale"))
+  
+
+# Thoughts: 
+# Machine learning algorithm should be non-black box in order to find innovations
+# https://towardsdatascience.com/machine-learning-interpretability-techniques-662c723454f3
 
 
-cor_mat <- cor(features)
 
-
-corrs <- findCorrelation(cor_mat)
 
