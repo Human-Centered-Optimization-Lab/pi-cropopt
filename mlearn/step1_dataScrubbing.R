@@ -13,11 +13,13 @@ library(dplyr)
 
 ## Constants
 
-OUTPUT_FEATURES = "Z:\\Gilgamesh\\kroppian\\agovization_results\\mlearning\\features.feather"
-OUTPUT_TARGETS = "Z:\\Gilgamesh\\kroppian\\agovization_results\\mlearning\\targets.feather"
+#OUTPUT_FEATURES = "Z:\\Gilgamesh\\kroppian\\agovization_results\\mlearning\\features.feather"
+#OUTPUT_TARGETS = "Z:\\Gilgamesh\\kroppian\\agovization_results\\mlearning\\targets.feather"
+OUTPUT_FEATURES = "/Users/iankropp/Projects/agovization/mlearn/features.feather"
+OUTPUT_TARGETS = "/Users/iankropp/Projects/agovization/mlearn/targets.feather"
 
-TAB_PATH = "Z:\\Gilgamesh\\kroppian\\agovization_results\\mlearning\\2021-09-10_13-31_attr_tab.feather"
-#TAB_PATH = "/Users/iankropp/Projects/agovization/mlearn/2021-09-10_13-31_attr_tab.feather"
+#TAB_PATH = "Z:\\Gilgamesh\\kroppian\\agovization_results\\mlearning\\2021-09-10_13-31_attr_tab.feather"
+TAB_PATH = "/Users/iankropp/Projects/agovization/mlearn/2021-09-10_13-31_attr_tab.feather"
 STAGES <- c("P","V6",  "V7", "V8", "V9", "V10",  "V11", "V12", "V13", "V14", "R1", "R2", "R3", "R4")
 PREDICTOR_COLS = c()
 
@@ -109,6 +111,11 @@ attribute_tab['growth_period_of_second_N_app'] <-
 zeroVars = nearZeroVar(attribute_tab, freqCut = 10000)
 
 predictors <- colnames(attribute_tab)[-zeroVars]
+predictors <- predictors[-which(predictors == "front")]
+predictors <- predictors[-which(predictors == "yield_")]
+predictors <- predictors[-which(predictors == "leaching")]
+predictors <- predictors[-which(predictors == "year")]
+
 
 attribute_tab <- attribute_tab[, -zeroVars]
 
@@ -146,4 +153,3 @@ non_corr_features = features[-corrs]
 ## Write to output
 arrow::write_feather(features, OUTPUT_FEATURES)
 arrow::write_feather(targets, OUTPUT_TARGETS)
-

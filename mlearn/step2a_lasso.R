@@ -3,8 +3,9 @@
 
 library(caret)
 
-INPUT_FEATURES = "Z:\\Gilgamesh\\kroppian\\agovization_results\\mlearning\\features.feather"
-INPUT_TARGETS = "Z:\\Gilgamesh\\kroppian\\agovization_results\\mlearning\\targets.feather"
+INPUT_FEATURES = "/Users/iankropp/Projects/agovization/mlearn/features.feather"
+INPUT_TARGETS = "/Users/iankropp/Projects/agovization/mlearn/targets.feather"
+ATTRIB_TAB_PATH = "/Users/iankropp/Projects/agovization/mlearn/attr_tab_cleaned.feather"
 
 ## Fetch data
 
@@ -13,6 +14,7 @@ features <- as_tibble(features_raw)
 
 targets_raw <- arrow::read_feather(INPUT_TARGETS)
 targets <- as_tibble(targets_raw)
+
 
 ## Split data
 
@@ -25,10 +27,14 @@ trainingTargets <- targets[inTraining,]
 testFeatures <- features[-inTraining,]
 testTargets <- targets[-inTraining,]
 
+# Bootstrap by default 
+# 25 bootstrapped iterations by default 
+# No repeats (only for cross validation)
+fitControl <- trainControl(verboseIter = TRUE) 
 
 ## Train model 
-#lassoFit <- train(trainingFeatures, 
-#                  trainingTargets$front, 
-#                  method="lasso", 
-#                  verbose = TRUE)
+lassoFit <- train(trainingFeatures, 
+                  trainingTargets$front,
+                  method="lasso",
+                  trControl = fitControl)
 
