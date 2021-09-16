@@ -7,6 +7,8 @@ INPUT_FEATURES = "/Users/iankropp/Projects/agovization/mlearn/features.feather"
 INPUT_TARGETS = "/Users/iankropp/Projects/agovization/mlearn/targets.feather"
 ATTRIB_TAB_PATH = "/Users/iankropp/Projects/agovization/mlearn/attr_tab_cleaned.feather"
 
+OUTPUT_RESULTS = "/Users/iankropp/Projects/agovization/mlearn/lassoResults"
+
 ## Fetch data
 
 features_raw <- arrow::read_feather(INPUT_FEATURES)
@@ -33,8 +35,20 @@ testTargets <- targets[-inTraining,]
 fitControl <- trainControl(verboseIter = TRUE) 
 
 ## Train model 
-lassoFit <- train(trainingFeatures, 
-                  trainingTargets$front,
+#lassoFitFront <- train(trainingFeatures, 
+#                  trainingTargets$front,
+#                  method="lasso",
+#                  trControl = fitControl)
+
+#lassoFitYield <- train(trainingFeatures, 
+#                  trainingTargets$yield_,
+#                  method="lasso",
+#                  trControl = fitControl)
+
+
+lassoFitLeaching <- train(trainingFeatures, 
+                  trainingTargets$leaching,
                   method="lasso",
                   trControl = fitControl)
 
+save(lassoFitLeaching, lassoFitYield, file=OUTPUT_RESULTS)
