@@ -60,12 +60,37 @@ fprintf("Test proportion of yield: %f\n", sum(targets(test_ind,:).yield == 1)/do
 fprintf("Training proportion of yield: %f\n", sum(targets(train_ind,:).yield == 1)/double(total_training_samples));
 
 
-%% fit the tree for various objectives
+%% front
 
-% front
-%mdlFront = fitctree(features, targets.front, 'MaxNumSplits', 20, 'CrossVal', 'on');
+mdlFront = fitctree(features(train_ind,:), targets(train_ind,:).front, 'MaxNumSplits', 15);
+view(mdlFront,'Mode','graph')
 
-% yield
+yHatTest = predict(mdlFront, features(test_ind,:));
+testAccur = sum(yHatTest == targets(test_ind,:).front)/double(total_testing_samples);
+
+yHatTrain = predict(mdlFront, features(train_ind,:));
+trainingAccur = sum(yHatTrain == targets(train_ind,:).front)/double(total_training_samples);
+
+fprintf("Front training error: %f\n", trainingAccur);
+fprintf("Front test error: %f\n", testAccur);
+
+% Plot variable importance
+figure
+bar(predictorImportance(mdlFront))
+
+title("Predictor importance for Pareto optimality")
+ylabel('Estimates');
+xlabel('Predictors');
+h = gca;
+h.XTick = 1:numel(mdlFront.PredictorNames);
+h.XTickLabel = mdlFront.PredictorNames;
+h.XTickLabelRotation = 45;
+h.TickLabelInterpreter = 'none';
+
+
+%% Fit a model for yield
+
+
 mdlYield = fitctree(features(train_ind,:), targets(train_ind,:).yield, 'MaxNumSplits', 15);
 view(mdlYield,'Mode','graph')
 
@@ -75,20 +100,45 @@ testAccur = sum(yHatTest == targets(test_ind,:).yield)/double(total_testing_samp
 yHatTrain = predict(mdlYield, features(train_ind,:));
 trainingAccur = sum(yHatTrain == targets(train_ind,:).yield)/double(total_training_samples);
 
+fprintf("Yield training error: %f\n", trainingAccur);
+fprintf("Yield test error: %f\n", testAccur);
 
-fprintf("Training error: %f\n", trainingAccur);
-fprintf("Test error: %f\n", testAccur);
+% Plot variable importance
+figure
+bar(predictorImportance(mdlYield))
 
+title("Predictor importance for yield")
+ylabel('Estimates');
+xlabel('Predictors');
+h = gca;
+h.XTick = 1:numel(mdlYield.PredictorNames);
+h.XTickLabel = mdlYield.PredictorNames;
+h.XTickLabelRotation = 45;
+h.TickLabelInterpreter = 'none';
 
+%% Fit a leaching model
+mdlLeaching = fitctree(features(train_ind,:), targets(train_ind,:).leaching, 'MaxNumSplits', 15);
+view(mdlLeaching,'Mode','graph')
 
-% leaching
-% mdlLeaching = fitctree(features, targets.leaching, 'MaxNumSplits', 10, 'CrossVal', 'on');
-% view(mdlLeaching.Trained{1},'Mode','graph')
+yHatTest = predict(mdlLeaching, features(test_ind,:));
+testAccur = sum(yHatTest == targets(test_ind,:).leaching)/double(total_testing_samples);
 
+yHatTrain = predict(mdlLeaching, features(train_ind,:));
+trainingAccur = sum(yHatTrain == targets(train_ind,:).leaching)/double(total_training_samples);
 
+fprintf("Leaching training error: %f\n", trainingAccur);
+fprintf("Leaching error: %f\n", testAccur);
 
-%% Functions
+% Plot variable importance
+figure
+bar(predictorImportance(mdlLeaching))
 
-% function rs = evaluateTraining(model, x, y_obs)
-%         
-% end
+title("Predictor importance for leaching")
+ylabel('Estimates');
+xlabel('Predictors');
+h = gca;
+h.XTick = 1:numel(mdlLeaching.PredictorNames);
+h.XTickLabel = mdlLeaching.PredictorNames;
+h.XTickLabelRotation = 45;
+h.TickLabelInterpreter = 'none';
+
