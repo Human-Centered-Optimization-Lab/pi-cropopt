@@ -40,19 +40,17 @@ targets.leaching = targets_raw.leaching < 10;
 %mdlFront = fitctree(features, targets.front, 'MaxNumSplits', 20, 'CrossVal', 'on');
 
 %% yield
-mdlYield = fitctree(features, targets.yield, 'MaxNumSplits', 15, 'CrossVal', 'on');
-view(mdlYield.Trained{1},'Mode','graph')
+mdlYield = fitctree(features, targets.yield, 'MaxNumSplits', 15);
+view(mdlYield,'Mode','graph')
+yHat = predict(mdlYield, features);
 
-
+trainingError = sum(yHat == targets.front)/length(targets.front);
 
 % leaching
 % mdlLeaching = fitctree(features, targets.leaching, 'MaxNumSplits', 10, 'CrossVal', 'on');
 % view(mdlLeaching.Trained{1},'Mode','graph')
 
 
-
-
-%rs = evaluateTraining(treeModel)
 
 %% Functions
 
