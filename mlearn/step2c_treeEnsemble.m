@@ -3,6 +3,9 @@
 %% Constants
 FEATURE_TABLE_PATH = "Z:\Gilgamesh\kroppian\agovization_results\mlearning\features_boold.mat";
 TARGET_TABLE_PATH = "Z:\Gilgamesh\kroppian\agovization_results\mlearning\targets_boold.mat";
+
+RF_MODEL_PATH = "Z:\Gilgamesh\kroppian\agovization_results\mlearning\rf_models.mat";
+
 % FEATURE_TABLE_PATH = "/Volumes/data/Gilgamesh/kroppian/agovization_results/mlearning/features.xlsx";
 % TARGET_TABLE_PATH = "/Volumes/data/Gilgamesh/kroppian/agovization_results/mlearning/targets.xlsx";
 
@@ -135,6 +138,10 @@ h.XTick = 1:numel(mdlLeachingEnsemb.PredictorNames);
 h.XTickLabel = mdlLeachingEnsemb.PredictorNames;
 h.XTickLabelRotation = 45;
 h.TickLabelInterpreter = 'none';
+
+%% Save results
+
+save(RF_MODEL_PATH, 'mdlYieldEnsemb', 'mdlFrontEnsemb', 'mdlLeachingEnsemb'); 
 
 %% References
 % https://www.mathworks.com/help/stats/ensemble-algorithms.html#bsxabwd
