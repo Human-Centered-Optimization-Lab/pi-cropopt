@@ -1,10 +1,14 @@
 
 
 %% Constants
-FEATURE_TABLE_PATH = "Z:\Gilgamesh\kroppian\agovization_results\mlearning\features.xlsx";
-TARGET_TABLE_PATH = "Z:\Gilgamesh\kroppian\agovization_results\mlearning\targets.xlsx";
+%FEATURE_TABLE_PATH = "Z:\Gilgamesh\kroppian\agovization_results\mlearning\features.xlsx";
+%TARGET_TABLE_PATH = "Z:\Gilgamesh\kroppian\agovization_results\mlearning\targets.xlsx";
 
-RF_MODEL_PATH = "Z:\Gilgamesh\kroppian\agovization_results\mlearning\rf_models_reg.mat";
+FEATURE_TABLE_PATH = "/mnt/nas/kroppian/agovization_results/mlearning/features.xlsx";
+TARGET_TABLE_PATH = "/mnt/nas/kroppian/agovization_results/mlearning/targets.xlsx";
+
+%RF_MODEL_PATH = "Z:\Gilgamesh\kroppian\agovization_results\mlearning\rf_models_reg.mat";
+RF_MODEL_PATH = "/mnt/nas/kroppian/agovization_results/mlearning/rf_models_reg.mat";
 
 % FEATURE_TABLE_PATH = "/Volumes/data/Gilgamesh/kroppian/agovization_results/mlearning/features.xlsx";
 % TARGET_TABLE_PATH = "/Volumes/data/Gilgamesh/kroppian/agovization_results/mlearning/targets.xlsx";
@@ -36,7 +40,9 @@ test_ind = find(test_ind);
 
 %% front
 if ~exist("mdlFrontEnsemb", 'var')
-    mdlFrontEnsemb = TreeBagger(100 ,features(train_ind,:), targets(train_ind,:).front, 'OOBPredictorImportance', 'on');
+    disp("Starting front regression...")
+    options = statset('UseParallel', true);
+    mdlFrontEnsemb = TreeBagger(100 ,features(train_ind,:), targets(train_ind,:).front, 'OOBPredictorImportance', 'on', 'Method', 'regression','Options', options);
 else
     disp('Front model results already exists. Skipping training');
 end
@@ -70,7 +76,9 @@ h.TickLabelInterpreter = 'none';
 
 %% Fit a model for yield
 if ~exist("mdlYieldEnsemb", 'var')
-    mdlYieldEnsemb = TreeBagger(100 ,features(train_ind,:), targets(train_ind,:).yield, 'OOBPredictorImportance', 'on');
+    disp("Starting yield regression...")
+    options = statset('UseParallel', true);
+    mdlYieldEnsemb = TreeBagger(100 ,features(train_ind,:), targets(train_ind,:).yield_, 'OOBPredictorImportance', 'on', 'Method', 'regression', 'Options', options);
 else
     disp('Yield model results already exists. Skipping training');
 end
@@ -103,7 +111,9 @@ h.TickLabelInterpreter = 'none';
 
 %% Fit a leaching model
 if ~exist("mdlLeachingEnsemb", 'var')
-    mdlLeachingEnsemb = TreeBagger(100 ,features(train_ind,:), targets(train_ind,:).leaching, 'OOBPredictorImportance', 'on' );
+    disp("Starting leaching regression...")
+    options = statset('UseParallel', true);
+    mdlLeachingEnsemb = TreeBagger(100 ,features(train_ind,:), targets(train_ind,:).leaching, 'OOBPredictorImportance', 'on', 'Method', 'regression', 'Options', options );
 else
     disp('Leaching model results already exists. Skipping training');
 end
@@ -136,7 +146,8 @@ h.TickLabelInterpreter = 'none';
 
 %% Save results
 
-save(RF_MODEL_PATH, 'mdlYieldEnsemb', 'mdlFrontEnsemb', 'mdlLeachingEnsemb'); 
+save(RF_MODEL_PATH, 'mdlYieldEnsemb', 'mdlFrontEnsemb', 'mdlLeachingEnsemb', '-v7.3'); 
+%save(RF_MODEL_PATH, 'mdlFrontEnsemb');
 
 %% References
 % https://www.mathworks.com/help/stats/ensemble-algorithms.html#bsxabwd
