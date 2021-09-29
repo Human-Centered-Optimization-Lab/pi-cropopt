@@ -16,11 +16,17 @@ class AttProcessors:
     
 
     # --- Constructor ---
-    def __init__(self, weather_tab, gdd_tab):
+    def __init__(self, weather_tab, gdd_tab, total_p_, normalThreshold, wetThreshold):
         self.weather_tab = weather_tab
         self.gdd_tab = gdd_tab
+        self.total_p_ = total_p_
+        self.normalThreshold = normalThreshold
+        self.wetThreshold = wetThreshold
+        
 
     # --- Internal methods ---
+
+
     @staticmethod
     def _filter_out_n_app(raw_schedule):
         return raw_schedule[raw_schedule[:,AttProcessors.IRR_COL] != 0]
@@ -121,6 +127,18 @@ class AttProcessors:
         return row['leaching']
 
     # --- Processed attributes ---
+
+    def climate(self, row):
+
+        if self.total_p_ < self.normalThreshold:
+            return 0
+        elif self.total_p_ < self.wetThreshold:
+            return 1
+        else:
+            return 2
+
+    def total_p(self, row):
+        return self.total_p_
 
     def minimum_irr(self, row):
         irr_sched = AttProcessors._filter_out_n_app(row['scheds'])

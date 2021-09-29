@@ -26,7 +26,7 @@ def process_year(arg):
         svpy = single_val_per_year[a]                   
 
         func = getattr(attribProcr, att_funct)
-        
+
         # Do we need to run this for every row? Or just once for the whole year
         if svpy: 
             single_res = func(tab.iloc[0,:])
@@ -45,7 +45,7 @@ def process_year(arg):
 if __name__ == "__main__":
 
 
-    threads = 23
+    threads = 1
 
     if threads != 1:
         # This somehow prevents this weird error while using multiprocessing
@@ -146,7 +146,9 @@ if __name__ == "__main__":
                     'freq_precip_during_R1',
                     'freq_precip_during_R2',
                     'freq_precip_during_R3',
-                    'freq_precip_during_R4' ]
+                    'freq_precip_during_R4', 
+                    'climate',
+                    'total_p']
     
 
     # Do we calculate this term for every row, or just once per year? 
@@ -210,7 +212,9 @@ if __name__ == "__main__":
                             True,  # freq_precip_during_R1',
                             True,  # freq_precip_during_R2',
                             True,  # freq_precip_during_R3',
-                            True]  # freq_precip_during_R4',
+                            True,  # freq_precip_during_R4',
+                            True,  # climate
+                            True]  # total_p
 
 
     # Sanity checks
@@ -245,6 +249,32 @@ if __name__ == "__main__":
 
     raw_table = {'year': []}
 
+
+    # Calculate dry, normal, and wet years in this climate
+
+    total_p = {}
+    
+    for year in years: 
+
+        year_modded = int((year  % 1e2) * 1e3) 
+  
+        wth_mask = np.logical_and(wth_tab['@DATE'] >= year_modded, wth_tab['@DATE'] <  (year_modded + 366))
+
+        total_p[year] = sum(wth_tab[wth_mask]['RAIN']) 
+
+    sorted_p = list(total_p.values())
+    
+    sorted_p.sort()
+
+    oneThird = int(len(sorted_p)/3);
+    twoThird = int((len(sorted_p)*2)/3);
+
+    nomralThreshold = sorted_p[oneThird]
+    wetThreshold = sorted_p[twoThird]
+    
+     
+    
+
     # initialize the attribute functions
     for att_funct in att_functs: 
         raw_table[att_funct] = []
@@ -265,7 +295,7 @@ if __name__ == "__main__":
         specific_wth_tab = wth_tab[wth_year_mask].copy()
         specific_gdd_tab = gdd_tab[gdd_tab['Year'] == year].copy()
 
-        procr_by_years[year] = AttProcessors(specific_wth_tab, specific_gdd_tab)
+        procr_by_years[year] = AttProcessors(specific_wth_tab, specific_gdd_tab, total_p[year], nomralThreshold, wetThreshold)
 
     print("Done.")
 
