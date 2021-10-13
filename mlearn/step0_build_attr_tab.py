@@ -45,7 +45,7 @@ def process_year(arg):
 if __name__ == "__main__":
 
 
-    threads = 1
+    threads = 23
 
     if threads != 1:
         # This somehow prevents this weird error while using multiprocessing
@@ -74,7 +74,9 @@ if __name__ == "__main__":
     # Read the GDD table
     gdd_tab_csv = "management_dates.csv"
     gdd_tab = pd.read_csv(gdd_tab_csv)
-   
+  
+
+
     # Read the weather table
     wth_file_path = "dhome/Weather/CASSREPR.WTH"
     wth_tab = pd.read_fwf(wth_file_path, skiprows=4)
@@ -257,8 +259,13 @@ if __name__ == "__main__":
     for year in years: 
 
         year_modded = int((year  % 1e2) * 1e3) 
-  
-        wth_mask = np.logical_and(wth_tab['@DATE'] >= year_modded, wth_tab['@DATE'] <  (year_modded + 366))
+        season_start_doy = gdd_tab[gdd_tab['Year'] == year].P[0]
+        season_end_doy  = gdd_tab[gdd_tab['Year'] == year].R6[1]
+
+        season_start_date = year_modded + season_start_doy
+        season_end_date  = year_modded + season_end_doy
+
+        wth_mask = np.logical_and(wth_tab['@DATE'] >= season_start_date, wth_tab['@DATE'] <  season_end_date)
 
         total_p[year] = sum(wth_tab[wth_mask]['RAIN']) 
 
