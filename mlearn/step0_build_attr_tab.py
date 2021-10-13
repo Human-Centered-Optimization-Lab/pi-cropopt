@@ -259,8 +259,8 @@ if __name__ == "__main__":
     for year in years: 
 
         year_modded = int((year  % 1e2) * 1e3) 
-        season_start_doy = gdd_tab[gdd_tab['Year'] == year].P[0]
-        season_end_doy  = gdd_tab[gdd_tab['Year'] == year].R6[1]
+        season_start_doy = int(gdd_tab[gdd_tab['Year'] == year].P)
+        season_end_doy  = int(gdd_tab[gdd_tab['Year'] == year].R6)
 
         season_start_date = year_modded + season_start_doy
         season_end_date  = year_modded + season_end_doy
