@@ -72,6 +72,8 @@ editedFeatures.total_precip_during_R2   = [];
 editedFeatures.total_precip_during_R3   = []; 
 editedFeatures.total_precip_during_R4   = []; 
 
+editedFeatures.number_of_precipitation_events = [];
+
 
 
 end
