@@ -10,6 +10,7 @@ TARGET_TABLE_OUTPUT_PATH = "Z:\Gilgamesh\kroppian\agovization_results\mlearning\
 % TARGET_TABLE_PATH = "/Volumes/data/Gilgamesh/kroppian/agovization_results/mlearning/targets.xlsx";
 
 
+
 %% Load data
 
 if ~exist("features", 'var')
@@ -37,9 +38,9 @@ targets.yield = targets_raw.yield_ > upperQuartile;
 % Make leaching a boolean
 sortedLeaching = sort(targets_raw.leaching);
 lowerQuartile = sortedLeaching(uint32(length(sortedLeaching)*.25));
-targets.leaching = targets_raw.leaching < 10;
+targets.leaching = targets_raw.leaching == 0;
 
-save(FEATURE_TABLE_OUTPUT_PATH, "features")
-save(TARGET_TABLE_OUTPUT_PATH, "targets")
+% save(FEATURE_TABLE_OUTPUT_PATH, "features")
+% save(TARGET_TABLE_OUTPUT_PATH, "targets")
 
 
