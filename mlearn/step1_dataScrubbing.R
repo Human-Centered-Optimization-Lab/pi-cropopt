@@ -4,7 +4,6 @@
 #install.packages("tibble")
 
 library(magrittr)
-library(tidymodels)
 library(caret)
 library(feather);
 library(tibble)
@@ -13,13 +12,14 @@ library(dplyr)
 
 ## Constants
 
-#OUTPUT_FEATURES = "Z:\\Gilgamesh\\kroppian\\agovization_results\\mlearning\\features.feather"
-#OUTPUT_TARGETS = "Z:\\Gilgamesh\\kroppian\\agovization_results\\mlearning\\targets.feather"
-OUTPUT_FEATURES = "/Users/iankropp/Projects/agovization/mlearn/features.feather"
-OUTPUT_TARGETS = "/Users/iankropp/Projects/agovization/mlearn/targets.feather"
+OUTPUT_FEATURES = "Z:\\Gilgamesh\\kroppian\\agovization_results\\mlearning\\features.feather"
+OUTPUT_TARGETS = "Z:\\Gilgamesh\\kroppian\\agovization_results\\mlearning\\targets.feather"
+#OUTPUT_FEATURES = "/Users/iankropp/Projects/agovization/mlearn/features.feather"
+#OUTPUT_TARGETS = "/Users/iankropp/Projects/agovization/mlearn/targets.feather"
 
-#TAB_PATH = "Z:\\Gilgamesh\\kroppian\\agovization_results\\mlearning\\2021-09-10_13-31_attr_tab.feather"
-TAB_PATH = "/Users/iankropp/Projects/agovization/mlearn/2021-09-10_13-31_attr_tab.feather"
+
+TAB_PATH = "Z:\\Gilgamesh\\kroppian\\agovization_results\\mlearning\\2021-09-28_16-47_attr_tab.feather"
+#TAB_PATH = "/Users/iankropp/Projects/agovization/mlearn/2021-09-28_16-47_attr_tab.pkl"
 STAGES <- c("P","V6",  "V7", "V8", "V9", "V10",  "V11", "V12", "V13", "V14", "R1", "R2", "R3", "R4")
 PREDICTOR_COLS = c()
 
@@ -86,7 +86,9 @@ predictors <- c('application_count',
                'freq_precip_during_R1',
                'freq_precip_during_R2',
                'freq_precip_during_R3',
-               'freq_precip_during_R4')
+               'freq_precip_during_R4',
+               'climate',
+               'total_p')
 
 ## Functions
 stage2num <- function(stage){
