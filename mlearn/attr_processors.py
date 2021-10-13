@@ -128,6 +128,7 @@ class AttProcessors:
 
     # --- Processed attributes ---
 
+
     def climate(self, row):
 
         if self.total_p_ < self.normalThreshold:
@@ -156,7 +157,7 @@ class AttProcessors:
         if np.size(irr_sched[:,AttProcessors.IRR_COL]) == 0:
             response = None
         else:
-            response = np.min(irr_sched[:,AttProcessors.IRR_COL])
+            response = np.max(irr_sched[:,AttProcessors.IRR_COL])
 
         return response
 
