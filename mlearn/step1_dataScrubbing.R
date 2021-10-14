@@ -12,17 +12,17 @@ library(dplyr)
 
 ## Constants
 
-OUTPUT_FEATURES = "Z:\\Gilgamesh\\kroppian\\agovization_results\\mlearning\\features.feather"
-OUTPUT_TARGETS = "Z:\\Gilgamesh\\kroppian\\agovization_results\\mlearning\\targets.feather"
-#OUTPUT_FEATURES = "/Users/iankropp/Projects/agovization/mlearn/features.feather"
-#OUTPUT_TARGETS = "/Users/iankropp/Projects/agovization/mlearn/targets.feather"
+#OUTPUT_FEATURES = "Z:\\Gilgamesh\\kroppian\\agovization_results\\mlearning\\features.feather"
+#OUTPUT_TARGETS = "Z:\\Gilgamesh\\kroppian\\agovization_results\\mlearning\\targets.feather"
+OUTPUT_FEATURES = "/Volumes/data/Gilgamesh/kroppian/agovization_results/mlearning/features.feather"
+OUTPUT_TARGETS = "/Volumes/data/Gilgamesh/kroppian/agovization_results/mlearning/targets.feather"
+OUTPUT_ATTRIB_TAB = "/Volumes/data/Gilgamesh/kroppian/agovization_results/mlearning/attrib_tab.feather"
 
 
-TAB_PATH = "Z:\\Gilgamesh\\kroppian\\agovization_results\\mlearning\\2021-09-28_16-47_attr_tab.feather"
-#TAB_PATH = "/Users/iankropp/Projects/agovization/mlearn/2021-09-28_16-47_attr_tab.pkl"
+#TAB_PATH = "Z:\\Gilgamesh\\kroppian\\agovization_results\\mlearning\\2021-09-28_16-47_attr_tab.feather"
+TAB_PATH = "/Volumes/data/Gilgamesh/kroppian/agovization_results/mlearning/2021-10-14_16-07_attr_tab.feather"
 STAGES <- c("P","V6",  "V7", "V8", "V9", "V10",  "V11", "V12", "V13", "V14", "R1", "R2", "R3", "R4")
 PREDICTOR_COLS = c()
-
 
 
 targets <- c('yield_',
@@ -121,6 +121,22 @@ predictors <- predictors[-which(predictors == "year")]
 
 attribute_tab <- attribute_tab[, -zeroVars]
 
+## Add the total_wat cols 
+attribute_tab$total_wat_during_v6  <- attribute_tab$total_irr_during_v6  + attribute_tab$total_precip_during_v6;
+attribute_tab$total_wat_during_v7  <- attribute_tab$total_irr_during_v7  + attribute_tab$total_precip_during_v7;
+attribute_tab$total_wat_during_v8  <- attribute_tab$total_irr_during_v8  + attribute_tab$total_precip_during_v8;
+attribute_tab$total_wat_during_v9  <- attribute_tab$total_irr_during_v9  + attribute_tab$total_precip_during_v9;
+attribute_tab$total_wat_during_v10 <- attribute_tab$total_irr_during_v10 + attribute_tab$total_precip_during_v10;
+attribute_tab$total_wat_during_v11 <- attribute_tab$total_irr_during_v11 + attribute_tab$total_precip_during_v11;
+attribute_tab$total_wat_during_v12 <- attribute_tab$total_irr_during_v12 + attribute_tab$total_precip_during_v12;
+attribute_tab$total_wat_during_v13 <- attribute_tab$total_irr_during_v13 + attribute_tab$total_precip_during_v13;
+attribute_tab$total_wat_during_v14 <- attribute_tab$total_irr_during_v14 + attribute_tab$total_precip_during_v14;
+attribute_tab$total_wat_during_R1  <- attribute_tab$total_irr_during_R1  + attribute_tab$total_precip_during_R1;
+attribute_tab$total_wat_during_R2  <- attribute_tab$total_irr_during_R2  + attribute_tab$total_precip_during_R2;
+attribute_tab$total_wat_during_R3  <- attribute_tab$total_irr_during_R3  + attribute_tab$total_precip_during_R3;
+attribute_tab$total_wat_during_R4  <- attribute_tab$total_irr_during_R4  + attribute_tab$total_precip_during_R4;
+
+
 
 ## Split up into features and targets
 features <-
@@ -131,27 +147,8 @@ targets <-
   attribute_tab %>%
   select(all_of(targets))
 
-## Correlation analysis
-print("Done. Running correlation analysis...")
-# TODO remove this once we've figured out the proper reason there's NA in the data
-nanVals <- which(!is.finite(features$minimum_irr))
-features <- features[-nanVals,]
-targets <- targets[-nanVals,]
-
-corrMat <- cor(features)
-corrs <- findCorrelation(corrMat, cutoff=0.75)
-
-non_corr_features = features[-corrs]
-
-# TODO Should I center and scale? 
-# print("Done. Scaling and centering ")
-# features <- preProcess(features, method = c("center", "scale"))
-  
-
-# Thoughts: 
-# Machine learning algorithm should be non-black box in order to find innovations
-# https://towardsdatascience.com/machine-learning-interpretability-techniques-662c723454f3
 
 ## Write to output
 arrow::write_feather(features, OUTPUT_FEATURES)
 arrow::write_feather(targets, OUTPUT_TARGETS)
+arrow::write_feather(attribute_tab, OUTPUT_ATTRIB_TAB)
