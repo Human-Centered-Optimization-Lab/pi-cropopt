@@ -87,7 +87,7 @@ fit <-mvpart(
   )
 
 R2 <- 1 - tail(printcp(fit)[, 'rel error'],1)
-p <- as.ggplot(function() {par(xpd= TRUE); mvpart:::plot.rpart(fit, margin = 0 ,compress = TRUE);
+p <- as.ggplot(function() {par(xpd= TRUE); mvpart:::plot.rpart(fit, margin = 0 ,compress = FALSE);
   mvpart:::text.rpart(fit, use.n = TRUE, legend = TRUE, digits = 3)}) +
   labs(caption = sprintf('Pareto-Optimal'),
        subtitle = bquote(~R^2 == .(round(R2,2)))) +
