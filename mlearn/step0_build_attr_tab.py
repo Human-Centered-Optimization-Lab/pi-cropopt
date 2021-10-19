@@ -5,7 +5,7 @@ import pickle
 from attr_processors import AttProcessors
 import pandas as pd
 import numpy as np
-
+import statistics
 
 
 # Functions
@@ -74,13 +74,15 @@ if __name__ == "__main__":
     # Read the GDD table
     gdd_tab_csv = "management_dates.csv"
     gdd_tab = pd.read_csv(gdd_tab_csv)
-  
+
 
 
     # Read the weather table
     wth_file_path = "dhome/Weather/CASSREPR.WTH"
     wth_tab = pd.read_fwf(wth_file_path, skiprows=4)
 
+    START_TRAIN = 1980; 
+    END_TRAIN = 2009
 
     infile = open(file_name, 'rb')
     tab = pickle.load(infile)
@@ -265,22 +267,25 @@ if __name__ == "__main__":
         season_start_date = year_modded + season_start_doy
         season_end_date  = year_modded + season_end_doy
 
-        wth_mask = np.logical_and(wth_tab['@DATE'] >= season_start_date, wth_tab['@DATE'] <  season_end_date)
+        wth_mask = np.logical_and(wth_tab['@DATE'] >= season_start_date, wth_tab['@DATE'] <=  season_end_date)
 
         total_p[year] = sum(wth_tab[wth_mask]['RAIN']) 
 
-    sorted_p = list(total_p.values())
+
+    test_total_p = {year: total_p[year] for year in total_p if year >= START_TRAIN and year <= END_TRAIN }
+
+    sorted_p = list(test_total_p.values())
     
     sorted_p.sort()
+
+    print(len(sorted_p))
 
     oneThird = int(len(sorted_p)/3);
     twoThird = int((len(sorted_p)*2)/3);
 
-    nomralThreshold = sorted_p[oneThird]
-    wetThreshold = sorted_p[twoThird]
-    
-     
-    
+    normalThreshold = statistics.mean([sorted_p[oneThird-1], sorted_p[oneThird]])
+    wetThreshold = statistics.mean([sorted_p[twoThird-1], sorted_p[twoThird]])
+
 
     # initialize the attribute functions
     for att_funct in att_functs: 
@@ -302,7 +307,7 @@ if __name__ == "__main__":
         specific_wth_tab = wth_tab[wth_year_mask].copy()
         specific_gdd_tab = gdd_tab[gdd_tab['Year'] == year].copy()
 
-        procr_by_years[year] = AttProcessors(specific_wth_tab, specific_gdd_tab, total_p[year], nomralThreshold, wetThreshold)
+        procr_by_years[year] = AttProcessors(specific_wth_tab, specific_gdd_tab, total_p[year], normalThreshold, wetThreshold)
 
     print("Done.")
 
