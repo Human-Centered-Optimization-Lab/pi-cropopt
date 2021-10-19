@@ -39,7 +39,7 @@ weather_tab <- weather_tab %>%
 
 # Sum up the rain for each year during the growing season
 rain_summary <- weather_tab %>% 
-                filter(doy > P & doy < R6) %>%        # Just during the growing season
+                filter(doy >= P & doy <= R6) %>%        # Just during the growing season
                 group_by(year) %>%  
                 summarize(total_rain = sum(rain)) %>%
                 select(year, total_rain)
@@ -49,6 +49,7 @@ year_count <- END_TRAIN - START_TRAIN + 1
 
 threshold_ind <- floor(year_count/3)
 
+# Calculate the 
 rain_ts <- rain_summary %>% 
             filter(year >= START_TRAIN & year <= END_TRAIN) %>%
             arrange(total_rain) %>%
@@ -60,7 +61,9 @@ threshold_wet <- mean(c(rain_ts[threshold_ind*2], rain_ts[threshold_ind*2+1]))
 rain_summary <- rain_summary %>%
                 mutate(climate = ifelse(total_rain < threshold_normal, 0, ifelse(total_rain < threshold_wet, 1, 2)))
 
+## Valdiation
 
+#  Make sure we have the right threshold
 dry_count     <- rain_summary %>% 
                   filter(year <= END_TRAIN) %>% 
                   mutate( dry_years = climate == 0) %>% 
