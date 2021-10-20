@@ -64,10 +64,10 @@ for(s in 1:length(growth_stages)){
   all_obvs <- append(optimized_irr,recommended_irr) 
    
   b <-  seq(min(all_obvs), max(all_obvs), length.out=15)
-   
-  opt_p <- hist(optimized_irr, col=rgb(0,0,1,1/4), breaks=b)
+  
+  
+  opt_p <- hist(optimized_irr, col=rgb(0,0,1,1/4), breaks=b, main=paste("Total water usage during ", stage_rec  ))
   rec_p <- hist(recommended_irr,col=rgb(1,0,0,1/4), breaks=b, add=T) 
- 
    
 }
 
