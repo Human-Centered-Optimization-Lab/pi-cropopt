@@ -31,7 +31,7 @@ class RoboFarmer():
         # To become a 2D array 
         raw_management = []
 
-        current_day = int(gdd_tab_year.P)
+        current_day = int(gdd_tab_year.P) + 5
 
         while current_day < int(gdd_tab_year.R1):
 
@@ -81,25 +81,32 @@ if __name__ == "__main__":
 
     schedules = []
 
-    for wet_year in wet_years: 
-        print("Year: %s" % wet_year)
-        schedules.append(rfarmer.realize_year(wet_year))
+    updates = []
 
-    for normal_year in normal_years: 
-        print("Year: %s" % normal_year)
-        schedules.append(rfarmer.realize_year(normal_year))
+    for year in wet_years: 
+        print("Year: %s" % year)
+        schedules.append(rfarmer.realize_year(year))
+        updates.append({ 'pdate': year*1e3 + 135, 'sdate': year*1e3 + 135, 'icdat': year*1e3 + 135 })
+
+
+    for year in normal_years: 
+        print("Year: %s" % year)
+        schedules.append(rfarmer.realize_year(year))
+        updates.append({ 'pdate': year*1e3 + 135, 'sdate': year*1e3 + 135, 'icdat': year*1e3 + 135 })
         
 
-    for dry_year in dry_years: 
-        print("Year: %s" % dry_years)
-        schedules.append(rfarmer.realize_year(dry_year))
+    for year in dry_years: 
+        print("Year: %s" % year)
+        schedules.append(rfarmer.realize_year(year))
+        updates.append({ 'pdate': year*1e3 + 135, 'sdate': year*1e3 + 135, 'icdat': year*1e3 + 135 })
 
 
-    result = dssat.run_batch(schedules, threads)
+
+    result = dssat.run_batch(schedules, threads, updates=updates)
 
     print(result)
 
-    results = {'year': [], 'climate': [], 'yield_': [], 'leaching': [], 'water_usage': []}
+    #results = {'year': [], 'climate': [], 'yield_': [], 'leaching': [], 'water_usage': []}
 
 
 

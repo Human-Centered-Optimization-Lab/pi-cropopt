@@ -108,14 +108,25 @@ class Dssat4Dum():
     # with date, irrigation, nitrogen, phosphorus, and potassium
     def run_batch(self, appsched, threads=1, updates={}):
 
-        batch_count = np.size(appsched, 0)
+        if isinstance(appsched, np.ndarray) :
+            batch_count = np.size(appsched, 0)
+        else:
+            batch_count = len(appsched)
 
         # Create the arg list, with the first item being the runid,
         # the second being the irrigation schedule, and the thid 
         # being updates
         argz = []
         for ind,dat in enumerate(appsched): 
-            argz.append((ind, dat, updates))
+
+            # Check if the user submitted a...
+            if isinstance(updates, dict):
+                # single update, 
+                argz.append((ind, dat, updates))
+            else:
+                # or one update per schedule
+                argz.append((ind, dat, updates[ind]))
+
 
         results = []
         if threads == 1: 
@@ -302,7 +313,7 @@ class Dssat4Dum():
                 no_replace_found = True
                 #print(updates)
                 for code in updates.keys():
-                    value = updates[code] 
+                    value = int(updates[code])
                     section = self.code_lookup[code].section
                     row = self.code_lookup[code].row
                     col = self.code_lookup[code].col
@@ -537,7 +548,7 @@ if __name__ == "__main__":
 
     threads = 1
 
-    updates = { 'pdate': 1980135, 'sdate': 1980135, 'icdat': 1980135 }
+    updates = { 'pdate': 1980136, 'sdate': 1980135, 'icdat': 1980135 }
 
 
     print(runner.run_batch(appsched3, threads, updates=updates))
