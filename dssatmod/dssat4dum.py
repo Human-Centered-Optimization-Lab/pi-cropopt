@@ -127,7 +127,6 @@ class Dssat4Dum():
                 # or one update per schedule
                 argz.append((ind, dat, updates[ind]))
 
-
         results = []
         if threads == 1: 
             # Eschew multiprocessing for debugging ease
