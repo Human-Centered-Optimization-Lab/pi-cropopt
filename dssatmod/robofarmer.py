@@ -64,10 +64,11 @@ if __name__ == "__main__":
     dry_years = [2012]
 
     # DSSAT parameters
-    home_dir = "/Users/iankropp/"
+    #home_dir = "/Users/iankropp/"
+    home_dir = "/home/ian/"
 
     dssat_home = "%s/Projects/agovization/dhome" % home_dir
-    dssat_exe = "%s/Projects/agovization/dhome/dscsm047-macos" % home_dir
+    dssat_exe = "%s/Projects/agovization/dhome/dscsm047-linux" % home_dir
     dssat_inp = "%s/Projects/agovization/dhome/DSSAT47.INP" % home_dir
     output_dir = "%s/Projects/agovization/output/" % home_dir
 
@@ -79,41 +80,81 @@ if __name__ == "__main__":
 
     rfarmer = RoboFarmer(wth_tab, gdd_tab, make_management_decision)
 
+    # inputs for DSSAT
     schedules = []
-
     updates = []
+
+    # Results 
+    year_col = [] 
+    climate = []
 
     for year in wet_years: 
         print("Year: %s" % year)
         schedules.append(rfarmer.realize_year(year))
         updates.append({ 'pdate': year*1e3 + 135, 'sdate': year*1e3 + 135, 'icdat': year*1e3 + 135 })
-
+        year_col.append(year)
+        climate.append(2)
 
     for year in normal_years: 
         print("Year: %s" % year)
         schedules.append(rfarmer.realize_year(year))
         updates.append({ 'pdate': year*1e3 + 135, 'sdate': year*1e3 + 135, 'icdat': year*1e3 + 135 })
+        year_col.append(year)
+        climate.append(1)
         
 
     for year in dry_years: 
         print("Year: %s" % year)
         schedules.append(rfarmer.realize_year(year))
         updates.append({ 'pdate': year*1e3 + 135, 'sdate': year*1e3 + 135, 'icdat': year*1e3 + 135 })
+        year_col.append(year)
+        climate.append(0)
 
 
 
-    result = dssat.run_batch(schedules, threads, updates=updates)
+    dssat_result = dssat.run_batch(schedules, threads, updates=updates)
+
+
+    full_result_mat = np.c_[year_col, climate, dssat_result]
+
+
+    result = pd.DataFrame(full_result_mat, columns=['year', 'climate', 'yield', 'leaching'])
+
 
     print(result)
 
-    #results = {'year': [], 'climate': [], 'yield_': [], 'leaching': [], 'water_usage': []}
 
 
 
-    #results['year'].append(wet_year)
-    #results['climate'].append(2)
-    #results['yield_'].append(yield_)
-    #results['leaching'].append(leaching)
-    #results['water_usage'].append(water_usage)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
