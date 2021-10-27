@@ -3,7 +3,8 @@ import pandas as pd
 import numpy as np
 from dssat4dum import Dssat4Dum
 
-class CommonPractice():
+
+class Practices(): 
 
     def __init__(self, wth_tab, gdd_tab, year):
         self.not_applied_n = True
@@ -19,7 +20,6 @@ class CommonPractice():
         self.gdd_tab_year = gdd_tab[gdd_tab['Year'] == year]
         self.total_nitro = 200
         self.irrigation_record = {}
-        
 
     def _get_past_rain_conditions(self, current_day, n):
         # Get previous n days of irrigation and precipitation
@@ -50,6 +50,8 @@ class CommonPractice():
         return total_rain
 
 
+class CommonPractice(Practices):
+        
     def make_management_decision(self, current_day):
 
 
