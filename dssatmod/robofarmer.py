@@ -10,35 +10,101 @@ class CommonPractice():
         wth_tab = wth_tab
         gdd_tab = gdd_tab 
 
-        self.total_nitro = 200
         self.year = year
 
-        year_modded = int((year  % 1e2) * 1e3) 
-
-        wth_mask = np.logical_and(wth_tab['@DATE'] >= year_modded, wth_tab['@DATE'] < (year_modded + 366))
-
+        self.year_modded = int((year  % 1e2) * 1e3) 
+        wth_mask = np.logical_and(wth_tab['@DATE'] >= self.year_modded, wth_tab['@DATE'] < (self.year_modded + 366))
+        
         self.wth_tab_year = wth_tab[wth_mask]
         self.gdd_tab_year = gdd_tab[gdd_tab['Year'] == year]
+        self.total_nitro = 200
+        self.irrigation_record = {}
+        
 
+    def _get_past_rain_conditions(self, current_day, n):
+        # Get previous n days of irrigation and precipitation
+
+        current_date_code = self.year_modded + current_day
+
+        # Tally up total past rain
+        total_rain = 0.0
+        for prev_days in range(n):
+            day = current_date_code - prev_days - 1
+            rain = float(self.wth_tab_year[self.wth_tab_year['@DATE'] == day].RAIN) 
+            total_rain = total_rain + rain
+        
+        return total_rain
+        
+
+    def _get_future_rain_conditions(self, current_day, n):
+
+        current_date_code = self.year_modded + current_day
+
+        total_rain = 0.0
+        # Tally up the total rain for next few days
+        for next_day in range(n):
+            day = current_date_code + next_day + 1
+            rain = float(self.wth_tab_year[self.wth_tab_year['@DATE'] == day].RAIN) 
+            total_rain = total_rain + rain
+
+        return total_rain
 
 
     def make_management_decision(self, current_day):
 
 
-        if current_day < int(self.gdd_tab_year.V6):
-            # If before V6
+        past_3day_rain = self._get_past_rain_conditions(current_day, 3)
+        past_5day_rain = self._get_past_rain_conditions(current_day, 5)
+        future_rain = self._get_future_rain_conditions(current_day, 2)
+
+        total_past_fut_rain = past_3day_rain + future_rain
+
+
+
+        # Irrigation logic
+        if current_day < int(self.gdd_tab_year.V6) or current_day >= int(self.gdd_tab_year.R2):
+            # If out of irrigation window, do nothing and move forward a day
             day_delta = 1
             irr_amount = 0
         elif current_day < int(self.gdd_tab_year.R1): 
-            day_delta = 5
-            irr_amount = 10
-        elif current_day < int(self.gdd_tab_year.R2): 
-            day_delta = 5
-            irr_amount = 20
-        else: 
-            day_delta = 1
-            irr_amount = 0
+            # If plant still in vegetative stage
 
+            if past_5day_rain >= 20: 
+                # Avoid irrigation in heavy rain period
+                irr_amount = 0
+                day_delta = 10
+            if total_past_fut_rain >= 10:
+                # Skip irrigation if needs already met
+                irr_amount = 0 
+                day_delta = 5
+            else: 
+                # Make up for irrigation deficit if needed
+                irr_amount = 10 - total_past_fut_rain 
+                day_delta = 5
+
+
+        elif current_day < int(self.gdd_tab_year.R2): 
+            # If plant is in the reproductive stages
+
+            if past_5day_rain >= 20: 
+                # Avoid irrigation in heavy rain period
+                irr_amount = 0
+                day_delta = 10
+            elif total_past_fut_rain >= 20:
+                # Skip irrigation if needs already met
+                irr_amount = 0
+                day_delta = 5
+            else:
+                # Make up for irrigation deficit if needed
+                irr_amount = 20 - total_past_fut_rain
+                day_delta = 5
+
+        if irr_amount != 0:
+            self.irrigation_record[self.year_modded + current_day] = irr_amount
+
+
+
+        # Nitrogen logic
         if current_day == int(self.gdd_tab_year.P): 
             nitro_amount = self.total_nitro*0.75
         elif current_day > int(self.gdd_tab_year.V6) and self.not_applied_n: 
