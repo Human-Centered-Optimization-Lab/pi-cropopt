@@ -50,6 +50,71 @@ class Practices():
         return total_rain
 
 
+class MachRecdPractices(Practices):
+
+    def make_management_decision(self, current_day):
+
+        past_3day_rain = self._get_past_rain_conditions(current_day, 3)
+        past_5day_rain = self._get_past_rain_conditions(current_day, 5)
+        future_rain = self._get_future_rain_conditions(current_day, 2)
+
+        total_past_fut_rain = past_3day_rain + future_rain
+
+        # Irrigation logic
+        if current_day < int(self.gdd_tab_year.V6) or current_day >= int(self.gdd_tab_year.R2):
+            # If out of irrigation window, do nothing and move forward a day
+            day_delta = 1
+            irr_amount = 0
+        elif current_day < int(self.gdd_tab_year.R1): 
+            # If plant still in vegetative stage
+
+            if past_5day_rain >= 20: 
+                # Avoid irrigation in heavy rain period
+                irr_amount = 0
+                day_delta = 10
+            if total_past_fut_rain >= 10:
+                # Skip irrigation if needs already met
+                irr_amount = 0 
+                day_delta = 5
+            else: 
+                # Make up for irrigation deficit if needed
+                irr_amount = 10 - total_past_fut_rain 
+                day_delta = 5
+
+
+        elif current_day < int(self.gdd_tab_year.R2): 
+            # If plant is in the reproductive stages
+
+            if past_5day_rain >= 20: 
+                # Avoid irrigation in heavy rain period
+                irr_amount = 0
+                day_delta = 10
+            elif total_past_fut_rain >= 20:
+                # Skip irrigation if needs already met
+                irr_amount = 0
+                day_delta = 5
+            else:
+                # Make up for irrigation deficit if needed
+                irr_amount = 20 - total_past_fut_rain
+                day_delta = 5
+
+        if irr_amount != 0:
+            self.irrigation_record[self.year_modded + current_day] = irr_amount
+
+
+
+        # Nitrogen logic
+        if current_day == int(self.gdd_tab_year.P): 
+            nitro_amount = self.total_nitro*0.75
+        elif current_day > int(self.gdd_tab_year.V6) and self.not_applied_n: 
+            nitro_amount = self.total_nitro*0.25
+            self.not_applied_n = False
+        else: 
+            nitro_amount = 0
+
+        return (irr_amount, nitro_amount, current_day + day_delta)
+
+
 class CommonPractice(Practices):
         
     def make_management_decision(self, current_day):
@@ -186,8 +251,10 @@ if __name__ == "__main__":
     dssat = Dssat4Dum(dssat_home, dssat_inp, dssat_exe, tmp_dir)
 
     # inputs for DSSAT
-    schedules = []
+    schedules_common_pract = []
+    schedules_mech_rec_pract = []
     updates = []
+
 
     # Results 
     year_col = [] 
@@ -195,13 +262,17 @@ if __name__ == "__main__":
 
     for year in wet_years: 
 
-        # Initialize robo farmer
+        # Initialize managers
         com_pract_manager = CommonPractice(wth_tab, gdd_tab, year)
-        rfarmer = RoboFarmer(com_pract_manager)
+        mach_rec_manager = MachRecdPractices(wth_tab, gdd_tab, year)
+
+        # Initialize robo farmers
+        comm_rfarmer = RoboFarmer(com_pract_manager)
+        mach_rec_rfarmer = RoboFarmer(mach_rec_manager)
 
         # Generate schedule for this year
-        schedules.append(rfarmer.realize_year())
-       
+        schedules_common_pract.append(comm_rfarmer.realize_year())
+        schedules_mech_rec_pract.append(mach_rec_rfarmer.realize_year())
         
         if year % 4 == 0:
             plant_date = 136
@@ -214,11 +285,17 @@ if __name__ == "__main__":
 
     for year in normal_years: 
 
-        # Initialize robo farmer
+        # Initialize managers
         com_pract_manager = CommonPractice(wth_tab, gdd_tab, year)
-        rfarmer = RoboFarmer(com_pract_manager)
+        mach_rec_manager = MachRecdPractices(wth_tab, gdd_tab, year)
 
-        schedules.append(rfarmer.realize_year())
+        # Initialize robo farmers
+        comm_rfarmer = RoboFarmer(com_pract_manager)
+        mach_rec_rfarmer = RoboFarmer(mach_rec_manager)
+
+        # Generate schedule for this year
+        schedules_common_pract.append(comm_rfarmer.realize_year())
+        schedules_mech_rec_pract.append(mach_rec_rfarmer.realize_year())
 
         if year % 4 == 0:
             plant_date = 136
@@ -233,33 +310,45 @@ if __name__ == "__main__":
     for year in dry_years: 
 
 
-        # Initialize robo farmer
+        # Initialize managers
         com_pract_manager = CommonPractice(wth_tab, gdd_tab, year)
-        rfarmer = RoboFarmer(com_pract_manager)
+        mach_rec_manager = MachRecdPractices(wth_tab, gdd_tab, year)
+
+        # Initialize robo farmers
+        comm_rfarmer = RoboFarmer(com_pract_manager)
+        mach_rec_rfarmer = RoboFarmer(mach_rec_manager)
+
+        # Generate schedule for this year
+        schedules_common_pract.append(comm_rfarmer.realize_year())
+        schedules_mech_rec_pract.append(mach_rec_rfarmer.realize_year())
         
         if year % 4 == 0:
             plant_date = 136
         else:
             plant_date = 135
 
-        schedules.append(rfarmer.realize_year())
         updates.append({ 'pdate': year*1e3 + plant_date, 'sdate': year*1e3 + plant_date, 'icdat': year*1e3 + plant_date })
         year_col.append(year)
         climate.append(0)
 
 
-    dssat_result = dssat.run_batch(schedules, threads, updates=updates)
+    # Run DSSAT 
+    com_dssat_result = dssat.run_batch(schedules_common_pract, threads, updates=updates)
+    dssat.clean_workspace()
+    mach_dssat_result = dssat.run_batch(schedules_mech_rec_pract, threads, updates=updates)
 
+    # Compile results into a dataframe
+    com_full_result_mat = np.c_[year_col, climate, com_dssat_result]
+    com_result = pd.DataFrame(com_full_result_mat, columns=['year', 'climate', 'yield', 'leaching'])
 
-    full_result_mat = np.c_[year_col, climate, dssat_result]
+    mach_full_result_mat = np.c_[year_col, climate, mach_dssat_result]
+    mach_result = pd.DataFrame(mach_full_result_mat, columns=['year', 'climate', 'yield', 'leaching'])
 
+    print("Common practices")
+    print(com_result)
 
-    result = pd.DataFrame(full_result_mat, columns=['year', 'climate', 'yield', 'leaching'])
-
-
-    print(result)
-
-
+    print("Mach practices")
+    print(mach_result) 
 
 
 
