@@ -3,9 +3,24 @@ import pandas as pd
 import numpy as np
 from dssat4dum import Dssat4Dum
 
-def make_management_decision(current_day, wth_tab, gdd_tab):
-    
-    return (10, current_day + 5)
+def make_common_practices_decision(current_day, wth_tab, gdd_tab):
+
+    if current_day < int(gdd_tab.V6):
+        # If before V6
+        day_delta = 1
+        irr_amount = 0
+    elif current_day < int(gdd_tab.R1): 
+        day_delta = 5
+        irr_amount = 10
+    elif current_day < int(gdd_tab.R2): 
+        day_delta = 5
+        irr_amount = 20
+    else: 
+        day_delta = 1
+        irr_amount = 0
+
+
+    return (irr_amount, current_day + day_delta)
 
 
 class RoboFarmer():
@@ -31,15 +46,16 @@ class RoboFarmer():
         # To become a 2D array 
         raw_management = []
 
-        current_day = int(gdd_tab_year.P) + 5
+        current_day = int(gdd_tab_year.P) 
 
-        while current_day < int(gdd_tab_year.R1):
+        while current_day < int(gdd_tab_year.R4):
 
             (irr_amount, next_day) = self.manager(current_day, wth_tab_year, gdd_tab_year)
 
             year_code = year*1e3 + current_day
 
-            raw_management.append([year_code, irr_amount, 0, 0, 0])
+            if irr_amount != 0:
+                raw_management.append([year_code, irr_amount, 0, 0, 0])
 
             current_day = next_day
             
@@ -74,11 +90,11 @@ if __name__ == "__main__":
 
     tmp_dir = "/tmp/"
 
-    threads = 4
+    threads = 1
 
     dssat = Dssat4Dum(dssat_home, dssat_inp, dssat_exe, tmp_dir)
 
-    rfarmer = RoboFarmer(wth_tab, gdd_tab, make_management_decision)
+    rfarmer = RoboFarmer(wth_tab, gdd_tab, make_common_practices_decision)
 
     # inputs for DSSAT
     schedules = []
@@ -109,7 +125,6 @@ if __name__ == "__main__":
         updates.append({ 'pdate': year*1e3 + 135, 'sdate': year*1e3 + 135, 'icdat': year*1e3 + 135 })
         year_col.append(year)
         climate.append(0)
-
 
 
     dssat_result = dssat.run_batch(schedules, threads, updates=updates)
