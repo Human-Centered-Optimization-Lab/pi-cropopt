@@ -3,24 +3,48 @@ import pandas as pd
 import numpy as np
 from dssat4dum import Dssat4Dum
 
-def make_common_practices_decision(current_day, wth_tab, gdd_tab):
+class CommonPractice():
 
-    if current_day < int(gdd_tab.V6):
-        # If before V6
-        day_delta = 1
-        irr_amount = 0
-    elif current_day < int(gdd_tab.R1): 
-        day_delta = 5
-        irr_amount = 10
-    elif current_day < int(gdd_tab.R2): 
-        day_delta = 5
-        irr_amount = 20
-    else: 
-        day_delta = 1
-        irr_amount = 0
+    def __init__(self, wth_tab, gdd_tab, year):
+        self.not_applied_n = True
+        self.wth_tab = wth_tab
+        self.gdd_tab = gdd_tab 
+        self.total_nitro = 200
+        self.year = year
+
+    def make_management_decision(self, current_day):
+
+        year_modded = int((year  % 1e2) * 1e3) 
+
+        wth_mask = np.logical_and(wth_tab['@DATE'] >= year_modded, wth_tab['@DATE'] < (year_modded + 366))
+
+        wth_tab_year = self.wth_tab[wth_mask]
+        gdd_tab_year = self.gdd_tab[self.gdd_tab['Year'] == year]
 
 
-    return (irr_amount, current_day + day_delta)
+        if current_day < int(gdd_tab_year.V6):
+            # If before V6
+            day_delta = 1
+            irr_amount = 0
+        elif current_day < int(gdd_tab_year.R1): 
+            day_delta = 5
+            irr_amount = 10
+        elif current_day < int(gdd_tab_year.R2): 
+            day_delta = 5
+            irr_amount = 20
+        else: 
+            day_delta = 1
+            irr_amount = 0
+
+        if current_day == int(gdd_tab_year.P): 
+            nitro_amount = self.total_nitro*0.75
+        elif current_day > int(gdd_tab_year.V6) and self.not_applied_n: 
+            nitro_amount = self.total_nitro*0.25
+            self.not_applied_n = False
+        else: 
+            nitro_amount = 0
+
+        return (irr_amount, nitro_amount, current_day + day_delta)
 
 
 class RoboFarmer():
@@ -50,12 +74,16 @@ class RoboFarmer():
 
         while current_day < int(gdd_tab_year.R4):
 
-            (irr_amount, next_day) = self.manager(current_day, wth_tab_year, gdd_tab_year)
+            (irr_amount, nitro_amount, next_day) = self.manager.make_management_decision(current_day)
 
             year_code = year*1e3 + current_day
 
             if irr_amount != 0:
                 raw_management.append([year_code, irr_amount, 0, 0, 0])
+
+            if nitro_amount != 0: 
+                raw_management.append([year_code, 0, nitro_amount, 0, 0])
+
 
             current_day = next_day
             
@@ -90,11 +118,10 @@ if __name__ == "__main__":
 
     tmp_dir = "/tmp/"
 
-    threads = 1
+    threads = 8
 
+    # Initialize DSSAT runner
     dssat = Dssat4Dum(dssat_home, dssat_inp, dssat_exe, tmp_dir)
-
-    rfarmer = RoboFarmer(wth_tab, gdd_tab, make_common_practices_decision)
 
     # inputs for DSSAT
     schedules = []
@@ -105,24 +132,56 @@ if __name__ == "__main__":
     climate = []
 
     for year in wet_years: 
-        print("Year: %s" % year)
+
+        # Initialize robo farmer
+        com_pract_manager = CommonPractice(wth_tab, gdd_tab, year)
+        rfarmer = RoboFarmer(wth_tab, gdd_tab, com_pract_manager)
+
+        # Generate schedule for this year
         schedules.append(rfarmer.realize_year(year))
-        updates.append({ 'pdate': year*1e3 + 135, 'sdate': year*1e3 + 135, 'icdat': year*1e3 + 135 })
+       
+        
+        if year % 4 == 0:
+            plant_date = 136
+        else:
+            plant_date = 135
+
+        updates.append({ 'pdate': year*1e3 + plant_date, 'sdate': year*1e3 + plant_date, 'icdat': year*1e3 + plant_date })
         year_col.append(year)
         climate.append(2)
 
     for year in normal_years: 
-        print("Year: %s" % year)
+
+        # Initialize robo farmer
+        com_pract_manager = CommonPractice(wth_tab, gdd_tab, year)
+        rfarmer = RoboFarmer(wth_tab, gdd_tab, com_pract_manager)
+
         schedules.append(rfarmer.realize_year(year))
-        updates.append({ 'pdate': year*1e3 + 135, 'sdate': year*1e3 + 135, 'icdat': year*1e3 + 135 })
+
+        if year % 4 == 0:
+            plant_date = 136
+        else:
+            plant_date = 135
+
+        updates.append({ 'pdate': year*1e3 + plant_date, 'sdate': year*1e3 + plant_date, 'icdat': year*1e3 + plant_date })
         year_col.append(year)
         climate.append(1)
         
 
     for year in dry_years: 
-        print("Year: %s" % year)
+
+
+        # Initialize robo farmer
+        com_pract_manager = CommonPractice(wth_tab, gdd_tab, year)
+        rfarmer = RoboFarmer(wth_tab, gdd_tab, com_pract_manager)
+        
+        if year % 4 == 0:
+            plant_date = 136
+        else:
+            plant_date = 135
+
         schedules.append(rfarmer.realize_year(year))
-        updates.append({ 'pdate': year*1e3 + 135, 'sdate': year*1e3 + 135, 'icdat': year*1e3 + 135 })
+        updates.append({ 'pdate': year*1e3 + plant_date, 'sdate': year*1e3 + plant_date, 'icdat': year*1e3 + plant_date })
         year_col.append(year)
         climate.append(0)
 
