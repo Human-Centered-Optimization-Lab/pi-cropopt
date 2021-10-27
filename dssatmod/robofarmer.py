@@ -7,38 +7,41 @@ class CommonPractice():
 
     def __init__(self, wth_tab, gdd_tab, year):
         self.not_applied_n = True
-        self.wth_tab = wth_tab
-        self.gdd_tab = gdd_tab 
+        wth_tab = wth_tab
+        gdd_tab = gdd_tab 
+
         self.total_nitro = 200
         self.year = year
-
-    def make_management_decision(self, current_day):
 
         year_modded = int((year  % 1e2) * 1e3) 
 
         wth_mask = np.logical_and(wth_tab['@DATE'] >= year_modded, wth_tab['@DATE'] < (year_modded + 366))
 
-        wth_tab_year = self.wth_tab[wth_mask]
-        gdd_tab_year = self.gdd_tab[self.gdd_tab['Year'] == year]
+        self.wth_tab_year = wth_tab[wth_mask]
+        self.gdd_tab_year = gdd_tab[gdd_tab['Year'] == year]
 
 
-        if current_day < int(gdd_tab_year.V6):
+
+    def make_management_decision(self, current_day):
+
+
+        if current_day < int(self.gdd_tab_year.V6):
             # If before V6
             day_delta = 1
             irr_amount = 0
-        elif current_day < int(gdd_tab_year.R1): 
+        elif current_day < int(self.gdd_tab_year.R1): 
             day_delta = 5
             irr_amount = 10
-        elif current_day < int(gdd_tab_year.R2): 
+        elif current_day < int(self.gdd_tab_year.R2): 
             day_delta = 5
             irr_amount = 20
         else: 
             day_delta = 1
             irr_amount = 0
 
-        if current_day == int(gdd_tab_year.P): 
+        if current_day == int(self.gdd_tab_year.P): 
             nitro_amount = self.total_nitro*0.75
-        elif current_day > int(gdd_tab_year.V6) and self.not_applied_n: 
+        elif current_day > int(self.gdd_tab_year.V6) and self.not_applied_n: 
             nitro_amount = self.total_nitro*0.25
             self.not_applied_n = False
         else: 
@@ -50,29 +53,20 @@ class CommonPractice():
 class RoboFarmer():
 
 
-    def __init__(self, wth_tab, gdd_tab, manager):
+    def __init__(self, manager):
 
         self.manager = manager
-        self.wth_tab = wth_tab
-        self.gdd_tab = gdd_tab
 
 
-    def realize_year(self, year):
-
-        year_modded = int((year  % 1e2) * 1e3) 
-       
-        wth_mask = np.logical_and(wth_tab['@DATE'] >= year_modded, wth_tab['@DATE'] < (year_modded + 366))
-
-        wth_tab_year = self.wth_tab[wth_mask]
-        gdd_tab_year = gdd_tab[self.gdd_tab['Year'] == year]
+    def realize_year(self):
 
 
         # To become a 2D array 
         raw_management = []
 
-        current_day = int(gdd_tab_year.P) 
+        current_day = int(self.manager.gdd_tab_year.P) 
 
-        while current_day < int(gdd_tab_year.R4):
+        while current_day < int(self.manager.gdd_tab_year.R4):
 
             (irr_amount, nitro_amount, next_day) = self.manager.make_management_decision(current_day)
 
@@ -135,10 +129,10 @@ if __name__ == "__main__":
 
         # Initialize robo farmer
         com_pract_manager = CommonPractice(wth_tab, gdd_tab, year)
-        rfarmer = RoboFarmer(wth_tab, gdd_tab, com_pract_manager)
+        rfarmer = RoboFarmer(com_pract_manager)
 
         # Generate schedule for this year
-        schedules.append(rfarmer.realize_year(year))
+        schedules.append(rfarmer.realize_year())
        
         
         if year % 4 == 0:
@@ -154,9 +148,9 @@ if __name__ == "__main__":
 
         # Initialize robo farmer
         com_pract_manager = CommonPractice(wth_tab, gdd_tab, year)
-        rfarmer = RoboFarmer(wth_tab, gdd_tab, com_pract_manager)
+        rfarmer = RoboFarmer(com_pract_manager)
 
-        schedules.append(rfarmer.realize_year(year))
+        schedules.append(rfarmer.realize_year())
 
         if year % 4 == 0:
             plant_date = 136
@@ -173,14 +167,14 @@ if __name__ == "__main__":
 
         # Initialize robo farmer
         com_pract_manager = CommonPractice(wth_tab, gdd_tab, year)
-        rfarmer = RoboFarmer(wth_tab, gdd_tab, com_pract_manager)
+        rfarmer = RoboFarmer(com_pract_manager)
         
         if year % 4 == 0:
             plant_date = 136
         else:
             plant_date = 135
 
-        schedules.append(rfarmer.realize_year(year))
+        schedules.append(rfarmer.realize_year())
         updates.append({ 'pdate': year*1e3 + plant_date, 'sdate': year*1e3 + plant_date, 'icdat': year*1e3 + plant_date })
         year_col.append(year)
         climate.append(0)
