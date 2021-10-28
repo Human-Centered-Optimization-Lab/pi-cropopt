@@ -56,8 +56,8 @@ if __name__ == "__main__":
         climate = year_by_climate[year] 
 
         # Initialize managers
-        com_pract_manager = CommonPractice(wth_tab, gdd_tab, year)
-        mach_rec_manager = MachRecdPractices(wth_tab, gdd_tab, year)
+        com_pract_manager = CommonPractice(wth_tab, gdd_tab, year, climate)
+        mach_rec_manager = MachRecdPractices(wth_tab, gdd_tab, year, climate)
 
         # Initialize robo farmers
         comm_rfarmer = RoboFarmer(com_pract_manager)

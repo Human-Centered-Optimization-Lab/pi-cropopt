@@ -7,7 +7,7 @@ from mlearn.attr_processors import AttProcessors as ap
 
 class Practices(): 
 
-    def __init__(self, wth_tab, gdd_tab, year):
+    def __init__(self, wth_tab, gdd_tab, year, climate):
         self.not_applied_n = True
         wth_tab = wth_tab
         gdd_tab = gdd_tab 
@@ -21,6 +21,7 @@ class Practices():
         self.gdd_tab_year = gdd_tab[gdd_tab['Year'] == year]
         self.total_nitro = 200
         self.irrigation_record = {}
+        self.climate = climate
 
     def _get_past_rain_conditions(self, current_day, n):
         current_date_code = self.year_modded + current_day
@@ -38,12 +39,12 @@ class MachRecdPractices(Practices):
 
     def make_management_decision(self, current_day):
 
-        #sched = np.array([[2011193, 12, 0, 0, 0], [2011200, 8, 0, 0, 0]])
-        #res = AttProcessors._calc_total_irr_per_period('V6', self.year, self.gdd_tab_year, sched)
-
         period = ap._get_period(self.year, self.gdd_tab_year, current_day)
 
-        period_precip_so_far = ap._calc_total_precip_per_period_til(period, self.year, self.gdd_tab_year, self.wth_tab_year, current_day) 
+        period_precip_so_far = ap._calc_total_precip_per_period_til(period, 
+                self.year, self.gdd_tab_year, self.wth_tab_year, current_day) 
+
+         
 
         past_3day_rain = self._get_past_rain_conditions(current_day, 3)
         past_5day_rain = self._get_past_rain_conditions(current_day, 5)
@@ -91,7 +92,6 @@ class MachRecdPractices(Practices):
 
         if irr_amount != 0:
             self.irrigation_record[self.year_modded + current_day] = irr_amount
-
 
 
         # Nitrogen logic
