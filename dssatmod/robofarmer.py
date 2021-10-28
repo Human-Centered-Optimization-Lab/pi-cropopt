@@ -39,12 +39,23 @@ class MachRecdPractices(Practices):
 
     def make_management_decision(self, current_day):
 
+
+        STAGE_UPDATES = { 
+            'V6': -0.098976109215017,
+            'V7': 0.311203319502075,
+            'V8': 0.130841121495327,
+            'V9': 0.506849315068493,
+            'V10': 0.6,
+            'V11': -0.00507614213197959,
+            'V12': -0.0051282051282052,
+            'V13': 0.142857142857143,
+            'V14': 0.139705882352941,
+            'R1': -0.100830367734282
+        }
+
+
+
         period = ap._get_period(self.year, self.gdd_tab_year, current_day)
-
-        period_precip_so_far = ap._calc_total_precip_per_period_til(period, 
-                self.year, self.gdd_tab_year, self.wth_tab_year, current_day) 
-
-         
 
         past_3day_rain = self._get_past_rain_conditions(current_day, 3)
         past_5day_rain = self._get_past_rain_conditions(current_day, 5)
@@ -60,34 +71,37 @@ class MachRecdPractices(Practices):
         elif current_day < int(self.gdd_tab_year.R1): 
             # If plant still in vegetative stage
 
+            threshold = 10 + 10* STAGE_UPDATES[period] 
+            
             if past_5day_rain >= 20: 
                 # Avoid irrigation in heavy rain period
                 irr_amount = 0
                 day_delta = 10
-            if total_past_fut_rain >= 10:
+            if total_past_fut_rain >= threshold:
                 # Skip irrigation if needs already met
                 irr_amount = 0 
                 day_delta = 5
             else: 
                 # Make up for irrigation deficit if needed
-                irr_amount = 10 - total_past_fut_rain 
+                irr_amount = threshold - total_past_fut_rain 
                 day_delta = 5
 
 
         elif current_day < int(self.gdd_tab_year.R2): 
             # If plant is in the reproductive stages
 
+            threshold = 20  + 20 *STAGE_UPDATES[period]
             if past_5day_rain >= 20: 
                 # Avoid irrigation in heavy rain period
                 irr_amount = 0
                 day_delta = 10
-            elif total_past_fut_rain >= 20:
+            elif total_past_fut_rain >= threshold:
                 # Skip irrigation if needs already met
                 irr_amount = 0
                 day_delta = 5
             else:
                 # Make up for irrigation deficit if needed
-                irr_amount = 20 - total_past_fut_rain
+                irr_amount = threshold - total_past_fut_rain
                 day_delta = 5
 
         if irr_amount != 0:

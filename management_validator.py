@@ -4,6 +4,7 @@ from dssatmod.robofarmer import RoboFarmer
 from dssatmod.robofarmer import MachRecdPractices
 from dssatmod.robofarmer import CommonPractice
 from dssatmod.dssat4dum import Dssat4Dum
+import matplotlib.pyplot as plt
 
 if __name__ == "__main__":
 
@@ -97,8 +98,17 @@ if __name__ == "__main__":
 
     print("Mach practices")
     print(mach_result) 
+    
+    x = com_result['year']    
 
+    y1 = com_result['yield']
+    y2 = mach_result['yield']
 
+    plt.scatter(x, y1, label="Common practices")
+    plt.scatter(x, y2, label="Common practices following recommendations")
+    plt.legend()
+    
 
+    plt.show()
 
 

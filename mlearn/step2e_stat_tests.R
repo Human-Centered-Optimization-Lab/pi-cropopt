@@ -28,11 +28,19 @@ attrib_tab$norm_yield <- norm_yield
 ## find high yielding solutions
 
 # Get the threshold for high yields
-  
+
+# Normalized yield with PO
 high_yielders <- filter(attrib_tab, norm_yield > 0.75) %>%
                  filter(front == 0)
+# End - Normalized yield 
 
+# Just PO
 #high_yielders <- filter(attrib_tab, front == 0)
+# End - Just PO
+
+# Normalized yield
+#high_yielders <- filter(attrib_tab, norm_yield > 0.75) 
+# End Normaliezd yiedl
 
 
 growth_stages <- c('total_wat_during_v6', 
@@ -68,9 +76,10 @@ for(s in 1:length(growth_stages)){
   opt_med <- median(optimized_irr)
   rec_med <- median(recommended_irr)
  
-  percentage_change = (rec_med - opt_med)/opt_med
+  percentage_change = -(rec_med - opt_med)/rec_med
    
-  print(str_interp("Stage: ${stage_rec}, opt: ${opt_med}, rec: ${rec_med}, % change ${percentage_change}")) 
+  #print(str_interp("Stage: ${stage_rec}, % change ${percentage_change}, rec: ${rec_med}, opt: ${opt_med}")) 
+  print(str_interp("'${stage_rec}': ${percentage_change},")) 
   
    
 }
