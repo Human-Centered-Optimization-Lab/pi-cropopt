@@ -23,32 +23,15 @@ class Practices():
         self.irrigation_record = {}
 
     def _get_past_rain_conditions(self, current_day, n):
-        # Get previous n days of irrigation and precipitation
-
         current_date_code = self.year_modded + current_day
-
-        # Tally up total past rain
-        total_rain = 0.0
-        for prev_days in range(n):
-            day = current_date_code - prev_days - 1
-            rain = float(self.wth_tab_year[self.wth_tab_year['@DATE'] == day].RAIN) 
-            total_rain = total_rain + rain
-        
-        return total_rain
+        rain_ts = AttProcessors._get_rain_within_period(self.wth_tab_year, current_date_code - n , current_date_code - 1)
+        return sum(rain_ts)
         
 
     def _get_future_rain_conditions(self, current_day, n):
-
         current_date_code = self.year_modded + current_day
-
-        total_rain = 0.0
-        # Tally up the total rain for next few days
-        for next_day in range(n):
-            day = current_date_code + next_day + 1
-            rain = float(self.wth_tab_year[self.wth_tab_year['@DATE'] == day].RAIN) 
-            total_rain = total_rain + rain
-
-        return total_rain
+        rain_ts = AttProcessors._get_rain_within_period(self.wth_tab_year, current_date_code + 1, current_date_code + n)
+        return sum(rain_ts)
 
 
 class MachRecdPractices(Practices):
