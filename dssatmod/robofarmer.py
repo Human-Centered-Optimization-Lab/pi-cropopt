@@ -2,7 +2,7 @@ import sys
 import pandas as pd
 import numpy as np
 from dssatmod.dssat4dum import Dssat4Dum
-from mlearn.attr_processors import AttProcessors
+from mlearn.attr_processors import AttProcessors as ap
 
 
 class Practices(): 
@@ -24,19 +24,20 @@ class Practices():
 
     def _get_past_rain_conditions(self, current_day, n):
         current_date_code = self.year_modded + current_day
-        rain_ts = AttProcessors._get_rain_within_period(self.wth_tab_year, current_date_code - n , current_date_code - 1)
+        rain_ts = ap._get_rain_within_period(self.wth_tab_year, current_date_code - n , current_date_code - 1)
         return sum(rain_ts)
         
 
     def _get_future_rain_conditions(self, current_day, n):
         current_date_code = self.year_modded + current_day
-        rain_ts = AttProcessors._get_rain_within_period(self.wth_tab_year, current_date_code + 1, current_date_code + n)
+        rain_ts = ap._get_rain_within_period(self.wth_tab_year, current_date_code + 1, current_date_code + n)
         return sum(rain_ts)
 
 
 class MachRecdPractices(Practices):
 
     def make_management_decision(self, current_day):
+
 
         past_3day_rain = self._get_past_rain_conditions(current_day, 3)
         past_5day_rain = self._get_past_rain_conditions(current_day, 5)
