@@ -7,7 +7,7 @@ from mlearn.attr_processors import AttProcessors as ap
 
 class Practices(): 
 
-    def __init__(self, wth_tab, gdd_tab, year, climate):
+    def __init__(self, wth_tab, gdd_tab, year, climate=-1):
         self.not_applied_n = True
         wth_tab = wth_tab
         gdd_tab = gdd_tab 

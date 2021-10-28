@@ -3,9 +3,10 @@ library(fitdistrplus)
 library(R.utils)
 library(stringr)
 
-#ATTRIB_TAB <- "/Volumes/data/Gilgamesh/kroppian/agovization_results/mlearning/attrib_tab.feather"
-ATTRIB_TAB <- "Z:/Gilgamesh/kroppian/agovization_results/mlearning/attrib_tab.feather"
-RECD_PRACTICES_PATH <- "Z:/Gilgamesh/kroppian/agovization_results/mlearning/recommended_practices.feather"
+ATTRIB_TAB <- "/Volumes/data/Gilgamesh/kroppian/agovization_results/mlearning/attrib_tab.feather"
+RECD_PRACTICES_PATH <- "/Volumes/data/Gilgamesh/kroppian/agovization_results/mlearning/recommended_practices.feather"
+#ATTRIB_TAB <- "Z:/Gilgamesh/kroppian/agovization_results/mlearning/attrib_tab.feather"
+#RECD_PRACTICES_PATH <- "Z:/Gilgamesh/kroppian/agovization_results/mlearning/recommended_practices.feather"
 
 attrib_tab <- arrow::read_feather(ATTRIB_TAB)
 recd_practs <- arrow::read_feather(RECD_PRACTICES_PATH)
@@ -20,7 +21,7 @@ norm_yield <- attrib_tab %>%
               dplyr::select(yield_, year_max_yield) %>%
               mutate(norm_yield = yield_ / year_max_yield) %>%
               pull(norm_yield)
-       
+ 
 attrib_tab$norm_yield <- norm_yield
 
 
@@ -43,10 +44,7 @@ growth_stages <- c('total_wat_during_v6',
                    'total_wat_during_v12',
                    'total_wat_during_v13',
                    'total_wat_during_v14',
-                   'total_wat_during_R1', 
-                   'total_wat_during_R2',
-                   'total_wat_during_R3',
-                   'total_wat_during_R4')
+                   'total_wat_during_R1')
 
 
 
@@ -58,16 +56,22 @@ for(s in 1:length(growth_stages)){
   stage_rec <- str_replace(stage_opt, "total_wat_during_", "") %>% capitalize()
   
   optimized_irr <- high_yielders[,stage_opt] %>% pull(stage_opt) 
-  
   recommended_irr <- recd_practs %>% filter(stages == stage_rec) %>% pull(irr)
 
   all_obvs <- append(optimized_irr,recommended_irr) 
-   
   b <-  seq(min(all_obvs), max(all_obvs), length.out=15)
-  
   
   opt_p <- hist(optimized_irr, col=rgb(0,0,1,1/4), breaks=b, main=paste("Total water usage during ", stage_rec  ))
   rec_p <- hist(recommended_irr,col=rgb(1,0,0,1/4), breaks=b, add=T) 
+ 
+  # Calculate the differenc between optimized and recommended
+  opt_med <- median(optimized_irr)
+  rec_med <- median(recommended_irr)
+ 
+  percentage_change = (rec_med - opt_med)/opt_med
+   
+  print(str_interp("Stage: ${stage_rec}, opt: ${opt_med}, rec: ${rec_med}, % change ${percentage_change}")) 
+  
    
 }
 
