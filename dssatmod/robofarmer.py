@@ -38,6 +38,12 @@ class MachRecdPractices(Practices):
 
     def make_management_decision(self, current_day):
 
+        #sched = np.array([[2011193, 12, 0, 0, 0], [2011200, 8, 0, 0, 0]])
+        #res = AttProcessors._calc_total_irr_per_period('V6', self.year, self.gdd_tab_year, sched)
+
+        period = ap._get_period(self.year, self.gdd_tab_year, current_day)
+
+        period_precip_so_far = ap._calc_total_precip_per_period_til(period, self.year, self.gdd_tab_year, self.wth_tab_year, current_day) 
 
         past_3day_rain = self._get_past_rain_conditions(current_day, 3)
         past_5day_rain = self._get_past_rain_conditions(current_day, 5)

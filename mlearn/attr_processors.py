@@ -1,4 +1,5 @@
 import numpy as np
+import sys
 
 # -- Form of processor: 
 
@@ -100,6 +101,21 @@ class AttProcessors:
 
         return weather['RAIN'][p_mask]
 
+    def _get_period(year, gdd_tab, doy):
+        date = AttProcessors._add_year_to_doy_2dig(doy, year)
+
+        gdd_tab_year = gdd_tab[gdd_tab['Year'] == year]
+        stages = gdd_tab_year.iloc[[0]].to_numpy()[0][1:]
+
+        # filter out which period we're in 
+        matching_stage = [i for (i, s) in  enumerate(stages) if s <= doy and stages[i+1] > doy][0]
+     
+        # since the first column is the year
+        matching_stage = matching_stage + 1
+
+        return gdd_tab_year.columns[matching_stage]
+
+
     @staticmethod
     def _calc_total_precip_per_period(period, year, gdd_tab, weather):
         return np.sum(AttProcessors._get_precip_period(period, year, gdd_tab, weather))
@@ -108,6 +124,11 @@ class AttProcessors:
     def _calc_freq_precip_per_period(period, year, gdd_tab, weather):
         return len(AttProcessors._get_precip_period(period, year, gdd_tab, weather))
 
+    @staticmethod
+    def _calc_total_precip_per_period_til(period, year, gdd_tab, weather, doy): 
+        date = AttProcessors._add_year_to_doy_2dig(doy, year)
+        weather_filtered = weather[weather['@DATE'] <= date]
+        return AttProcessors._calc_total_precip_per_period(period, year, gdd_tab, weather_filtered)
 
     # --- Transfered attributes ---
     # Or attributes that we're just copying from the main table
