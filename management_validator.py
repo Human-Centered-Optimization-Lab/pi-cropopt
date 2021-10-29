@@ -37,7 +37,7 @@ if __name__ == "__main__":
 
     tmp_dir = "/tmp/"
 
-    threads = 4
+    threads = 1
 
     # Initialize DSSAT runner
     dssat = Dssat4Dum(dssat_home, dssat_inp, dssat_exe, tmp_dir)
@@ -51,6 +51,8 @@ if __name__ == "__main__":
     # Results 
     year_col = [] 
     climates = []
+    total_wat_common_pract = [] 
+    total_wat_mech_rec_pract = [] 
 
     for year in year_by_climate: 
 
@@ -65,8 +67,10 @@ if __name__ == "__main__":
         mach_rec_rfarmer = RoboFarmer(mach_rec_manager)
 
         # Generate schedule for this year
-        schedules_common_pract.append(comm_rfarmer.realize_year())
-        schedules_mech_rec_pract.append(mach_rec_rfarmer.realize_year())
+        comm_sched = comm_rfarmer.realize_year()
+        mech_sched = mach_rec_rfarmer.realize_year()
+        schedules_common_pract.append(comm_sched)
+        schedules_mech_rec_pract.append(mech_sched)
         
         if year % 4 == 0:
             plant_date = 136
@@ -74,6 +78,10 @@ if __name__ == "__main__":
             plant_date = 135
 
         updates.append({ 'pdate': year*1e3 + plant_date, 'sdate': year*1e3 + plant_date, 'icdat': year*1e3 + plant_date })
+
+        total_wat_common_pract.append(sum(comm_sched[:, 1]))
+        total_wat_mech_rec_pract.append(sum(mech_sched[:, 1]))
+
         year_col.append(year)
 
         climates.append(climate)
@@ -85,13 +93,11 @@ if __name__ == "__main__":
     mach_dssat_result = dssat.run_batch(schedules_mech_rec_pract, threads, updates=updates)
 
     # Compile results into a dataframe
+    com_full_result_mat = np.c_[year_col, climates, com_dssat_result, total_wat_common_pract]
+    com_result = pd.DataFrame(com_full_result_mat, columns=['year', 'climate', 'yield', 'leaching', 'total_wat'])
 
-
-    com_full_result_mat = np.c_[year_col, climates, com_dssat_result]
-    com_result = pd.DataFrame(com_full_result_mat, columns=['year', 'climate', 'yield', 'leaching'])
-
-    mach_full_result_mat = np.c_[year_col, climates, mach_dssat_result]
-    mach_result = pd.DataFrame(mach_full_result_mat, columns=['year', 'climate', 'yield', 'leaching'])
+    mach_full_result_mat = np.c_[year_col, climates, mach_dssat_result, total_wat_mech_rec_pract]
+    mach_result = pd.DataFrame(mach_full_result_mat, columns=['year', 'climate', 'yield', 'leaching', 'total_wat'])
 
     print("Common practices")
     print(com_result)
@@ -107,8 +113,7 @@ if __name__ == "__main__":
     plt.scatter(x, y1, label="Common practices")
     plt.scatter(x, y2, label="Common practices following recommendations")
     plt.legend()
-    
+    plt.legend(loc='lower left');
 
     plt.show()
-
 
