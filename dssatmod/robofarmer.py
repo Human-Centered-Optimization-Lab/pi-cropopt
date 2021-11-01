@@ -54,57 +54,6 @@ class MachRecdPractices(Practices):
         }
 
 
-        #STAGE_UPDATES_DRY = {
-        #    'V6': -0.00341296928327638,
-        #    'V7': -0.443983402489627,
-        #    'V8': 0.0186915887850468,
-        #    'V9': 0.780821917808219,
-        #    'V10': -0.383333333333333,
-        #    'V11': 0.522842639593909,
-        #    'V12': 0.117948717948718,
-        #    'V13': -0.263157894736842,
-        #    'V14': 0.389705882352941,
-        #    'R1': -0.513641755634638
-        #        }
-
-        #STAGE_UPDATES_NORMAL = {
-        #    'V6': -0.52901023890785,
-        #    'V7': 0.311203319502075,
-        #    'V8': -0.280373831775701,
-        #    'V9': 0.287671232876712,
-        #    'V10': -0.0666666666666667,
-        #    'V11': -0.532994923857868,
-        #    'V12': -0.292307692307692,
-        #    'V13': -0.293233082706767,
-        #    'V14': 0.166666666666667,
-        #    'R1': -0.311981020166073
-        #    }
-
-        #STAGE_UPDATES_WET = {
-        #    'V6': 0.255972696245734,
-        #    'V7': 1.79668049792531,
-        #    'V8': -0.177570093457944,
-        #    'V9': 1.9041095890411,
-        #    'V10': 0.7,
-        #    'V11': -0.299492385786802,
-        #    'V12': 0.0153846153846154,
-        #    'V13': 0.338345864661654,
-        #    'V14': -0.230392156862745,
-        #    'R1': 0.311981020166074,
-        #        }
-
-
-
-        #if self.climate == 0: 
-        #    stage_updates = STAGE_UPDATES_DRY
-        #elif self.climate == 1:
-        #    stage_updates = STAGE_UPDATES_NORMAL
-        #elif self.climate == 2:
-        #    stage_updates = STAGE_UPDATES_WET
-
-
-        stage_updates = STAGE_UPDATES
-
         period = ap._get_period(self.year, self.gdd_tab_year, current_day)
 
         past_3day_rain = self._get_past_rain_conditions(current_day, 3)
@@ -121,7 +70,7 @@ class MachRecdPractices(Practices):
         elif current_day < int(self.gdd_tab_year.R1): 
             # If plant still in vegetative stage
 
-            threshold = 10 + 10*stage_updates[period] 
+            threshold = 10 + 10*STAGE_UPDATES[period] 
             
             if past_5day_rain >= 20: 
                 # Avoid irrigation in heavy rain period
@@ -140,7 +89,7 @@ class MachRecdPractices(Practices):
         elif current_day < int(self.gdd_tab_year.R2): 
             # If plant is in the reproductive stages
 
-            threshold = 20  + 20 *stage_updates[period]
+            threshold = 20  + 20 *STAGE_UPDATES[period]
             if past_5day_rain >= 20: 
                 # Avoid irrigation in heavy rain period
                 irr_amount = 0
