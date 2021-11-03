@@ -15,6 +15,8 @@ toNum = @(x)str2num(x);
 load(FEATURE_TABLE_PATH)
 load(TARGET_TABLE_PATH)
 
+features = cleanUpFeatures(features);
+
 
 %% split data into training and testing subsets
 total_samples = size(targets, 1);

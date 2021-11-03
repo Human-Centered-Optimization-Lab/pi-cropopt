@@ -18,17 +18,11 @@ OUTPUT_RESULTS = "ctreeResults"
 
 ## Fetch data
 
-#features_raw <- arrow::read_feather(INPUT_FEATURES)
-#features <- as_tibble(features_raw)
-#
-#targets_raw <- arrow::read_feather(INPUT_TARGETS)
-#targets <- as_tibble(targets_raw)
+features_raw <- arrow::read_feather(INPUT_FEATURES)
+features <- as_tibble(features_raw)
 
-
-features <- arrow::read_feather(INPUT_FEATURES)
-
-targets <- arrow::read_feather(INPUT_TARGETS)
-
+targets_raw <- arrow::read_feather(INPUT_TARGETS)
+targets <- as_tibble(targets_raw)
 
 
 ## Build data tables
@@ -52,3 +46,9 @@ fitControl <- trainControl(verboseIter = TRUE)
 frontFit <- train(front ~ ., data = frontData, 
                  method = "ctree", 
                  trControl = fitControl)
+
+
+
+
+
+

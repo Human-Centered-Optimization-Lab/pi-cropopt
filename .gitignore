@@ -18,3 +18,4 @@ output
 *.pkl
 *.xlsx
 
+.Rproj.user

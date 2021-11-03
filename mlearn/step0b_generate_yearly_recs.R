@@ -25,6 +25,8 @@ get_growth_period <- function(gdd_tab, given_year, doy) {
 
 ## Load management data
 
+OUTPUT_PATH <- 'Z:/Gilgamesh/kroppian/agovization_results/mlearning/recommended_practices.feather'
+
 GDD_TAB_PATH <- 'C:/Users/Ian Kropp/Projects/agovization/management_dates.csv'
 #GDD_TAB_PATH <- '/Users/iankropp/Projects/agovization/management_dates.csv'
 gdd_tab <- read.csv(GDD_TAB_PATH)
@@ -124,4 +126,4 @@ for(y in 1:length(years)){
 }
 
 
-
+arrow::write_feather(result, OUTPUT_PATH)

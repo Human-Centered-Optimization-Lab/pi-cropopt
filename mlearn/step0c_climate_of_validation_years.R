@@ -4,6 +4,9 @@ library(dplyr)
 WTH_FILE_PATH <- "../dhome/Weather/CASSREPR.WTH"
 MGT_FILE_PATH <- "../management_dates.csv"
 
+OUTPUT_TAB <- "Z:/Gilgamesh/kroppian/agovization_results/mlearning/climate.feather"
+
+
 COLUMN_NAMES <- c("date", "srad", "tmax", "tmin", "rain")
 
 START_TRAIN <- 1980
@@ -42,7 +45,7 @@ rain_summary <- weather_tab %>%
                 filter(doy >= P & doy <= R6) %>%        # Just during the growing season
                 group_by(year) %>%  
                 summarize(total_rain = sum(rain)) %>%
-                select(year, total_rain)
+                dplyr::select(year, total_rain)
 
 # Calculate the threshold
 year_count <- END_TRAIN - START_TRAIN + 1
@@ -84,6 +87,7 @@ wet_count     <- rain_summary %>%
 
 
 
-
+## Save the climate data
+arrow::write_feather(rain_summary, OUTPUT_TAB)
 
 
