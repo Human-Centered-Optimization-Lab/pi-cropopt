@@ -43,7 +43,6 @@ class AttProcessors:
         end_date = date
 
         wth_mask = np.logical_and(wth_tab['@DATE'] >= begin_date, wth_tab['@DATE'] <= end_date )
-        print(wth_tab[wth_mask])
         rain_amount = sum(wth_tab[wth_mask].RAIN) 
 
         return rain_amount
@@ -174,8 +173,10 @@ class AttProcessors:
 
         second_n_app_date = AttProcessors._get_2nd_n_app_date(row.scheds)
 
-        plant_date = self.gdd_tab.P[0] 
-        year = self.gdd_tab.Year[0] 
+        year = row['year']
+        gdds = self.gdd_tab[self.gdd_tab['Year'] == year]
+        plant_date = gdds['P']
+
 
         plant_doy = AttProcessors._add_year_to_doy_2dig(plant_date, year)
 
