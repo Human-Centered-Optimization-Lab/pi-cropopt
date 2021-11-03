@@ -1,8 +1,6 @@
 import pandas as pd
 import numpy as np
-from dssatmod.robofarmer import RoboFarmer
-from dssatmod.robofarmer import MachRecdPractices
-from dssatmod.robofarmer import Practices
+from dssatmod.robofarmer import *
 from dssatmod.dssat4dum import Dssat4Dum
 import matplotlib.pyplot as plt
 
@@ -45,7 +43,9 @@ if __name__ == "__main__":
 
     # inputs for DSSAT
     schedules_common_pract = []
-    schedules_mech_rec_pract = []
+    schedules_irr_only_pract = []
+    schedules_nitro_only_pract = []
+
     updates = []
 
 
@@ -53,7 +53,8 @@ if __name__ == "__main__":
     year_col = [] 
     climates = []
     total_wat_common_pract = [] 
-    total_wat_mech_rec_pract = [] 
+    total_wat_irr_only= [] 
+    total_wat_nitro_only = []
 
     for year in year_by_climate: 
 
@@ -61,18 +62,23 @@ if __name__ == "__main__":
 
         # Initialize managers
         com_pract_manager = Practices(wth_tab, gdd_tab, year, climate)
-        mach_rec_manager = MachRecdPractices(wth_tab, gdd_tab, year, climate)
+        irr_only_manager = RecIrrOnly(wth_tab, gdd_tab, year, climate)
+        nitro_only_manager = RecNitroOnly(wth_tab, gdd_tab, year, climate)
 
         # Initialize robo farmers
         comm_rfarmer = RoboFarmer(com_pract_manager)
-        mach_rec_rfarmer = RoboFarmer(mach_rec_manager)
+        irr_only_rfarmer = RoboFarmer(irr_only_manager)
+        nitro_only_rfarmer = RoboFarmer(nitro_only_manager)
 
         # Generate schedule for this year
         comm_sched = comm_rfarmer.realize_year()
-        mech_sched = mach_rec_rfarmer.realize_year()
-        schedules_common_pract.append(comm_sched)
-        schedules_mech_rec_pract.append(mech_sched)
+        irr_only_sched = irr_only_rfarmer.realize_year()
+        nitro_only_sched = nitro_only_rfarmer.realize_year()
         
+        schedules_common_pract.append(comm_sched)
+        schedules_irr_only_pract.append(irr_only_sched)
+        schedules_nitro_only_pract.append(nitro_only_sched)
+
         if year % 4 == 0:
             plant_date = 136
         else:
@@ -81,7 +87,8 @@ if __name__ == "__main__":
         updates.append({ 'pdate': year*1e3 + plant_date, 'sdate': year*1e3 + plant_date, 'icdat': year*1e3 + plant_date })
 
         total_wat_common_pract.append(sum(comm_sched[:, 1]))
-        total_wat_mech_rec_pract.append(sum(mech_sched[:, 1]))
+        total_wat_irr_only.append(sum(irr_only_sched[:, 1]))
+        total_wat_nitro_only.append(sum(nitro_only_sched[:, 1]))
 
         year_col.append(year)
 
@@ -91,30 +98,29 @@ if __name__ == "__main__":
     # Run DSSAT 
     com_dssat_result = dssat.run_batch(schedules_common_pract, threads, updates=updates)
     dssat.clean_workspace()
-    mach_dssat_result = dssat.run_batch(schedules_mech_rec_pract, threads, updates=updates)
+    irr_only_dssat_result = dssat.run_batch(schedules_irr_only_pract, threads, updates=updates)
+    dssat.clean_workspace()
+    nitro_only_dssat_result = dssat.run_batch(schedules_nitro_only_pract, threads, updates=updates)
+
 
     # Compile results into a dataframe
     com_full_result_mat = np.c_[year_col, climates, com_dssat_result, total_wat_common_pract]
     com_result = pd.DataFrame(com_full_result_mat, columns=['year', 'climate', 'yield', 'leaching', 'total_wat'])
 
-    mach_full_result_mat = np.c_[year_col, climates, mach_dssat_result, total_wat_mech_rec_pract]
-    mach_result = pd.DataFrame(mach_full_result_mat, columns=['year', 'climate', 'yield', 'leaching', 'total_wat'])
+    irr_only_full_result_mat = np.c_[year_col, climates, irr_only_dssat_result, total_wat_irr_only]
+    irr_only_result = pd.DataFrame(irr_only_full_result_mat, columns=['year', 'climate', 'yield', 'leaching', 'total_wat'])
+
+    nitro_only_full_result_mat = np.c_[year_col, climates, nitro_only_dssat_result, total_wat_nitro_only]
+    nitro_only_result = pd.DataFrame(nitro_only_full_result_mat, columns=['year', 'climate', 'yield', 'leaching', 'total_wat'])
+    
 
     print("Common practices")
     print(com_result)
 
-    print("Mach practices")
-    print(mach_result) 
-    
-    x = com_result['year']    
+    print("Irr only practices")
+    print(irr_only_result) 
 
-    y1 = com_result['yield']
-    y2 = mach_result['yield']
-
-    plt.scatter(x, y1, label="Common practices")
-    plt.scatter(x, y2, label="Common practices following recommendations")
-    plt.legend()
-    plt.legend(loc='lower left');
-
-    plt.show()
+    print("Nitro only practices")
+    print(nitro_only_result) 
+   
 

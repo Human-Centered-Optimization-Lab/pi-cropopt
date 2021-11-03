@@ -125,7 +125,7 @@ class Practices():
 
 
 
-class MachRecdPractices(Practices):
+class RecIrrOnly(Practices):
 
     def make_irrigation_management(self, current_day):
 
@@ -199,6 +199,8 @@ class MachRecdPractices(Practices):
         return (irr_amount, current_day + day_delta)
 
 
+class RecNitroOnly(Practices):
+
     def make_nitro_management(self, current_day): 
 
         yesterday_rain = self._get_past_rain_conditions(current_day, 1)
@@ -210,17 +212,22 @@ class MachRecdPractices(Practices):
             day_delta = 1
         elif current_day >= int(self.gdd_tab_year.V6) and self.not_applied_n: 
 
-            if yesterday_rain > 20: 
+
+            if yesterday_rain > 8: 
                 day_delta = 5
                 nitro_amount = 0
-            elif yesterday_rain > 10:
+            elif yesterday_rain > 3.6:
                 day_delta = 3
                 nitro_amount = 0
+            elif past_2day_rain > 0.8:
+                day_delta = 1
+                nitro_amount = 0
             else: 
-                # it can rain any amount, beyond the big ones, and be able to fertilize
                 nitro_amount = self.total_nitro*0.25
                 self.not_applied_n = False
                 day_delta = 1
+
+
 
 
         else: 
