@@ -12,15 +12,16 @@ library(dplyr)
 
 ## Constants
 
-#OUTPUT_FEATURES = "Z:\\Gilgamesh\\kroppian\\agovization_results\\mlearning\\features.feather"
-#OUTPUT_TARGETS = "Z:\\Gilgamesh\\kroppian\\agovization_results\\mlearning\\targets.feather"
-OUTPUT_FEATURES = "/Volumes/data/Gilgamesh/kroppian/agovization_results/mlearning/features.feather"
-OUTPUT_TARGETS = "/Volumes/data/Gilgamesh/kroppian/agovization_results/mlearning/targets.feather"
-OUTPUT_ATTRIB_TAB = "/Volumes/data/Gilgamesh/kroppian/agovization_results/mlearning/attrib_tab.feather"
+OUTPUT_FEATURES = "Z:\\Gilgamesh\\kroppian\\agovization_results\\mlearning\\features.feather"
+OUTPUT_TARGETS = "Z:\\Gilgamesh\\kroppian\\agovization_results\\mlearning\\targets.feather"
+OUTPUT_ATTRIB_TAB = "Z:\\Gilgamesh\\kroppian\\agovization_results\\mlearning\\attrib_tab.feather"
+#OUTPUT_FEATURES = "/Volumes/data/Gilgamesh/kroppian/agovization_results/mlearning/features.feather"
+#OUTPUT_TARGETS = "/Volumes/data/Gilgamesh/kroppian/agovization_results/mlearning/targets.feather"
+#OUTPUT_ATTRIB_TAB = "/Volumes/data/Gilgamesh/kroppian/agovization_results/mlearning/attrib_tab.feather"
 
 
-#TAB_PATH = "Z:\\Gilgamesh\\kroppian\\agovization_results\\mlearning\\2021-09-28_16-47_attr_tab.feather"
-TAB_PATH = "/Volumes/data/Gilgamesh/kroppian/agovization_results/mlearning/2021-10-14_16-07_attr_tab.feather"
+TAB_PATH = "Z:\\Gilgamesh\\kroppian\\agovization_results\\mlearning\\2021-09-28_16-47_attr_tab.feather"
+#TAB_PATH = "/Volumes/data/Gilgamesh/kroppian/agovization_results/mlearning/2021-10-14_16-07_attr_tab.feather"
 STAGES <- c("P","V6",  "V7", "V8", "V9", "V10",  "V11", "V12", "V13", "V14", "R1", "R2", "R3", "R4")
 PREDICTOR_COLS = c()
 
@@ -88,7 +89,11 @@ predictors <- c('application_count',
                'freq_precip_during_R3',
                'freq_precip_during_R4',
                'climate',
-               'total_p')
+               'total_p',
+               'dry_days_before_N',
+               'total_wat_1_day_prior_N',
+               'total_wat_3_day_prior_N',
+               'total_wat_5_day_prior_N')
 
 ## Functions
 stage2num <- function(stage){
@@ -141,11 +146,11 @@ attribute_tab$total_wat_during_R4  <- attribute_tab$total_irr_during_R4  + attri
 ## Split up into features and targets
 features <-
   attribute_tab %>%
-  select(all_of(predictors))
+  dplyr::select(all_of(predictors))
 
 targets <- 
   attribute_tab %>%
-  select(all_of(targets))
+  dplyr::select(all_of(targets))
 
 
 ## Write to output
