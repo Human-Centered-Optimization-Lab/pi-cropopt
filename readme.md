@@ -33,7 +33,7 @@ This project contains an innovization framework, which entails:
 │   ├── appCounter.py           # Takes the genome of an irrigation optimization run and returns the number of applications in each solution. 
 │   ├── cropopt.py              # The optimization problem fed into pymoo, including objective function 
 │   ├── cropover.py             # Implementation of the cropover routine
-│   ├── main.py                 # The main file for the optimization portion of agricultural innovization
+│   ├── main.py                 # The main file for the optimization portion of agricultural innovization. Outputs run_sim_record.pkl
 │   ├── main_cropverVsSPS.py    # Script I used to compare the performance of cropover and sparse population sampling
 │   └── sps.py
 ├── plotting
@@ -41,7 +41,7 @@ This project contains an innovization framework, which entails:
 │   ├── plotHV.py               # Plots the hyper-volume of a given run
 │   └── plotRuns.py             # Plots irrigation, yield, and number of applications in each solution
 ├── postprocess
-│   ├── step0_run_summary.py    # Aggregates multiple runs into a single data table (run_results.xlsx)
+│   ├── step0_run_summary.py    # Aggregates multiple runs into a single data table (run_results.xlsx), and does a non-dominated sorting on all repetitions of the runs
 │   ├── step1_plotPareto.py     # Plots... global pareto front? 
 │   └── step1a_weather_stats.py # Plots... weather stats?? 
 ├── seeds.csv
