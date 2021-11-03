@@ -92,11 +92,13 @@ if __name__ == "__main__":
 
 
 
-
-    att_functs = [  'dry_days_before_N',
-                    'total_wat_1_day_prior_N',
-                    'total_wat_3_day_prior_N',
-                    'total_wat_5_day_prior_N',
+    att_functs = [  'max_p_1_day_prior_N' ,
+                    'max_p_3_day_prior_N',
+                    'max_p_5_day_prior_N',
+                    'dry_days_before_N',
+                    'total_p_1_day_prior_N',
+                    'total_p_3_day_prior_N',
+                    'total_p_5_day_prior_N',
                     'application_count', 
                     'total_irrigation', 
                     'yield_', 
@@ -163,7 +165,10 @@ if __name__ == "__main__":
     
 
     # Do we calculate this term for every row, or just once per year? 
-    single_val_per_year = [ False, # dry_days_before_N
+    single_val_per_year = [ False, # 'max_p_1_day_prior_N' 
+                            False, # 'max_p_3_day_prior_N',
+                            False, # 'max_p_5_day_prior_N',
+                            False, # dry_days_before_N
                             False, # total_wat_1_day_prior_N
                             False, # total_wat_3_day_prior_N
                             False, # total_wat_5_day_prior_N
@@ -234,7 +239,7 @@ if __name__ == "__main__":
 
     # Sanity checks
     if len(single_val_per_year) != len(att_functs):
-        print("Error: attribute function list and single-val-per-year different sizes")
+        print("Error: attribute function list and single-val-per-year different sizes (%d vs %d)" % (len(single_val_per_year) , len(att_functs)))
         sys.exit(1)
 
     if len(set(att_functs)) != len(att_functs):
