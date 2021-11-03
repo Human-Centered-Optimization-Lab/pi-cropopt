@@ -20,8 +20,8 @@ OUTPUT_ATTRIB_TAB = "Z:\\Gilgamesh\\kroppian\\agovization_results\\mlearning\\at
 #OUTPUT_ATTRIB_TAB = "/Volumes/data/Gilgamesh/kroppian/agovization_results/mlearning/attrib_tab.feather"
 
 
-TAB_PATH = "Z:\\Gilgamesh\\kroppian\\agovization_results\\mlearning\\2021-09-28_16-47_attr_tab.feather"
-#TAB_PATH = "/Volumes/data/Gilgamesh/kroppian/agovization_results/mlearning/2021-10-14_16-07_attr_tab.feather"
+TAB_PATH = "Z:\\Gilgamesh\\kroppian\\agovization_results\\mlearning\\2021-11-03_14-34_attr_tab.feather"
+#TAB_PATH = "/Volumes/data/Gilgamesh/kroppian/agovization_results/mlearning/2021-11-03_14-34_attr_tab.feather"
 STAGES <- c("P","V6",  "V7", "V8", "V9", "V10",  "V11", "V12", "V13", "V14", "R1", "R2", "R3", "R4")
 PREDICTOR_COLS = c()
 
@@ -91,9 +91,12 @@ predictors <- c('application_count',
                'climate',
                'total_p',
                'dry_days_before_N',
-               'total_wat_1_day_prior_N',
-               'total_wat_3_day_prior_N',
-               'total_wat_5_day_prior_N')
+               'total_p_1_day_prior_N',
+               'total_p_3_day_prior_N',
+               'total_p_5_day_prior_N',
+               'max_p_1_day_prior_N',
+               'max_p_3_day_prior_N',
+               'max_p_5_day_prior_N')
 
 ## Functions
 stage2num <- function(stage){
