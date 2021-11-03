@@ -126,10 +126,8 @@ class MachRecdPractices(Practices):
             elif yesterday_rain > 10:
                 day_delta = 3
                 nitro_amount = 0
-            elif past_2day_rain > 0:
-                day_delta = 1
-                nitro_amount = 0
             else: 
+                # it can rain any amount, beyond the big ones, and be able to fertilize
                 nitro_amount = self.total_nitro*0.25
                 self.not_applied_n = False
                 day_delta = 1
