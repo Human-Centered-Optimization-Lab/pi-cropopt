@@ -90,7 +90,14 @@ if __name__ == "__main__":
 
     years = set(tab['year'])
 
-    att_functs = [ 'application_count', 
+
+
+
+    att_functs = [  'dry_days_before_N',
+                    'total_wat_1_day_prior_N',
+                    'total_wat_3_day_prior_N',
+                    'total_wat_5_day_prior_N',
+                    'application_count', 
                     'total_irrigation', 
                     'yield_', 
                     'front',
@@ -156,7 +163,11 @@ if __name__ == "__main__":
     
 
     # Do we calculate this term for every row, or just once per year? 
-    single_val_per_year = [ False, # application_count', 
+    single_val_per_year = [ False, # dry_days_before_N
+                            False, # total_wat_1_day_prior_N
+                            False, # total_wat_3_day_prior_N
+                            False, # total_wat_5_day_prior_N
+                            False, # application_count', 
                             False, # total_irrigation', 
                             False, # yield_', 
                             False, # front',

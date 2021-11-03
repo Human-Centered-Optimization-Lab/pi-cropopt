@@ -29,6 +29,26 @@ class AttProcessors:
 
 
     @staticmethod
+    def _get_2nd_n_app_date(sched):
+
+        n_sched = AttProcessors._filter_out_irr_app(sched)
+        second_n_app_date = int(max(n_sched[:, 0]))
+        second_n_app_date = int(second_n_app_date % 1e5)
+
+        return second_n_app_date
+
+    def _get_nth_day_prev_precip(wth_tab, date, n):
+
+        begin_date = date - n + 1
+        end_date = date
+
+        wth_mask = np.logical_and(wth_tab['@DATE'] >= begin_date, wth_tab['@DATE'] <= end_date )
+        print(wth_tab[wth_mask])
+        rain_amount = sum(wth_tab[wth_mask].RAIN) 
+
+        return rain_amount
+
+    @staticmethod
     def _filter_out_n_app(raw_schedule):
         return raw_schedule[raw_schedule[:,AttProcessors.IRR_COL] != 0]
 
@@ -149,6 +169,49 @@ class AttProcessors:
 
     # --- Processed attributes ---
 
+
+    def dry_days_before_N(self, row):
+
+        second_n_app_date = AttProcessors._get_2nd_n_app_date(row.scheds)
+
+        plant_date = self.gdd_tab.P[0] 
+        year = self.gdd_tab.Year[0] 
+
+        plant_doy = AttProcessors._add_year_to_doy_2dig(plant_date, year)
+
+        dates = list(range(plant_doy, second_n_app_date))
+        dates.reverse()
+      
+        dry_days = 0 
+
+        # Move backwards from the the day before the second nitrogen app
+        for date in dates: 
+            rain_amount = float(self.weather_tab[self.weather_tab['@DATE'] == date].RAIN) 
+
+            if rain_amount != 0:
+                break
+
+            dry_days = dry_days + 1 
+
+        return dry_days
+
+    def total_wat_1_day_prior_N(self, row):
+
+        second_n_app_date = AttProcessors._get_2nd_n_app_date(row.scheds)
+        rain_amount = AttProcessors._get_nth_day_prev_precip(self.weather_tab, second_n_app_date - 1, 1)
+        return rain_amount
+
+    def total_wat_3_day_prior_N(self, row):
+
+        second_n_app_date = AttProcessors._get_2nd_n_app_date(row.scheds)
+        rain_amount = AttProcessors._get_nth_day_prev_precip(self.weather_tab, second_n_app_date - 1, 3)
+        return rain_amount
+
+    def total_wat_5_day_prior_N(self, row):
+
+        second_n_app_date = AttProcessors._get_2nd_n_app_date(row.scheds)
+        rain_amount = AttProcessors._get_nth_day_prev_precip(self.weather_tab, second_n_app_date - 1, 5)
+        return rain_amount
 
     def climate(self, row):
 
