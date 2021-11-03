@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from dssatmod.robofarmer import RoboFarmer
 from dssatmod.robofarmer import MachRecdPractices
-from dssatmod.robofarmer import CommonPractice
+from dssatmod.robofarmer import Practices
 from dssatmod.dssat4dum import Dssat4Dum
 import matplotlib.pyplot as plt
 
@@ -60,7 +60,7 @@ if __name__ == "__main__":
         climate = year_by_climate[year] 
 
         # Initialize managers
-        com_pract_manager = CommonPractice(wth_tab, gdd_tab, year, climate)
+        com_pract_manager = Practices(wth_tab, gdd_tab, year, climate)
         mach_rec_manager = MachRecdPractices(wth_tab, gdd_tab, year, climate)
 
         # Initialize robo farmers

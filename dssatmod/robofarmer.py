@@ -35,6 +35,96 @@ class Practices():
         return sum(rain_ts)
 
 
+    def make_irrigation_management(self, current_day):
+
+
+        past_3day_rain = self._get_past_rain_conditions(current_day, 3)
+        past_5day_rain = self._get_past_rain_conditions(current_day, 5)
+        future_rain = self._get_future_rain_conditions(current_day, 2)
+
+        total_past_fut_rain = past_3day_rain + future_rain
+
+        # Irrigation logic
+        if current_day < int(self.gdd_tab_year.V6) or current_day >= int(self.gdd_tab_year.R2):
+            # If out of irrigation window, do nothing and move forward a day
+            day_delta = 1
+            irr_amount = 0
+        elif current_day < int(self.gdd_tab_year.R1): 
+            # If plant still in vegetative stage
+
+            if past_5day_rain >= 20: 
+                # Avoid irrigation in heavy rain period
+                irr_amount = 0
+                day_delta = 10
+            if total_past_fut_rain >= 10:
+                # Skip irrigation if needs already met
+                irr_amount = 0 
+                day_delta = 5
+            else: 
+                # Make up for irrigation deficit if needed
+                irr_amount = 10 - total_past_fut_rain 
+                day_delta = 5
+
+
+        elif current_day < int(self.gdd_tab_year.R2): 
+            # If plant is in the reproductive stages
+
+            if past_5day_rain >= 20: 
+                # Avoid irrigation in heavy rain period
+                irr_amount = 0
+                day_delta = 10
+            elif total_past_fut_rain >= 20:
+                # Skip irrigation if needs already met
+                irr_amount = 0
+                day_delta = 5
+            else:
+                # Make up for irrigation deficit if needed
+                irr_amount = 20 - total_past_fut_rain
+                day_delta = 5
+
+        if irr_amount != 0:
+            self.irrigation_record[self.year_modded + current_day] = irr_amount
+
+
+        return (irr_amount, current_day + day_delta)
+
+
+    def make_nitro_management(self, current_day): 
+
+        yesterday_rain = self._get_past_rain_conditions(current_day, 1)
+        past_2day_rain = self._get_past_rain_conditions(current_day, 2)
+
+        # Nitrogen logic
+        if current_day == int(self.gdd_tab_year.P): 
+            nitro_amount = self.total_nitro*0.75
+            day_delta = 1
+        elif current_day >= int(self.gdd_tab_year.V6) and self.not_applied_n: 
+
+            if yesterday_rain > 20: 
+                day_delta = 5
+                nitro_amount = 0
+            elif yesterday_rain > 10:
+                day_delta = 3
+                nitro_amount = 0
+            elif past_2day_rain > 0:
+                day_delta = 1
+                nitro_amount = 0
+            else: 
+                nitro_amount = self.total_nitro*0.25
+                self.not_applied_n = False
+                day_delta = 1
+
+
+        else: 
+            nitro_amount = 0
+            day_delta = 1
+
+        return (nitro_amount, current_day + day_delta)
+
+
+
+
+
 class MachRecdPractices(Practices):
 
     def make_irrigation_management(self, current_day):
@@ -128,97 +218,6 @@ class MachRecdPractices(Practices):
                 nitro_amount = 0
             else: 
                 # it can rain any amount, beyond the big ones, and be able to fertilize
-                nitro_amount = self.total_nitro*0.25
-                self.not_applied_n = False
-                day_delta = 1
-
-
-        else: 
-            nitro_amount = 0
-            day_delta = 1
-
-        return (nitro_amount, current_day + day_delta)
-
-
-
-
-class CommonPractice(Practices):
-        
-    def make_irrigation_management(self, current_day):
-
-
-        past_3day_rain = self._get_past_rain_conditions(current_day, 3)
-        past_5day_rain = self._get_past_rain_conditions(current_day, 5)
-        future_rain = self._get_future_rain_conditions(current_day, 2)
-
-        total_past_fut_rain = past_3day_rain + future_rain
-
-        # Irrigation logic
-        if current_day < int(self.gdd_tab_year.V6) or current_day >= int(self.gdd_tab_year.R2):
-            # If out of irrigation window, do nothing and move forward a day
-            day_delta = 1
-            irr_amount = 0
-        elif current_day < int(self.gdd_tab_year.R1): 
-            # If plant still in vegetative stage
-
-            if past_5day_rain >= 20: 
-                # Avoid irrigation in heavy rain period
-                irr_amount = 0
-                day_delta = 10
-            if total_past_fut_rain >= 10:
-                # Skip irrigation if needs already met
-                irr_amount = 0 
-                day_delta = 5
-            else: 
-                # Make up for irrigation deficit if needed
-                irr_amount = 10 - total_past_fut_rain 
-                day_delta = 5
-
-
-        elif current_day < int(self.gdd_tab_year.R2): 
-            # If plant is in the reproductive stages
-
-            if past_5day_rain >= 20: 
-                # Avoid irrigation in heavy rain period
-                irr_amount = 0
-                day_delta = 10
-            elif total_past_fut_rain >= 20:
-                # Skip irrigation if needs already met
-                irr_amount = 0
-                day_delta = 5
-            else:
-                # Make up for irrigation deficit if needed
-                irr_amount = 20 - total_past_fut_rain
-                day_delta = 5
-
-        if irr_amount != 0:
-            self.irrigation_record[self.year_modded + current_day] = irr_amount
-
-
-        return (irr_amount, current_day + day_delta)
-
-
-    def make_nitro_management(self, current_day): 
-
-        yesterday_rain = self._get_past_rain_conditions(current_day, 1)
-        past_2day_rain = self._get_past_rain_conditions(current_day, 2)
-
-        # Nitrogen logic
-        if current_day == int(self.gdd_tab_year.P): 
-            nitro_amount = self.total_nitro*0.75
-            day_delta = 1
-        elif current_day >= int(self.gdd_tab_year.V6) and self.not_applied_n: 
-
-            if yesterday_rain > 20: 
-                day_delta = 5
-                nitro_amount = 0
-            elif yesterday_rain > 10:
-                day_delta = 3
-                nitro_amount = 0
-            elif past_2day_rain > 0:
-                day_delta = 1
-                nitro_amount = 0
-            else: 
                 nitro_amount = self.total_nitro*0.25
                 self.not_applied_n = False
                 day_delta = 1
