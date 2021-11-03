@@ -111,24 +111,36 @@ class MachRecdPractices(Practices):
 
     def make_nitro_management(self, current_day): 
 
-        past_3day_rain = self._get_past_rain_conditions(current_day, 3)
-        past_5day_rain = self._get_past_rain_conditions(current_day, 5)
-        future_rain = self._get_future_rain_conditions(current_day, 2)
-
-        total_past_fut_rain = past_3day_rain + future_rain
+        yesterday_rain = self._get_past_rain_conditions(current_day, 1)
+        past_2day_rain = self._get_past_rain_conditions(current_day, 2)
 
         # Nitrogen logic
         if current_day == int(self.gdd_tab_year.P): 
             nitro_amount = self.total_nitro*0.75
-        elif current_day > int(self.gdd_tab_year.V6) and self.not_applied_n: 
-            nitro_amount = self.total_nitro*0.25
-            self.not_applied_n = False
+            day_delta = 1
+        elif current_day >= int(self.gdd_tab_year.V6) and self.not_applied_n: 
+
+            if yesterday_rain > 20: 
+                day_delta = 5
+                nitro_amount = 0
+            elif yesterday_rain > 10:
+                day_delta = 3
+                nitro_amount = 0
+            elif past_2day_rain > 0:
+                day_delta = 1
+                nitro_amount = 0
+            else: 
+                nitro_amount = self.total_nitro*0.25
+                self.not_applied_n = False
+                day_delta = 1
+
+
         else: 
             nitro_amount = 0
-
-        day_delta = 1
+            day_delta = 1
 
         return (nitro_amount, current_day + day_delta)
+
 
 
 
@@ -190,22 +202,33 @@ class CommonPractice(Practices):
 
     def make_nitro_management(self, current_day): 
 
-        past_3day_rain = self._get_past_rain_conditions(current_day, 3)
-        past_5day_rain = self._get_past_rain_conditions(current_day, 5)
-        future_rain = self._get_future_rain_conditions(current_day, 2)
-
-        total_past_fut_rain = past_3day_rain + future_rain
+        yesterday_rain = self._get_past_rain_conditions(current_day, 1)
+        past_2day_rain = self._get_past_rain_conditions(current_day, 2)
 
         # Nitrogen logic
         if current_day == int(self.gdd_tab_year.P): 
             nitro_amount = self.total_nitro*0.75
-        elif current_day > int(self.gdd_tab_year.V6) and self.not_applied_n: 
-            nitro_amount = self.total_nitro*0.25
-            self.not_applied_n = False
+            day_delta = 1
+        elif current_day >= int(self.gdd_tab_year.V6) and self.not_applied_n: 
+
+            if yesterday_rain > 20: 
+                day_delta = 5
+                nitro_amount = 0
+            elif yesterday_rain > 10:
+                day_delta = 3
+                nitro_amount = 0
+            elif past_2day_rain > 0:
+                day_delta = 1
+                nitro_amount = 0
+            else: 
+                nitro_amount = self.total_nitro*0.25
+                self.not_applied_n = False
+                day_delta = 1
+
+
         else: 
             nitro_amount = 0
-
-        day_delta = 1
+            day_delta = 1
 
         return (nitro_amount, current_day + day_delta)
 
@@ -258,21 +281,12 @@ class RoboFarmer():
 
         management = np.array(raw_management)
 
+        print("----")
+        print(self.manager.gdd_tab_year)
+        print(management)
+        print("----")
+
         return management
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
