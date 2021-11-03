@@ -37,7 +37,7 @@ class Practices():
 
 class MachRecdPractices(Practices):
 
-    def make_management_decision(self, current_day):
+    def make_irrigation_management(self, current_day):
 
 
         STAGE_UPDATES = { 
@@ -106,6 +106,16 @@ class MachRecdPractices(Practices):
         if irr_amount != 0:
             self.irrigation_record[self.year_modded + current_day] = irr_amount
 
+        return (irr_amount, current_day + day_delta)
+
+
+    def make_nitro_management(self, current_day): 
+
+        past_3day_rain = self._get_past_rain_conditions(current_day, 3)
+        past_5day_rain = self._get_past_rain_conditions(current_day, 5)
+        future_rain = self._get_future_rain_conditions(current_day, 2)
+
+        total_past_fut_rain = past_3day_rain + future_rain
 
         # Nitrogen logic
         if current_day == int(self.gdd_tab_year.P): 
@@ -116,12 +126,15 @@ class MachRecdPractices(Practices):
         else: 
             nitro_amount = 0
 
-        return (irr_amount, nitro_amount, current_day + day_delta)
+        day_delta = 1
+
+        return (nitro_amount, current_day + day_delta)
+
 
 
 class CommonPractice(Practices):
         
-    def make_management_decision(self, current_day):
+    def make_irrigation_management(self, current_day):
 
 
         past_3day_rain = self._get_past_rain_conditions(current_day, 3)
@@ -129,8 +142,6 @@ class CommonPractice(Practices):
         future_rain = self._get_future_rain_conditions(current_day, 2)
 
         total_past_fut_rain = past_3day_rain + future_rain
-
-
 
         # Irrigation logic
         if current_day < int(self.gdd_tab_year.V6) or current_day >= int(self.gdd_tab_year.R2):
@@ -174,6 +185,16 @@ class CommonPractice(Practices):
             self.irrigation_record[self.year_modded + current_day] = irr_amount
 
 
+        return (irr_amount, current_day + day_delta)
+
+
+    def make_nitro_management(self, current_day): 
+
+        past_3day_rain = self._get_past_rain_conditions(current_day, 3)
+        past_5day_rain = self._get_past_rain_conditions(current_day, 5)
+        future_rain = self._get_future_rain_conditions(current_day, 2)
+
+        total_past_fut_rain = past_3day_rain + future_rain
 
         # Nitrogen logic
         if current_day == int(self.gdd_tab_year.P): 
@@ -184,7 +205,11 @@ class CommonPractice(Practices):
         else: 
             nitro_amount = 0
 
-        return (irr_amount, nitro_amount, current_day + day_delta)
+        day_delta = 1
+
+        return (nitro_amount, current_day + day_delta)
+
+
 
 
 class RoboFarmer():
@@ -203,24 +228,56 @@ class RoboFarmer():
 
         current_day = int(self.manager.gdd_tab_year.P) 
 
+        # Build irrigation schedule
         while current_day < int(self.manager.gdd_tab_year.R4):
 
-            (irr_amount, nitro_amount, next_day) = self.manager.make_management_decision(current_day)
+            (irr_amount, next_day) = self.manager.make_irrigation_management(current_day)
 
             year_code = self.manager.year*1e3 + current_day
 
             if irr_amount != 0:
                 raw_management.append([year_code, irr_amount, 0, 0, 0])
 
+            current_day = next_day
+            
+
+        current_day = int(self.manager.gdd_tab_year.P) 
+        # Build nitrogen schedule
+        while current_day < int(self.manager.gdd_tab_year.R4):
+
+            (nitro_amount, next_day) = self.manager.make_nitro_management(current_day)
+
+            year_code = self.manager.year*1e3 + current_day
+
             if nitro_amount != 0: 
                 raw_management.append([year_code, 0, nitro_amount, 0, 0])
 
 
             current_day = next_day
-            
+
 
         management = np.array(raw_management)
 
         return management
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
