@@ -12,15 +12,6 @@ if(! is.null(dev.list())){
   dev.off(dev.list()["RStudioGD"]) # Clears plots
 }
 
-## Plot percentage of years improvement
-p1 <- ggplot(data=run_summary, aes(x=run, y=percent_yield_impr*100))  +
-   geom_bar(stat="identity") + 
-   ylim(0, 100  ) + 
-   ylab("Percentage of years improved (%)") + 
-   xlab("Strategy") 
-
-plot(p1)
-
 
 ## Plot average loss/gains
 
@@ -37,40 +28,75 @@ plot_run_summary_2 <- run_summary %>%
 
 plot_run_summary <- rbind(plot_run_summary_1, plot_run_summary_2)
 
-p2 <- ggplot(data=plot_run_summary, aes(x=run, y=change, fill=type)) + 
+p1 <- ggplot(data=plot_run_summary, aes(x=run, y=change, fill=type)) + 
     geom_bar(stat="identity", position=position_dodge()) + 
     labs(x = "", fill = "Chagne type") + 
     ylab("Magnitude of change in yield (kg/ha)") 
 
-plot(p2)
+plot(p1)
 
 
 ## Plot cumulative net gain in yield 
 
 # stack them on top of each other for ggplot
 df1 <- cumul_net_changes %>% 
-        dplyr::select(year, cumul_net_changes_irr) %>%
-        rename(net_change=cumul_net_changes_irr) %>%
+        dplyr::select(year, cumul_net_yield_changes_irr) %>%
+        rename(net_change=cumul_net_yield_changes_irr) %>%
         mutate(type="Irrigation only")
 
 
 df2 <- cumul_net_changes %>% 
-        dplyr::select(year, cumul_net_changes_nitro) %>%
-        rename(net_change=cumul_net_changes_nitro) %>%
+        dplyr::select(year, cumul_net_yield_changes_nitro) %>%
+        rename(net_change=cumul_net_yield_changes_nitro) %>%
         mutate(type="Nitro only")
 
 df3 <- cumul_net_changes %>% 
-        dplyr::select(year, cumul_net_changes_all_recs) %>%
-        rename(net_change=cumul_net_changes_all_recs) %>%
+        dplyr::select(year, cumul_net_yield_changes_all_recs) %>%
+        rename(net_change=cumul_net_yield_changes_all_recs) %>%
         mutate(type="All reccomendations")
 
 
-cumul_net_changes_plot <- rbind(df1, df2, df3)
+cumul_net_yield_changes_plot <- rbind(df1, df2, df3)
 
-p3 <- ggplot(data=cumul_net_changes_plot, aes(x=year, y=net_change, group=type)) + 
+p2 <- ggplot(data=cumul_net_yield_changes_plot, aes(x=year, y=net_change, group=type)) + 
       geom_line(aes(color=type)) +
       geom_point(aes(shape=type)) + 
       ylab("Cumulative net yield increase (kg/ha)") 
       
+plot(p2)
 
+
+## Plot cumulative net change in leaching 
+
+# stack them on top of each other for ggplot
+df1 <- cumul_net_changes %>% 
+        dplyr::select(year, cumul_net_leach_changes_irr) %>%
+        rename(net_change=cumul_net_leach_changes_irr) %>%
+        mutate(type="Irrigation only")
+
+
+df2 <- cumul_net_changes %>% 
+        dplyr::select(year, cumul_net_leach_changes_nitro) %>%
+        rename(net_change=cumul_net_leach_changes_nitro) %>%
+        mutate(type="Nitro only")
+
+df3 <- cumul_net_changes %>% 
+        dplyr::select(year, cumul_net_leach_changes_all_recs) %>%
+        rename(net_change=cumul_net_leach_changes_all_recs) %>%
+        mutate(type="All reccomendations")
+
+avg_leach <- 16.783
+
+df4 <- cumul_net_changes %>% 
+        mutate(net_change=avg_leach) %>%
+        mutate(type="Average leaching in common practices") %>%
+        dplyr::select(year, net_change, type)
+
+cumul_net_leach_changes_plot <- rbind(df1, df2, df3, df4)
+
+p3 <- ggplot(data=cumul_net_leach_changes_plot, aes(x=year, y=net_change, group=type)) + 
+      geom_line(aes(color=type)) +
+      geom_point(aes(shape=type)) + 
+      ylab("Cumulative net leaching increase (kg/ha)") 
+      
 plot(p3)

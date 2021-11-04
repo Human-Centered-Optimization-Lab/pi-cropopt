@@ -108,33 +108,57 @@ run_summary <- data.frame(run, percent_yield_impr, avg_yield_loss, avg_yield_gai
 
 ## Year-by-year analysis
 
-# Calculate the net gain from the recommended practices
-net_changes_irr_only <- irr_only_result %>% 
+# Calculate the net yield gain from the recommended practices
+net_yield_changes_irr_only <- irr_only_result %>% 
                         mutate(irr_only_net_yield = yield_rec - yield) %>%
                         select(year, irr_only_net_yield)
 
-net_changes_nitro_only <- nitro_only_result %>% 
+net_yield_changes_nitro_only <- nitro_only_result %>% 
                           mutate(nitro_only_net_yield = yield_rec - yield) %>%
                           select(year, nitro_only_net_yield)
 
-net_changes_all_recs <- all_recs_result %>% 
+net_yield_changes_all_recs <- all_recs_result %>% 
                         mutate(all_rec_net_yield = yield_rec - yield) %>%
                         select(year, all_rec_net_yield)
 
-net_changes <- net_changes_irr_only %>%
-               full_join(net_changes_nitro_only) %>%
-               full_join(net_changes_all_recs)
+# Calculate the net leach change from the recommended practices
+net_leach_changes_irr_only <- irr_only_result %>% 
+                        mutate(irr_only_net_leach = leaching_rec - leaching) %>%
+                        select(year, irr_only_net_leach)
+
+net_leach_changes_nitro_only <- nitro_only_result %>% 
+                          mutate(nitro_only_net_leach = leaching_rec - leaching) %>%
+                          select(year, nitro_only_net_leach)
+
+net_leach_changes_all_recs <- all_recs_result %>% 
+                        mutate(all_rec_net_leach = leaching_rec - leaching) %>%
+                        select(year, all_rec_net_leach)
+
+
+
+
+
+net_changes <- net_yield_changes_irr_only %>%
+               full_join(net_yield_changes_nitro_only) %>%
+               full_join(net_yield_changes_all_recs) %>%
+               full_join(net_leach_changes_irr_only) %>%
+               full_join(net_leach_changes_nitro_only) %>%
+               full_join(net_leach_changes_all_recs) 
                
 
 # Calculate the cumulative net gain from the recommended practices
 cumul_net_changes <- net_changes %>% 
                      arrange(year) %>%
-                     mutate(cumul_net_changes_irr = cumsum(irr_only_net_yield)) %>%
-                     mutate(cumul_net_changes_nitro = cumsum(nitro_only_net_yield)) %>%
-                     mutate(cumul_net_changes_all_recs = cumsum(all_rec_net_yield)) 
+                     mutate(cumul_net_yield_changes_irr = cumsum(irr_only_net_yield)) %>%
+                     mutate(cumul_net_yield_changes_nitro = cumsum(nitro_only_net_yield)) %>%
+                     mutate(cumul_net_yield_changes_all_recs = cumsum(all_rec_net_yield)) %>%
+                     mutate(cumul_net_leach_changes_irr = cumsum(irr_only_net_leach)) %>%
+                     mutate(cumul_net_leach_changes_nitro = cumsum(nitro_only_net_leach)) %>%
+                     mutate(cumul_net_leach_changes_all_recs = cumsum(all_rec_net_leach)) 
   
 
 
+print(str_interp("Average leaching: ${mean(comm_pract$leaching)}"))
 
 
 ## Output results
