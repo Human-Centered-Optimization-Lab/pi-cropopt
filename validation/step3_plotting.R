@@ -24,6 +24,7 @@ plot_run_summary_1 <- run_summary %>%
 plot_run_summary_2 <- run_summary %>% 
                       dplyr::select(run, avg_yield_loss) %>% 
                       dplyr::rename(change = avg_yield_loss) %>% 
+                      dplyr::mutate(change = change*-1) %>% 
                       dplyr::mutate(type = "loss")
 
 plot_run_summary <- rbind(plot_run_summary_1, plot_run_summary_2)
