@@ -37,7 +37,7 @@ NITRO_ONLY_RESULT_PATH    <- "/Volumes/data/Gilgamesh/kroppian/agovization_resul
 ALL_RECS_RESULT_PATH      <- "/Volumes/data/Gilgamesh/kroppian/agovization_results/validation/all_recs_full_result.feather"
 
 SUMMARY_OUTPUT_PATH <- "/Volumes/data/Gilgamesh/kroppian/agovization_results/validation/validation_summary.feather"
-CUMUL_NET_CHANGE_OUTPUT_PATH <- "/Volumes/data/Gilgamesh/kroppian/agovization_results/validation/validation_summary.feather"
+CUMUL_NET_CHANGE_OUTPUT_PATH <- "/Volumes/data/Gilgamesh/kroppian/agovization_results/validation/cumul_net_change.feather"
 
 comm_pract           <- arrow::read_feather(COMM_PRACT_PATH)     
 irr_only_result      <- arrow::read_feather(IRR_ONLY_RESULT_PATH)  
