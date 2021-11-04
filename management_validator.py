@@ -6,6 +6,9 @@ import matplotlib.pyplot as plt
 
 if __name__ == "__main__":
 
+
+    OUTPUT_PATH = "/mnt/nas/kroppian/agovization_results/"
+
     # Gather weather data
     wth_file_path = "dhome/Weather/CASSREPR.WTH"
     gdd_tab_path = "management_dates.csv"
@@ -45,6 +48,8 @@ if __name__ == "__main__":
     schedules_common_pract = []
     schedules_irr_only_pract = []
     schedules_nitro_only_pract = []
+    schedules_all_recs = []
+    
 
     updates = []
 
@@ -55,6 +60,7 @@ if __name__ == "__main__":
     total_wat_common_pract = [] 
     total_wat_irr_only= [] 
     total_wat_nitro_only = []
+    total_wat_all_recs = []
 
     for year in year_by_climate: 
 
@@ -64,20 +70,24 @@ if __name__ == "__main__":
         com_pract_manager = Practices(wth_tab, gdd_tab, year, climate)
         irr_only_manager = RecIrrOnly(wth_tab, gdd_tab, year, climate)
         nitro_only_manager = RecNitroOnly(wth_tab, gdd_tab, year, climate)
+        all_recs_manager = AllRecs(wth_tab, gdd_tab, year, climate)
 
         # Initialize robo farmers
         comm_rfarmer = RoboFarmer(com_pract_manager)
         irr_only_rfarmer = RoboFarmer(irr_only_manager)
         nitro_only_rfarmer = RoboFarmer(nitro_only_manager)
+        all_recs_rfarmer = RoboFarmer(all_recs_manager) 
 
         # Generate schedule for this year
         comm_sched = comm_rfarmer.realize_year()
         irr_only_sched = irr_only_rfarmer.realize_year()
         nitro_only_sched = nitro_only_rfarmer.realize_year()
+        all_recs_sched = all_recs_rfarmer.realize_year()
         
         schedules_common_pract.append(comm_sched)
         schedules_irr_only_pract.append(irr_only_sched)
         schedules_nitro_only_pract.append(nitro_only_sched)
+        schedules_all_recs.append(all_recs_sched)
 
         if year % 4 == 0:
             plant_date = 136
@@ -89,6 +99,7 @@ if __name__ == "__main__":
         total_wat_common_pract.append(sum(comm_sched[:, 1]))
         total_wat_irr_only.append(sum(irr_only_sched[:, 1]))
         total_wat_nitro_only.append(sum(nitro_only_sched[:, 1]))
+        total_wat_all_recs.append(sum(all_recs_sched[:, 1]))
 
         year_col.append(year)
 
@@ -101,6 +112,8 @@ if __name__ == "__main__":
     irr_only_dssat_result = dssat.run_batch(schedules_irr_only_pract, threads, updates=updates)
     dssat.clean_workspace()
     nitro_only_dssat_result = dssat.run_batch(schedules_nitro_only_pract, threads, updates=updates)
+    dssat.clean_workspace()
+    all_recs_dssat_result = dssat.run_batch(schedules_all_recs, threads, updates=updates)
 
 
     # Compile results into a dataframe
@@ -112,7 +125,10 @@ if __name__ == "__main__":
 
     nitro_only_full_result_mat = np.c_[year_col, climates, nitro_only_dssat_result, total_wat_nitro_only]
     nitro_only_result = pd.DataFrame(nitro_only_full_result_mat, columns=['year', 'climate', 'yield', 'leaching', 'total_wat'])
-    
+   
+    all_recs_full_result_mat = np.c_[year_col, climates, all_recs_dssat_result, total_wat_all_recs]
+    all_recs_full_result = pd.DataFrame(all_recs_full_result_mat, columns=['year', 'climate', 'yield', 'leaching', 'total_wat'])
+
 
     print("Common practices")
     print(com_result)
@@ -122,5 +138,20 @@ if __name__ == "__main__":
 
     print("Nitro only practices")
     print(nitro_only_result) 
-   
+  
+    print("Irrigation and nitrogen recommendations")
+    print(all_recs_full_result)
+
+
+    print("Saving...")
+    com_result.to_feather("%s/comm_pract.feather"                     % OUTPUT_PATH)
+    irr_only_result.to_feather("%s/irr_only_result.feather"           % OUTPUT_PATH)
+    nitro_only_result.to_feather("%s/nitro_only_result.feather"       % OUTPUT_PATH)
+    all_recs_full_result.to_feather("%s/all_recs_full_result.feather" % OUTPUT_PATH)
+
+
+    print("Done.")
+
+
+
 

@@ -238,6 +238,11 @@ class RecNitroOnly(Practices):
 
 
 
+class AllRecs(RecIrrOnly, RecNitroOnly):
+
+    def dummy(self):
+        print("Howdy!")
+
 
 class RoboFarmer():
 
