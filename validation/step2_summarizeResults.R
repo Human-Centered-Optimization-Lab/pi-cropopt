@@ -1,6 +1,24 @@
 library(dplyr)
 library(magrittr)
 
+summarize <- function(input_tab) {
+ 
+  output_tab <- input_tab %>% 
+                mutate(imprv_yield = yield_rec > yield) %>%
+                mutate(worse_yield = yield_rec < yield) %>% 
+                mutate(good_leaching = leaching_rec >= leaching) %>%
+                mutate(imprv_leaching = leaching_rec < leaching) %>%
+                mutate(worse_leaching = leaching_rec > leaching) %>%
+                mutate(loss_yield = ifelse(worse_yield, yield - yield_rec, 0)) %>%
+                mutate(gain_yield = ifelse(imprv_yield, yield_rec - yield, 0)) %>% 
+                mutate(loss_leaching = ifelse(worse_leaching, leaching_rec - leaching, 0 )) %>%
+                mutate(gain_leaching = ifelse(imprv_leaching, leaching - leaching_rec, 0))
+   
+  return(output_tab)  
+}
+
+
+
 ## Reading data
 
 COMM_PRACT_PATH           <- "/Volumes/data/Gilgamesh/kroppian/agovization_results/comm_pract.feather"
@@ -42,6 +60,14 @@ nitro_only_result <- comm_pract %>%
 
 all_recs_result <- comm_pract %>%
                    full_join(all_recs_result)
+
+## Performance summary 
+
+irr_only_summary <- summarize(irr_only_result)
+
+nitro_only_summary <- summarize(nitro_only_result)
+
+all_recs_summary <- summarize(all_recs_result)
 
 
 
