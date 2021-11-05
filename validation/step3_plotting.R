@@ -3,6 +3,7 @@ library(magrittr)
 
 SUMMARY_INPUT_PATH <- "/Volumes/data/Gilgamesh/kroppian/agovization_results/validation/validation_summary.feather"
 CUMUL_NET_CHANGE_OUTPUT_PATH <- "/Volumes/data/Gilgamesh/kroppian/agovization_results/validation/cumul_net_change.feather"
+PLOT_OUTPUT_PATH <- "/Users/iankropp/OneDrive - Michigan State University/Documents/Shared/todo/paper1Innovization/figures"
 
 run_summary <- arrow::read_feather(SUMMARY_INPUT_PATH)    
 cumul_net_changes <- arrow::read_feather(CUMUL_NET_CHANGE_OUTPUT_PATH)
@@ -19,23 +20,30 @@ if(! is.null(dev.list())){
 plot_run_summary_1 <- run_summary %>% 
                       dplyr::select(run, avg_yield_gain) %>% 
                       dplyr::rename(change = avg_yield_gain) %>% 
-                      dplyr::mutate(type = "gain")
+                      dplyr::mutate(type = "gains")
 
 plot_run_summary_2 <- run_summary %>% 
                       dplyr::select(run, avg_yield_loss) %>% 
                       dplyr::rename(change = avg_yield_loss) %>% 
                       dplyr::mutate(change = change*-1) %>% 
-                      dplyr::mutate(type = "loss")
+                      dplyr::mutate(type = "losses")
 
 plot_run_summary <- rbind(plot_run_summary_1, plot_run_summary_2)
 
 p1 <- ggplot(data=plot_run_summary, aes(x=run, y=change, fill=type)) + 
     geom_bar(stat="identity", position=position_dodge()) + 
-    labs(x = "", fill = "Chagne type") + 
-    ylab("Magnitude of change in yield (kg/ha)") 
+    labs(x = "", fill = "Change type") + 
+    ylab("Average change in yield (2010-2018) (kg/ha)") 
 
 plot(p1)
 
+ggsave(
+  paste(PLOT_OUTPUT_PATH, "/averageChangeYield.png", sep=""),
+  p1,
+  width = 5,
+  height = 4,
+  dpi = 1200
+)
 
 ## Plot cumulative net gain in yield 
 
@@ -66,6 +74,13 @@ p2 <- ggplot(data=cumul_net_yield_changes_plot, aes(x=year, y=net_change, group=
       
 plot(p2)
 
+ggsave(
+  paste(PLOT_OUTPUT_PATH, "/cumulYieldChange.png", sep=""),
+  p2,
+  width = 6,
+  height = 4,
+  dpi = 1200
+)
 
 ## Plot cumulative net change in leaching 
 
@@ -101,3 +116,11 @@ p3 <- ggplot(data=cumul_net_leach_changes_plot, aes(x=year, y=net_change, group=
       ylab("Cumulative net leaching increase (kg/ha)") 
       
 plot(p3)
+
+ggsave(
+  paste(PLOT_OUTPUT_PATH, "/cumulLeachChange.png", sep=""),
+  p3,
+  width = 6,
+  height = 4,
+  dpi = 1200
+)
