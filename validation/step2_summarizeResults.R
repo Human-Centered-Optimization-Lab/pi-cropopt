@@ -82,7 +82,7 @@ irr_only_summary <- summarize(irr_only_result)
 nitro_only_summary <- summarize(nitro_only_result)
 all_recs_summary <- summarize(all_recs_result)
 
-# Create results table
+# Create summarized results table
 run <- c("Irr recs only", "Nitro recs only", "Irr and Nitro recs")
 
 percent_yield_impr <- c(
@@ -92,10 +92,72 @@ percent_yield_impr <- c(
                         )
 
 avg_yield_loss <- c(
-                      avg_yield_loss(irr_only_summary),
+                      avg_yield_loss(irr_only_summary)  ,
                       avg_yield_loss(nitro_only_summary),
                       avg_yield_loss(all_recs_summary)
                     )
+
+max_yield_loss <- c(
+                    irr_only_summary %>% 
+                      filter(worse_yield) %>% 
+                      mutate(diff=yield-yield_rec) %>% 
+                      summarise(m = max(diff)) %>% pull(m),
+                    nitro_only_summary %>% 
+                      filter(worse_yield) %>% 
+                      mutate(diff=yield-yield_rec) %>% 
+                      summarise(m = max(diff)) %>% pull(m),
+                    all_recs_summary %>% 
+                      filter(worse_yield) %>% 
+                      mutate(diff=yield-yield_rec) %>% 
+                      summarise(m = max(diff)) %>% pull(m)
+)
+
+min_yield_loss <- c(
+                    irr_only_summary %>% 
+                      filter(worse_yield) %>% 
+                      mutate(diff=yield-yield_rec) %>% 
+                      summarise(m = min(diff)) %>% pull(m),
+                    nitro_only_summary %>% 
+                      filter(worse_yield) %>% 
+                      mutate(diff=yield-yield_rec) %>% 
+                      summarise(m = min(diff)) %>% pull(m),
+                    all_recs_summary %>% 
+                      filter(worse_yield) %>% 
+                      mutate(diff=yield-yield_rec) %>% 
+                      summarise(m = min(diff)) %>% pull(m)
+)
+
+max_yield_gain <- c(
+                    irr_only_summary %>% 
+                      filter(imprv_yield) %>% 
+                      mutate(diff=yield_rec-yield) %>% 
+                      summarise(m = max(diff)) %>% pull(m),
+                    nitro_only_summary %>% 
+                      filter(imprv_yield) %>% 
+                      mutate(diff=yield_rec-yield) %>% 
+                      summarise(m = max(diff)) %>% pull(m),
+                    all_recs_summary %>% 
+                      filter(imprv_yield) %>% 
+                      mutate(diff=yield_rec-yield) %>% 
+                      summarise(m = max(diff)) %>% pull(m)
+)
+
+min_yield_gain <- c(
+                    irr_only_summary %>% 
+                      filter(imprv_yield) %>% 
+                      mutate(diff=yield_rec-yield) %>% 
+                      summarise(m = min(diff)) %>% pull(m),
+                    nitro_only_summary %>% 
+                      filter(imprv_yield) %>% 
+                      mutate(diff=yield_rec-yield) %>% 
+                      summarise(m = min(diff)) %>% pull(m),
+                    all_recs_summary %>% 
+                      filter(imprv_yield) %>% 
+                      mutate(diff=yield_rec-yield) %>% 
+                      summarise(m = min(diff)) %>% pull(m)
+)
+
+
 
 avg_yield_gain <- c(
                       avg_yield_gain(irr_only_summary),
@@ -104,7 +166,7 @@ avg_yield_gain <- c(
                     )
 
 
-run_summary <- data.frame(run, percent_yield_impr, avg_yield_loss, avg_yield_gain)
+run_summary <- data.frame(run, percent_yield_impr, avg_yield_loss, avg_yield_gain, max_yield_loss, min_yield_loss, max_yield_gain, min_yield_gain)
 
 ## Year-by-year analysis
 
@@ -161,10 +223,32 @@ cumul_net_changes <- net_changes %>%
 print(str_interp("Average leaching: ${mean(comm_pract$leaching)}"))
 
 
+## Create pretty table 
+
+# Rename recommended columns to delineate them in the final column 
+df1 <- irr_only_result %>% 
+                   rename(irr_only_yield_rec    = yield_rec) %>%
+                   rename(irr_only_leaching_rec = leaching_rec) %>%
+                   rename(irr_only_wat_rec      = total_wat_rec)
+
+df2 <- nitro_only_result %>% 
+                     rename(nitr_only_yield_rec     = yield_rec) %>%
+                     rename(nitr_only_leaching_rec  = leaching_rec) %>%
+                     rename(nitr_only_total_wat_rec = total_wat_rec)
+
+df3 <- all_recs_result %>%
+                        rename(all_rec_yield_rec = yield_rec) %>%
+                        rename(all_rec_leaching_rec = leaching_rec) %>%
+                        rename(all_rec_total_wat_rec = total_wat_rec)
+
+pretty_tab <- df1 %>%
+              full_join(df2) %>%
+              full_join(df3)
+
+
 ## Output results
 arrow::write_feather(run_summary, SUMMARY_OUTPUT_PATH)
 arrow::write_feather(cumul_net_changes, CUMUL_NET_CHANGE_OUTPUT_PATH)
-
 
 
 
