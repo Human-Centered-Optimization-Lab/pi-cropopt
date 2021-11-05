@@ -5,6 +5,8 @@ library(stringr)
 summarize <- function(input_tab) {
  
   output_tab <- input_tab %>% 
+                mutate(wat_eff = yield/total_wat) %>%
+                mutate(wat_eff_rec = yield_rec/total_wat_rec) %>%
                 mutate(imprv_yield = yield_rec > yield) %>%
                 mutate(worse_yield = yield_rec < yield) %>% 
                 mutate(good_leaching = leaching_rec >= leaching) %>%
@@ -13,7 +15,7 @@ summarize <- function(input_tab) {
                 mutate(loss_yield = ifelse(worse_yield, yield - yield_rec, 0)) %>%
                 mutate(gain_yield = ifelse(imprv_yield, yield_rec - yield, 0)) %>% 
                 mutate(loss_leaching = ifelse(worse_leaching, leaching_rec - leaching, 0 )) %>%
-                mutate(gain_leaching = ifelse(imprv_leaching, leaching - leaching_rec, 0))
+                mutate(gain_leaching = ifelse(imprv_leaching, leaching - leaching_rec, 0)) 
    
   return(output_tab)  
 }
@@ -31,13 +33,16 @@ avg_yield_gain <- function(summ_tab){
 
 ## Reading data
 
-COMM_PRACT_PATH           <- "/Volumes/data/Gilgamesh/kroppian/agovization_results/validation/comm_pract.feather"
-IRR_ONLY_RESULT_PATH      <- "/Volumes/data/Gilgamesh/kroppian/agovization_results/validation/irr_only_result.feather"
-NITRO_ONLY_RESULT_PATH    <- "/Volumes/data/Gilgamesh/kroppian/agovization_results/validation/nitro_only_result.feather"
-ALL_RECS_RESULT_PATH      <- "/Volumes/data/Gilgamesh/kroppian/agovization_results/validation/all_recs_full_result.feather"
+ROOT_PATH <- "/Volumes/data/Gilgamesh/kroppian/agovization_results/validation/"
+ROOT_PATH <- "Z:/Gilgamesh/kroppian/agovization_results/validation/"
 
-SUMMARY_OUTPUT_PATH <- "/Volumes/data/Gilgamesh/kroppian/agovization_results/validation/validation_summary.feather"
-CUMUL_NET_CHANGE_OUTPUT_PATH <- "/Volumes/data/Gilgamesh/kroppian/agovization_results/validation/cumul_net_change.feather"
+COMM_PRACT_PATH           <- paste(ROOT_PATH, "comm_pract.feather", sep = "")
+IRR_ONLY_RESULT_PATH      <- paste(ROOT_PATH, "irr_only_result.feather", sep = "")
+NITRO_ONLY_RESULT_PATH    <- paste(ROOT_PATH, "nitro_only_result.feather", sep = "")
+ALL_RECS_RESULT_PATH      <- paste(ROOT_PATH, "all_recs_full_result.feather", sep = "")
+
+SUMMARY_OUTPUT_PATH <- paste(ROOT_PATH, "validation_summary.feather", sep = "")
+CUMUL_NET_CHANGE_OUTPUT_PATH <- paste(ROOT_PATH, "cumul_net_change.feather", sep = "")
 
 comm_pract           <- arrow::read_feather(COMM_PRACT_PATH)     
 irr_only_result      <- arrow::read_feather(IRR_ONLY_RESULT_PATH)  
@@ -74,6 +79,8 @@ nitro_only_result <- comm_pract %>%
 
 all_recs_result <- comm_pract %>%
                    full_join(all_recs_result)
+
+
 
 ## Performance summary 
 
@@ -173,28 +180,29 @@ run_summary <- data.frame(run, percent_yield_impr, avg_yield_loss, avg_yield_gai
 # Calculate the net yield gain from the recommended practices
 net_yield_changes_irr_only <- irr_only_result %>% 
                         mutate(irr_only_net_yield = yield_rec - yield) %>%
-                        select(year, irr_only_net_yield)
+                        dplyr::select(year, irr_only_net_yield)
 
 net_yield_changes_nitro_only <- nitro_only_result %>% 
                           mutate(nitro_only_net_yield = yield_rec - yield) %>%
-                          select(year, nitro_only_net_yield)
+                          dplyr::select(year, nitro_only_net_yield)
 
 net_yield_changes_all_recs <- all_recs_result %>% 
                         mutate(all_rec_net_yield = yield_rec - yield) %>%
-                        select(year, all_rec_net_yield)
+                        dplyr::select(year, all_rec_net_yield)
+
 
 # Calculate the net leach change from the recommended practices
 net_leach_changes_irr_only <- irr_only_result %>% 
                         mutate(irr_only_net_leach = leaching_rec - leaching) %>%
-                        select(year, irr_only_net_leach)
+                        dplyr::select(year, irr_only_net_leach)
 
 net_leach_changes_nitro_only <- nitro_only_result %>% 
                           mutate(nitro_only_net_leach = leaching_rec - leaching) %>%
-                          select(year, nitro_only_net_leach)
+                          dplyr::select(year, nitro_only_net_leach)
 
 net_leach_changes_all_recs <- all_recs_result %>% 
                         mutate(all_rec_net_leach = leaching_rec - leaching) %>%
-                        select(year, all_rec_net_leach)
+                        dplyr::select(year, all_rec_net_leach)
 
 
 
@@ -223,27 +231,44 @@ cumul_net_changes <- net_changes %>%
 print(str_interp("Average leaching: ${mean(comm_pract$leaching)}"))
 
 
-## Create pretty table 
 
 # Rename recommended columns to delineate them in the final column 
-df1 <- irr_only_result %>% 
-                   rename(irr_only_yield_rec    = yield_rec) %>%
-                   rename(irr_only_leaching_rec = leaching_rec) %>%
-                   rename(irr_only_wat_rec      = total_wat_rec)
+df1 <- irr_only_summary %>% 
+                   rename(irr_only_yield    = yield_rec) %>%
+                   rename(irr_only_leaching = leaching_rec) %>%
+                   rename(irr_only_wat      = total_wat_rec)  %>%
+                   rename(irr_only_wat_eff  = wat_eff_rec) %>% 
+                   dplyr::select(year, yield, leaching, total_wat, wat_eff,
+                                 irr_only_yield, irr_only_leaching, 
+                                 irr_only_wat, irr_only_wat_eff)
+  
 
-df2 <- nitro_only_result %>% 
-                     rename(nitr_only_yield_rec     = yield_rec) %>%
-                     rename(nitr_only_leaching_rec  = leaching_rec) %>%
-                     rename(nitr_only_total_wat_rec = total_wat_rec)
 
-df3 <- all_recs_result %>%
-                        rename(all_rec_yield_rec = yield_rec) %>%
-                        rename(all_rec_leaching_rec = leaching_rec) %>%
-                        rename(all_rec_total_wat_rec = total_wat_rec)
+df2 <- nitro_only_summary %>% 
+                     rename(nitr_only_yield     = yield_rec) %>%
+                     rename(nitr_only_leaching  = leaching_rec) %>%
+                     rename(nitr_only_total_wat = total_wat_rec) %>%
+                     rename(nitr_only_wat_eff   = wat_eff_rec) %>%
+                     dplyr::select(year, yield, leaching, total_wat, wat_eff,
+                                 nitr_only_yield, nitr_only_leaching, 
+                                 nitr_only_total_wat, nitr_only_wat_eff)
+  
+
+df3 <- all_recs_summary %>%
+                        rename(all_rec_yield = yield_rec) %>%
+                        rename(all_rec_leaching = leaching_rec) %>%
+                        rename(all_rec_total_wat = total_wat_rec) %>%
+                        rename(all_rec_wat_eff   = wat_eff_rec) %>%
+                        dplyr::select(year, yield, leaching, total_wat, wat_eff,
+                                 all_rec_yield, all_rec_leaching,
+                                 all_rec_total_wat, all_rec_wat_eff )
+
+
 
 pretty_tab <- df1 %>%
               full_join(df2) %>%
-              full_join(df3)
+              full_join(df3) %>%
+              arrange(year)
 
 
 ## Output results
