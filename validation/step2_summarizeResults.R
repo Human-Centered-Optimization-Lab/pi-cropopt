@@ -2,6 +2,8 @@ library(dplyr)
 library(magrittr)
 library(stringr)
 
+## ------- Start - functions -------
+
 summarize <- function(input_tab) {
  
   output_tab <- input_tab %>% 
@@ -12,10 +14,15 @@ summarize <- function(input_tab) {
                 mutate(good_leaching = leaching_rec >= leaching) %>%
                 mutate(imprv_leaching = leaching_rec < leaching) %>%
                 mutate(worse_leaching = leaching_rec > leaching) %>%
+                mutate(imprv_wat_eff = wat_eff_rec > wat_eff) %>%
+                mutate(worse_wat_eff = wat_eff_rec < wat_eff) %>%
                 mutate(loss_yield = ifelse(worse_yield, yield - yield_rec, 0)) %>%
                 mutate(gain_yield = ifelse(imprv_yield, yield_rec - yield, 0)) %>% 
                 mutate(loss_leaching = ifelse(worse_leaching, leaching_rec - leaching, 0 )) %>%
-                mutate(gain_leaching = ifelse(imprv_leaching, leaching - leaching_rec, 0)) 
+                mutate(gain_leaching = ifelse(imprv_leaching, leaching - leaching_rec, 0)) %>%
+                mutate(loss_wat_eff = ifelse(worse_wat_eff, wat_eff - wat_eff_rec, 0)) %>%
+                mutate(gain_wat_eff = ifelse(imprv_wat_eff, wat_eff_rec - wat_eff, 0)) 
+  
    
   return(output_tab)  
 }
@@ -30,8 +37,27 @@ avg_yield_gain <- function(summ_tab){
   return(avg_gain)  
 }
 
+med_wat_eff_loss <- function(summ_tab){
+  med_loss <- summ_tab %>% 
+                filter(worse_wat_eff) %>% 
+                summarise(a = median(loss_wat_eff)) %>% 
+                pull(a)
+  
+  return(med_loss)
+}
 
-## Reading data
+med_wat_eff_gain <- function(summ_tab){
+  med_gain <- summ_tab %>% 
+                filter(imprv_wat_eff) %>% 
+                summarise(a = median(gain_wat_eff)) %>% 
+                pull(a)
+  
+  return(med_gain)
+}
+
+## ------- End - functions -------
+
+## ------- Start - Reading data -------
 
 ROOT_PATH <- "/Volumes/data/Gilgamesh/kroppian/agovization_results/validation/"
 ROOT_PATH <- "Z:/Gilgamesh/kroppian/agovization_results/validation/"
@@ -43,15 +69,20 @@ ALL_RECS_RESULT_PATH      <- paste(ROOT_PATH, "all_recs_full_result.feather", se
 
 SUMMARY_OUTPUT_PATH <- paste(ROOT_PATH, "validation_summary.feather", sep = "")
 CUMUL_NET_CHANGE_OUTPUT_PATH <- paste(ROOT_PATH, "cumul_net_change.feather", sep = "")
+PRETTY_TAB_OUTPUT_PATH <- paste(ROOT_PATH, "pretty_tab.csv", sep="")
 
 comm_pract           <- arrow::read_feather(COMM_PRACT_PATH)     
 irr_only_result      <- arrow::read_feather(IRR_ONLY_RESULT_PATH)  
 nitro_only_result    <- arrow::read_feather(NITRO_ONLY_RESULT_PATH)
 all_recs_result      <- arrow::read_feather(ALL_RECS_RESULT_PATH)
 
+
+
 year_count <- nrow(irr_only_result)
 
-## Join the different practice tables with common practice tables
+## ------- End - Reading data -------
+
+## ------- Start - Join rec practices with com practices -------
 
 # Rename recommended columns to delineate them in the final column 
 irr_only_result <- irr_only_result %>% 
@@ -81,8 +112,9 @@ all_recs_result <- comm_pract %>%
                    full_join(all_recs_result)
 
 
+## ------- End - Join rec practices with com practices -------
 
-## Performance summary 
+## ------- Start - Calculate innovization performance  -------
 
 # Create supporting columns 
 irr_only_summary <- summarize(irr_only_result)
@@ -164,16 +196,99 @@ min_yield_gain <- c(
                       summarise(m = min(diff)) %>% pull(m)
 )
 
-
-
 avg_yield_gain <- c(
                       avg_yield_gain(irr_only_summary),
                       avg_yield_gain(nitro_only_summary),
                       avg_yield_gain(all_recs_summary)
                     )
 
+percent_wat_eff_impr <- c(
+                        sum(irr_only_summary$imprv_wat_eff)/year_count,
+                        sum(nitro_only_summary$imprv_wat_eff)/year_count,
+                        sum(all_recs_summary$imprv_wat_eff)/year_count
+                        )
 
-run_summary <- data.frame(run, percent_yield_impr, avg_yield_loss, avg_yield_gain, max_yield_loss, min_yield_loss, max_yield_gain, min_yield_gain)
+max_wat_eff_gain <- c(
+                    irr_only_summary %>% 
+                      filter(imprv_wat_eff) %>% 
+                      mutate(diff=wat_eff_rec-wat_eff) %>% 
+                      summarise(m = max(diff)) %>% pull(m),
+                    nitro_only_summary %>% 
+                      filter(imprv_wat_eff) %>% 
+                      mutate(diff=wat_eff_rec-wat_eff) %>% 
+                      summarise(m = max(diff)) %>% pull(m),
+                    all_recs_summary %>% 
+                      filter(imprv_wat_eff) %>% 
+                      mutate(diff=wat_eff_rec-wat_eff) %>% 
+                      summarise(m = max(diff)) %>% pull(m)
+)
+
+min_wat_eff_gain <- c(
+                    irr_only_summary %>% 
+                      filter(imprv_wat_eff) %>% 
+                      mutate(diff=wat_eff_rec-wat_eff) %>% 
+                      summarise(m = min(diff)) %>% pull(m),
+                    nitro_only_summary %>% 
+                      filter(imprv_wat_eff) %>% 
+                      mutate(diff=wat_eff_rec-wat_eff) %>% 
+                      summarise(m = min(diff)) %>% pull(m),
+                    all_recs_summary %>% 
+                      filter(imprv_wat_eff) %>% 
+                      mutate(diff=wat_eff_rec-wat_eff) %>% 
+                      summarise(m = min(diff)) %>% pull(m)
+)
+
+max_wat_eff_loss <- c(
+                    irr_only_summary %>% 
+                      filter(worse_wat_eff) %>% 
+                      mutate(diff=wat_eff-wat_eff_rec) %>% 
+                      summarise(m = max(diff)) %>% pull(m),
+                    nitro_only_summary %>% 
+                      filter(worse_wat_eff) %>% 
+                      mutate(diff=wat_eff-wat_eff_rec) %>% 
+                      summarise(m = max(diff)) %>% pull(m),
+                    all_recs_summary %>% 
+                      filter(worse_wat_eff) %>% 
+                      mutate(diff=wat_eff-wat_eff_rec) %>% 
+                      summarise(m = max(diff)) %>% pull(m)
+)
+
+min_wat_eff_loss <- c(
+                    irr_only_summary %>% 
+                      filter(worse_wat_eff) %>% 
+                      mutate(diff=wat_eff-wat_eff_rec) %>% 
+                      summarise(m = min(diff)) %>% pull(m),
+                    nitro_only_summary %>% 
+                      filter(worse_wat_eff) %>% 
+                      mutate(diff=wat_eff-wat_eff_rec) %>% 
+                      summarise(m = min(diff)) %>% pull(m),
+                    all_recs_summary %>% 
+                      filter(worse_wat_eff) %>% 
+                      mutate(diff=wat_eff-wat_eff_rec) %>% 
+                      summarise(m = min(diff)) %>% pull(m)
+)
+
+
+med_wat_eff_loss <- c(
+                      med_wat_eff_loss(irr_only_summary),
+                      med_wat_eff_loss(nitro_only_summary),
+                      med_wat_eff_loss(all_recs_summary)
+)
+
+med_wat_eff_gain <- c(
+                      med_wat_eff_gain(irr_only_summary),
+                      med_wat_eff_gain(nitro_only_summary),
+                      med_wat_eff_gain(all_recs_summary)
+)
+
+
+run_summary <- data.frame(run, percent_yield_impr, avg_yield_loss, 
+                          avg_yield_gain, max_yield_loss, min_yield_loss, 
+                          max_yield_gain, min_yield_gain, percent_wat_eff_impr,
+                          med_wat_eff_loss, med_wat_eff_gain, min_wat_eff_gain, 
+                          max_wat_eff_gain, max_wat_eff_loss, min_wat_eff_loss)
+
+## ------- End - Calculate innovization performance  -------
 
 ## Year-by-year analysis
 
@@ -234,13 +349,13 @@ print(str_interp("Average leaching: ${mean(comm_pract$leaching)}"))
 
 # Rename recommended columns to delineate them in the final column 
 df1 <- irr_only_summary %>% 
-                   rename(irr_only_yield    = yield_rec) %>%
-                   rename(irr_only_leaching = leaching_rec) %>%
-                   rename(irr_only_wat      = total_wat_rec)  %>%
-                   rename(irr_only_wat_eff  = wat_eff_rec) %>% 
-                   dplyr::select(year, yield, leaching, total_wat, wat_eff,
+                   rename(irr_only_yield     = yield_rec) %>%
+                   rename(irr_only_leaching  = leaching_rec) %>%
+                   rename(irr_only_total_wat = total_wat_rec)  %>%
+                   rename(irr_only_wat_eff   = wat_eff_rec) %>% 
+                   dplyr::select(year, climate, yield, leaching, total_wat, wat_eff,
                                  irr_only_yield, irr_only_leaching, 
-                                 irr_only_wat, irr_only_wat_eff)
+                                 irr_only_total_wat, irr_only_wat_eff)
   
 
 
@@ -249,7 +364,7 @@ df2 <- nitro_only_summary %>%
                      rename(nitr_only_leaching  = leaching_rec) %>%
                      rename(nitr_only_total_wat = total_wat_rec) %>%
                      rename(nitr_only_wat_eff   = wat_eff_rec) %>%
-                     dplyr::select(year, yield, leaching, total_wat, wat_eff,
+                     dplyr::select(year, climate, yield, leaching, total_wat, wat_eff,
                                  nitr_only_yield, nitr_only_leaching, 
                                  nitr_only_total_wat, nitr_only_wat_eff)
   
@@ -259,7 +374,7 @@ df3 <- all_recs_summary %>%
                         rename(all_rec_leaching = leaching_rec) %>%
                         rename(all_rec_total_wat = total_wat_rec) %>%
                         rename(all_rec_wat_eff   = wat_eff_rec) %>%
-                        dplyr::select(year, yield, leaching, total_wat, wat_eff,
+                        dplyr::select(year, climate, yield, leaching, total_wat, wat_eff,
                                  all_rec_yield, all_rec_leaching,
                                  all_rec_total_wat, all_rec_wat_eff )
 
@@ -274,6 +389,7 @@ pretty_tab <- df1 %>%
 ## Output results
 arrow::write_feather(run_summary, SUMMARY_OUTPUT_PATH)
 arrow::write_feather(cumul_net_changes, CUMUL_NET_CHANGE_OUTPUT_PATH)
+write.csv(pretty_tab, PRETTY_TAB_OUTPUT_PATH)
 
 
 
