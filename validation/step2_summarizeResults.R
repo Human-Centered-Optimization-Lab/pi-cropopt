@@ -55,6 +55,18 @@ med_wat_eff_gain <- function(summ_tab){
   return(med_gain)
 }
 
+avg_leaching_imprv <- function(summ_tab){
+  avg_loss <- sum(summ_tab$loss_leaching)/sum(summ_tab$imprv_leaching)
+  return(avg_loss)  
+  
+}
+
+avg_leaching_worsening <- function(summ_tab){
+  avg_gain <- sum(summ_tab$gain_leaching)/sum(summ_tab$worse_leaching)
+  return(avg_gain)  
+}
+
+
 ## ------- End - functions -------
 
 ## ------- Start - Reading data -------
@@ -124,6 +136,7 @@ all_recs_summary <- summarize(all_recs_result)
 # Create summarized results table
 run <- c("Irr recs only", "Nitro recs only", "Irr and Nitro recs")
 
+# Start - Yearly yield summaries
 percent_yield_impr <- c(
                         sum(irr_only_summary$imprv_yield)/year_count,
                         sum(nitro_only_summary$imprv_yield)/year_count,
@@ -202,6 +215,9 @@ avg_yield_gain <- c(
                       avg_yield_gain(all_recs_summary)
                     )
 
+# End - Yearly yield summaries
+
+# Start - Yearly water use  summaries
 percent_wat_eff_impr <- c(
                         sum(irr_only_summary$imprv_wat_eff)/year_count,
                         sum(nitro_only_summary$imprv_wat_eff)/year_count,
@@ -281,16 +297,105 @@ med_wat_eff_gain <- c(
                       med_wat_eff_gain(all_recs_summary)
 )
 
+# End - Yearly water use  summaries
+
+# Start - Yearly leaching summaries 
+percent_leaching_impr <- c(
+                        sum(irr_only_summary$imprv_leaching)/year_count,
+                        sum(nitro_only_summary$imprv_leaching)/year_count,
+                        sum(all_recs_summary$imprv_leaching)/year_count
+                        )
+
+max_leaching_imprv <- c(
+                    irr_only_summary %>% 
+                      filter(imprv_leaching) %>% 
+                      mutate(diff=leaching-leaching_rec) %>% 
+                      summarise(m = ifelse(length(diff) == 0, 0, max(diff))) %>% 
+                      pull(m),
+                    nitro_only_summary %>% 
+                      filter(imprv_leaching) %>% 
+                      mutate(diff=leaching-leaching_rec) %>% 
+                      summarise(m = ifelse(length(diff) == 0, 0, max(diff))) %>% 
+                      pull(m),
+                    all_recs_summary %>% 
+                      filter(imprv_leaching) %>% 
+                      mutate(diff=leaching-leaching_rec) %>% 
+                      summarise(m = ifelse(length(diff) == 0, 0, max(diff))) %>% 
+                      pull(m)
+)
+
+min_leaching_imprv <- c(
+                    irr_only_summary %>% 
+                      filter(imprv_leaching) %>% 
+                      mutate(diff=leaching-leaching_rec) %>% 
+                      summarise(m = ifelse(length(diff) == 0, 0, max(diff))) %>% pull(m),
+                    nitro_only_summary %>% 
+                      filter(imprv_leaching) %>% 
+                      mutate(diff=leaching-leaching_rec) %>% 
+                      summarise(m = ifelse(length(diff) == 0, 0, max(diff))) %>% pull(m),
+                    all_recs_summary %>% 
+                      filter(imprv_leaching) %>% 
+                      mutate(diff=leaching-leaching_rec) %>% 
+                      summarise(m = ifelse(length(diff) == 0, 0, max(diff))) %>% pull(m)
+)
+
+max_leaching_worsening <- c(
+                    irr_only_summary %>% 
+                      filter(worse_leaching) %>% 
+                      mutate(diff=leaching_rec-leaching) %>% 
+                      summarise(m = ifelse(length(diff) == 0, 0, max(diff))) %>% pull(m),
+                    nitro_only_summary %>% 
+                      filter(worse_leaching) %>% 
+                      mutate(diff=leaching_rec-leaching) %>% 
+                      summarise(m = ifelse(length(diff) == 0, 0, max(diff))) %>% pull(m),
+                    all_recs_summary %>% 
+                      filter(worse_leaching) %>% 
+                      mutate(diff=leaching_rec-leaching) %>% 
+                      summarise(m = ifelse(length(diff) == 0, 0, max(diff))) %>% pull(m)
+)
+
+min_leaching_worsening <- c(
+                    irr_only_summary %>% 
+                      filter(worse_leaching) %>% 
+                      mutate(diff=leaching_rec-leaching) %>% 
+                      summarise(m = ifelse(length(diff) == 0, 0, max(diff))) %>% pull(m),
+                    nitro_only_summary %>% 
+                      filter(worse_leaching) %>% 
+                      mutate(diff=leaching_rec-leaching) %>% 
+                      summarise(m = ifelse(length(diff) == 0, 0, max(diff))) %>% pull(m),
+                    all_recs_summary %>% 
+                      filter(worse_leaching) %>% 
+                      mutate(diff=leaching_rec-leaching) %>% 
+                      summarise(m = ifelse(length(diff) == 0, 0, max(diff))) %>% pull(m)
+)
+
+
+avg_leaching_imprv <- c(
+                      avg_leaching_imprv(irr_only_summary),
+                      avg_leaching_imprv(nitro_only_summary),
+                      avg_leaching_imprv(all_recs_summary)
+)
+
+avg_leaching_worsening <- c(
+                      avg_leaching_worsening(irr_only_summary),
+                      avg_leaching_worsening(nitro_only_summary),
+                      avg_leaching_worsening(all_recs_summary)
+)
+# End - Yearly leaching summaries 
 
 run_summary <- data.frame(run, percent_yield_impr, avg_yield_loss, 
                           avg_yield_gain, max_yield_loss, min_yield_loss, 
                           max_yield_gain, min_yield_gain, percent_wat_eff_impr,
                           med_wat_eff_loss, med_wat_eff_gain, min_wat_eff_gain, 
-                          max_wat_eff_gain, max_wat_eff_loss, min_wat_eff_loss)
+                          max_wat_eff_gain, max_wat_eff_loss, min_wat_eff_loss,
+                          percent_leaching_impr, max_leaching_imprv, 
+                          min_leaching_imprv, max_leaching_worsening, 
+                          min_leaching_worsening, avg_leaching_imprv, 
+                          avg_leaching_worsening)
 
-## ------- End - Calculate innovization performance  -------
+## ------- End - Calculate innovization performance -------
 
-## Year-by-year analysis
+## ------- Start - Year-by-year analysis -------
 
 # Calculate the net yield gain from the recommended practices
 net_yield_changes_irr_only <- irr_only_result %>% 
@@ -345,7 +450,9 @@ cumul_net_changes <- net_changes %>%
 
 print(str_interp("Average leaching: ${mean(comm_pract$leaching)}"))
 
+## ------- End - Year-by-year analysis -------
 
+## ------- Start - Create pretty table -------
 
 # Rename recommended columns to delineate them in the final column 
 df1 <- irr_only_summary %>% 
@@ -385,8 +492,10 @@ pretty_tab <- df1 %>%
               full_join(df3) %>%
               arrange(year)
 
+## ------- End - Create pretty table -------
 
-## Output results
+## ------- End - Output results -------
+
 arrow::write_feather(run_summary, SUMMARY_OUTPUT_PATH)
 arrow::write_feather(cumul_net_changes, CUMUL_NET_CHANGE_OUTPUT_PATH)
 write.csv(pretty_tab, PRETTY_TAB_OUTPUT_PATH)
