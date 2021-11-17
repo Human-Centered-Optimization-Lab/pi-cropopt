@@ -74,9 +74,14 @@ avg_leaching_worsening <- function(summ_tab){
 ROOT_PATH <- "/Volumes/data/Gilgamesh/kroppian/agovization_results/validation/"
 ROOT_PATH <- "Z:/Gilgamesh/kroppian/agovization_results/validation/"
 
-COMM_PRACT_PATH           <- paste(ROOT_PATH, "comm_pract.feather", sep = "")
-IRR_ONLY_RESULT_PATH      <- paste(ROOT_PATH, "irr_only_result.feather", sep = "")
-NITRO_ONLY_RESULT_PATH    <- paste(ROOT_PATH, "nitro_only_result.feather", sep = "")
+#COMM_PRACT_PATH           <- paste(ROOT_PATH,           "comm_pract.feather", sep = "")
+#IRR_ONLY_RESULT_PATH      <- paste(ROOT_PATH,      "irr_only_result.feather", sep = "")
+#NITRO_ONLY_RESULT_PATH    <- paste(ROOT_PATH,    "nitro_only_result.feather", sep = "")
+#ALL_RECS_RESULT_PATH      <- paste(ROOT_PATH, "all_recs_full_result.feather", sep = "")
+
+COMM_PRACT_PATH           <- paste(ROOT_PATH,           "comm_pract.feather", sep = "")
+IRR_ONLY_RESULT_PATH      <- paste(ROOT_PATH,      "irr_only_result.feather", sep = "")
+NITRO_ONLY_RESULT_PATH    <- paste(ROOT_PATH,    "nitro_only_result.feather", sep = "")
 ALL_RECS_RESULT_PATH      <- paste(ROOT_PATH, "all_recs_full_result.feather", sep = "")
 
 SUMMARY_OUTPUT_PATH <- paste(ROOT_PATH, "validation_summary.feather", sep = "")
