@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 if __name__ == "__main__":
 
 
-    OUTPUT_PATH = "/mnt/nas/kroppian/agovization_results/"
+    OUTPUT_PATH = "/mnt/nas/kroppian/agovization_results/validation/"
 
     # Gather weather data
     wth_file_path = "dhome/Weather/CASSREPR.WTH"
@@ -22,10 +22,10 @@ if __name__ == "__main__":
     #dry_years = [2012]
 
     # Excluding 2018 and 2019 because I don't have the gdd data on hand
-    year_by_climate = {1980:  0, 1981:  2, 1982:  0, 1983:  0, 1984:  1, 1985:  1, 1986:  2, 1987:  2, 1988:  0, 1989:  1, 1990:  2, 1991:  0, 1992:  1, 1993:  2, 1994:  1, 1995:  1, 1996:  2, 1997:  2, 1998:  0, 1999:  0, 2000:  1, 2001:  2, 2002:  0, 2003:  0, 2004:  1, 2005:  0, 2006:  2, 2007:  1, 2008:  2, 2009:  1}
-    year_by_climate = {2011: 2, 2013: 1, 2014: 1, 2015: 1, 2016: 1, 2017: 1, 2012: 0, 2010: 1, 2018: 2}
+    #year_by_climate = {2011: 2, 2013: 1, 2014: 1, 2015: 1, 2016: 1, 2017: 1, 2012: 0, 2010: 1, 2018: 2}
+    #year_by_climate = {1980:  0, 1981:  2, 1982:  0, 1983:  0, 1984:  1, 1985:  1, 1986:  2, 1987:  2, 1988:  0, 1989:  1, 1990:  2, 1991:  0, 1992:  1, 1993:  2, 1994:  1, 1995:  1, 1996:  2, 1997:  2, 1998:  0, 1999:  0, 2000:  1, 2001:  2, 2002:  0, 2003:  0, 2004:  1, 2005:  0, 2006:  2, 2007:  1, 2008:  2, 2009:  1}
 
-
+    year_by_climate = {1980:  0, 1981:  2, 1982:  0, 1983:  0, 1984:  1, 1985:  1, 1986:  2, 1987:  2, 1988:  0, 1989:  1, 1990:  2, 1991:  0, 1992:  1, 1993:  2, 1994:  1, 1995:  1, 1996:  2, 1997:  2, 1998:  0, 1999:  0, 2000:  1, 2001:  2, 2002:  0, 2003:  0, 2004:  1, 2005:  0, 2006:  2, 2007:  1, 2008:  2, 2009:  1, 2011: 2, 2013: 1, 2014: 1, 2015: 1, 2016: 1, 2017: 1, 2012: 0, 2010: 1, 2018: 2}
 
     # DSSAT parameters
     #home_dir = "/Users/iankropp/"
@@ -144,9 +144,9 @@ if __name__ == "__main__":
 
 
     print("Saving...")
-    com_result.to_feather("%s/comm_pract.feather"                     % OUTPUT_PATH)
-    irr_only_result.to_feather("%s/irr_only_result.feather"           % OUTPUT_PATH)
-    nitro_only_result.to_feather("%s/nitro_only_result.feather"       % OUTPUT_PATH)
+    com_result.to_feather(                    "%s/comm_pract.feather" % OUTPUT_PATH)
+    irr_only_result.to_feather(          "%s/irr_only_result.feather" % OUTPUT_PATH)
+    nitro_only_result.to_feather(      "%s/nitro_only_result.feather" % OUTPUT_PATH)
     all_recs_full_result.to_feather("%s/all_recs_full_result.feather" % OUTPUT_PATH)
 
 
