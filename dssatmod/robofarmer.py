@@ -290,10 +290,6 @@ class RoboFarmer():
 
         management = np.array(raw_management)
 
-        print("----")
-        print(self.manager.gdd_tab_year)
-        print(management)
-        print("----")
 
         return management
 
