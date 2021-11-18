@@ -3,12 +3,12 @@ library(fitdistrplus)
 library(R.utils)
 library(stringr)
 
-#ATTRIB_TAB <- "/Volumes/data/Gilgamesh/kroppian/agovization_results/mlearning/attrib_tab.feather"
-#RECD_PRACTICES_PATH <- "/Volumes/data/Gilgamesh/kroppian/agovization_results/mlearning/recommended_practices.feather"
-#CLIMATE_PATH <- "/Volumes/data/Gilgamesh/kroppian/agovization_results/mlearning/climate.feather"
-ATTRIB_TAB <- "Z:/Gilgamesh/kroppian/agovization_results/mlearning/attrib_tab.feather"
-RECD_PRACTICES_PATH <- "Z:/Gilgamesh/kroppian/agovization_results/mlearning/recommended_practices.feather"
-CLIMATE_PATH <- "Z:/Gilgamesh/kroppian/agovization_results/mlearning/climate.feather"
+ATTRIB_TAB <- "/Volumes/data/Gilgamesh/kroppian/agovization_results/mlearning/attrib_tab.feather"
+RECD_PRACTICES_PATH <- "/Volumes/data/Gilgamesh/kroppian/agovization_results/mlearning/recommended_practices.feather"
+CLIMATE_PATH <- "/Volumes/data/Gilgamesh/kroppian/agovization_results/mlearning/climate.feather"
+#ATTRIB_TAB <- "Z:/Gilgamesh/kroppian/agovization_results/mlearning/attrib_tab.feather"
+#RECD_PRACTICES_PATH <- "Z:/Gilgamesh/kroppian/agovization_results/mlearning/recommended_practices.feather"
+#CLIMATE_PATH <- "Z:/Gilgamesh/kroppian/agovization_results/mlearning/climate.feather"
 
 
 attrib_tab <- arrow::read_feather(ATTRIB_TAB)
