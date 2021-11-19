@@ -79,9 +79,9 @@ IRR_ONLY_RESULT_PATH      <- paste(ROOT_PATH,  "nitro_full.feather", sep = "")
 NITRO_ONLY_RESULT_PATH    <- paste(ROOT_PATH,  "all_recs_full.feather", sep = "")
 ALL_RECS_RESULT_PATH      <- paste(ROOT_PATH,  "irr_full.feather", sep = "")
 
-SUMMARY_OUTPUT_PATH <- paste(ROOT_PATH, "validation_summary_gen0.feather", sep = "")
-CUMUL_NET_CHANGE_OUTPUT_PATH <- paste(ROOT_PATH, "cumul_net_change_gen0.feather", sep = "")
-PRETTY_TAB_OUTPUT_PATH <- paste(ROOT_PATH, "pretty_tab_gen0.csv", sep="")
+SUMMARY_OUTPUT_PATH <- paste(ROOT_PATH, "validation_summary.feather", sep = "")
+CUMUL_NET_CHANGE_OUTPUT_PATH <- paste(ROOT_PATH, "cumul_net_change.feather", sep = "")
+PRETTY_TAB_OUTPUT_PATH <- paste(ROOT_PATH, "pretty_tab.csv", sep="")
 
 comm_pract_full           <- arrow::read_feather(COMM_PRACT_PATH)     
 irr_only_result_full      <- arrow::read_feather(IRR_ONLY_RESULT_PATH)  
@@ -102,21 +102,11 @@ for (run_id in run_ids){
  
   print(paste("Processing run", run_id)) 
   
-  
-  
-  
-  
   comm_pract        <- comm_pract_full        %>% filter(run == run_id)
   irr_only_result   <- irr_only_result_full   %>% filter(run == run_id)
   nitro_only_result <- nitro_only_result_full %>% filter(run == run_id)
   all_recs_result   <- all_recs_result_full   %>% filter(run == run_id)
   
-  
-  
-  
-  
-  
-   
   # Rename recommended columns to delineate them in the final column 
   irr_only_result <- irr_only_result %>% 
                      rename(yield_rec = yield) %>%
@@ -534,8 +524,8 @@ for (run_id in run_ids){
 
 ## ------- End - Output results -------
 
-#arrow::write_feather(run_summary, SUMMARY_OUTPUT_PATH)
-#arrow::write_feather(cumul_net_changes, CUMUL_NET_CHANGE_OUTPUT_PATH)
+arrow::write_feather(run_summaries, SUMMARY_OUTPUT_PATH)
+arrow::write_feather(cumul_net_changes, CUMUL_NET_CHANGE_OUTPUT_PATH)
 #write.csv(pretty_tab, PRETTY_TAB_OUTPUT_PATH)
 
 
