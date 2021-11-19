@@ -20,24 +20,26 @@ if(! is.null(dev.list())){
   dev.off(dev.list()["RStudioGD"]) # Clears plots
 }
 
+run_summary       <- run_summary       %>% filter(run_id == 1)
+cumul_net_changes <- cumul_net_changes %>% filter(run_id == 1)
 
 ## Plot average loss/gains
 
 # Massage data for chart
 plot_run_summary_1 <- run_summary %>% 
-                      dplyr::select(run, avg_yield_gain) %>% 
-                      dplyr::rename(change = avg_yield_gain) %>% 
+                      dplyr::select(run_type, avg_yield_gains) %>% 
+                      dplyr::rename(change = avg_yield_gains) %>% 
                       dplyr::mutate(type = "gains")
 
 plot_run_summary_2 <- run_summary %>% 
-                      dplyr::select(run, avg_yield_loss) %>% 
-                      dplyr::rename(change = avg_yield_loss) %>% 
+                      dplyr::select(run_type, avg_yield_losses) %>% 
+                      dplyr::rename(change = avg_yield_losses) %>% 
                       dplyr::mutate(change = change*-1) %>% 
                       dplyr::mutate(type = "losses")
 
 plot_run_summary <- rbind(plot_run_summary_1, plot_run_summary_2)
 
-p1 <- ggplot(data=plot_run_summary, aes(x=run, y=change, fill=type)) + 
+p1 <- ggplot(data=plot_run_summary, aes(x=run_type, y=change, fill=type)) + 
     geom_bar(stat="identity", position=position_dodge()) + 
     labs(x = "", fill = "Change type") + 
     ylab("Average change in yield (2010-2018) (kg/ha)") 
