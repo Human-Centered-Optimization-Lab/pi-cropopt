@@ -15,6 +15,7 @@ class Practices():
         self.year = year
 
         self.year_modded = int((year  % 1e2) * 1e3) 
+
         wth_mask = np.logical_and(wth_tab['@DATE'] >= self.year_modded, wth_tab['@DATE'] < (self.year_modded + 366))
         
         self.wth_tab_year = wth_tab[wth_mask]

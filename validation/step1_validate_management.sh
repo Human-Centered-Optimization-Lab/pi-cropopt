@@ -1,5 +1,7 @@
 #!/bin/zsh
 
+# to run: zsh validation/step1_validate_management.sh
+
 # don't forget to conda activate! 
 
 root_dir="$(dirname $0)"
@@ -11,21 +13,36 @@ output_file="./dhome/Weather/CASSREPR.WTH"
 
 i=0
 
-for wfile in $(ls -1 ./dhome/Weather/*WTD) 
+
+for wfile in $(ls -1 ./dhome/Weather/observedWeather/*WTH) 
 do
 
-  echo "*WEATHER DATA : CAMI"                                    > ${output_file}
-  echo ""                                                       >> ${output_file}
-  echo "@ INSI      LAT     LONG  ELEV   TAV   AMP REFHT WNDHT" >> ${output_file}
-  echo "  CAMI   41.931  -86.002   231   9.4  26.6 -99.0 -99.0" >> ${output_file}
-  cat $wfile | sed 's/G/ /g'                                    >> ${output_file}
+  echo "original file: $wfile"
+  cat $wfile > ${output_file}
 
 
-  python validation_step1_validate_management.py $i
+  python  validation_step1_validate_management.py $i
   i=$(expr $i + 1)
 
-  
-
 done
+
+
+
+
+# Stochastic route
+#for wfile in $(ls -1 ./dhome/Weather/*WTD) 
+#do
+#
+#  echo "*WEATHER DATA : CAMI"                                    > ${output_file}
+#  echo ""                                                       >> ${output_file}
+#  echo "@ INSI      LAT     LONG  ELEV   TAV   AMP REFHT WNDHT" >> ${output_file}
+#  echo "  CAMI   41.931  -86.002   231   9.4  26.6 -99.0 -99.0" >> ${output_file}
+#  cat $wfile | sed 's/G/ /g'                                    >> ${output_file}
+#
+#
+#  python validation_step1_validate_management.py $i
+#  i=$(expr $i + 1)
+#
+#done
 
 
