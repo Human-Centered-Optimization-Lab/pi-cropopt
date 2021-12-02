@@ -94,6 +94,27 @@ ggplot(dat, aes(x=Leaching, fill=Practices)) +
         geom_histogram(alpha=0.2, position="identity") + 
         ggtitle("Distribution of yearly nitrogen leaching for irrigation recommendations")
 
+# Water efficiency comparative histograms
+cat1 <- array(data="Common practices", dim = length(comm_pract_full$wat_eff))
+cat2 <- array(data="Irrigation recommendations", dim = length(comm_pract_full$wat_eff))
+dat <- data.frame(Wat_Eff=c(comm_pract_full$wat_eff, irr_only_full$wat_eff), Practices = c(cat1, cat2) )
+ggplot(dat, aes(x=Wat_Eff, fill=Practices)) + 
+        geom_histogram(alpha=0.2, position="identity") + 
+        ggtitle("Distribution of yearly nitrogen wat_eff for irrigation recommendations")
+
+cat1 <- array(data="Common practices", dim = length(comm_pract_full$wat_eff))
+cat2 <- array(data="Nitrogen recommendations", dim = length(comm_pract_full$wat_eff))
+dat <- data.frame(Wat_Eff=c(comm_pract_full$wat_eff, nitro_only_full$wat_eff), Practices = c(cat1, cat2) )
+ggplot(dat, aes(x=Wat_Eff, fill=Practices)) + 
+        geom_histogram(alpha=0.2, position="identity") + 
+        ggtitle("Distribution of yearly nitrogen wat_eff for irrigation recommendations")
+
+cat1 <- array(data="Common practices", dim = length(comm_pract_full$wat_eff))
+cat2 <- array(data="All recommendations", dim = length(comm_pract_full$wat_eff))
+dat <- data.frame(Wat_Eff=c(comm_pract_full$wat_eff, all_recs_full$wat_eff), Practices = c(cat1, cat2))
+ggplot(dat, aes(x=Wat_Eff, fill=Practices)) + 
+        geom_histogram(alpha=0.2, position="identity") + 
+        ggtitle("Distribution of yearly nitrogen wat_eff for irrigation recommendations")
 
 
 
