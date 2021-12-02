@@ -24,10 +24,19 @@ if(! is.null(dev.list())){
   dev.off(dev.list()["RStudioGD"]) # Clears plots
 }
 
-hist(comm_pract_full$yield, 20, main="Common practices year-by-year")
-hist(irr_only_full$yield  , 20, main="Irr only year-by-year")
-hist(nitro_only_full$yield, 20, main="Nitro only year-by-year")
-hist(all_recs_full$yield  , 20, main="All recs year-by-year")
+# Yield
+hist(comm_pract_full$yield, 20, main="Common practices year-by-year yield")
+hist(irr_only_full$yield  , 20, main="Irr only year-by-year yield")
+hist(nitro_only_full$yield, 20, main="Nitro only year-by-year yield")
+hist(all_recs_full$yield  , 20, main="All recs year-by-year yield")
+
+# Nitrogen leaching
+hist(comm_pract_full$leaching, 20, main="Common practices year-by-year leaching")
+hist(irr_only_full$leaching  , 20, main="Irr only year-by-year leaching")
+hist(nitro_only_full$leaching, 20, main="Nitro only year-by-year leaching")
+hist(all_recs_full$leaching  , 20, main="All recs year-by-year leaching")
+
+
 
 ## Cumulative plotting 
 
@@ -85,6 +94,25 @@ p_all_w   <- wilcox.test(comm_pract_full$yield, all_recs_full$yield)
 print(p_irr_w$p.value    )
 print(p_nitro_w$p.value  )
 print(p_all_w$p.value    )
+
+print("year-by-year change in leaching")
+
+print("t.test")
+p_irr_t   <- t.test(comm_pract_full$leaching, irr_only_full$leaching  )
+p_nitro_t <- t.test(comm_pract_full$leaching, nitro_only_full$leaching)
+p_all_t   <- t.test(comm_pract_full$leaching, all_recs_full$leaching  )
+print(p_irr_t$p.value    )
+print(p_nitro_t$p.value  )
+print(p_all_t$p.value    )
+
+print("Wilcoxon")
+p_irr_w   <- wilcox.test(comm_pract_full$leaching, irr_only_full$leaching)
+p_nitro_w <- wilcox.test(comm_pract_full$leaching, nitro_only_full$leaching)
+p_all_w   <- wilcox.test(comm_pract_full$leaching, all_recs_full$leaching)
+print(p_irr_w$p.value    )
+print(p_nitro_w$p.value  )
+print(p_all_w$p.value    )
+
 
 
 ## Cumulative tests
