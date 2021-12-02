@@ -1,4 +1,4 @@
-
+library("ggplot2")
 ## Get data 
 
 ROOT_PATH <- "Z:/Gilgamesh/kroppian/agovization_results/validation/"
@@ -32,27 +32,72 @@ if(! is.null(dev.list())){
   dev.off(dev.list()["RStudioGD"]) # Clears plots
 }
 
-# Yield
+# Yield single histogram
 hist(comm_pract_full$yield, 20, main="Common practices year-by-year yield")
 hist(irr_only_full$yield  , 20, main="Irr only year-by-year yield")
 hist(nitro_only_full$yield, 20, main="Nitro only year-by-year yield")
 hist(all_recs_full$yield  , 20, main="All recs year-by-year yield")
 
-# Nitrogen leaching
+# Nitrogen leaching single histogram
 hist(comm_pract_full$leaching, 20, main="Common practices year-by-year leaching")
 hist(irr_only_full$leaching  , 20, main="Irr only year-by-year leaching")
 hist(nitro_only_full$leaching, 20, main="Nitro only year-by-year leaching")
 hist(all_recs_full$leaching  , 20, main="All recs year-by-year leaching")
 
-# Water efficiency
+# Water efficiency single histogram
 hist(comm_pract_full$wat_eff, 20, main="Common practices year-by-year water efficiency")
 hist(irr_only_full$wat_eff  , 20, main="Irr only year-by-year water efficiency")
 hist(nitro_only_full$wat_eff, 20, main="Nitro only year-by-year water efficiency")
 hist(all_recs_full$wat_eff  , 20, main="All recs year-by-year water efficiency")
 
-## Cumulative plotting 
+# Yield comparative histogram
+cat1 <- array(data="Common practices", dim = length(comm_pract_full$yield))
+cat2 <- array(data="Irrigation recommendations", dim = length(comm_pract_full$yield))
+dat <- data.frame(Yield=c(comm_pract_full$yield, irr_only_full$yield), Practices = c(cat1, cat2) )
+ggplot(dat, aes(x=Yield, fill=Practices)) + 
+        geom_histogram(alpha=0.2, position="identity") + 
+        ggtitle("Distribution of yearly yields for irrigation recommendations")
 
-# Clear old plots
+cat1 <- array(data="Common practices", dim = length(comm_pract_full$yield))
+cat2 <- array(data="Nitrogen recommendations", dim = length(comm_pract_full$yield))
+dat <- data.frame(Yield=c(comm_pract_full$yield, nitro_only_full$yield), Practices = c(cat1, cat2) )
+ggplot(dat, aes(x=Yield, fill=Practices)) + 
+        geom_histogram(alpha=0.2, position="identity") + 
+        ggtitle("Distribution of yearly yields for irrigation recommendations")
+
+cat1 <- array(data="Common practices", dim = length(comm_pract_full$yield))
+cat2 <- array(data="All recommendations", dim = length(comm_pract_full$yield))
+dat <- data.frame(Yield=c(comm_pract_full$yield, all_recs_full$yield), Practices = c(cat1, cat2) )
+ggplot(dat, aes(x=Yield, fill=Practices)) + 
+        geom_histogram(alpha=0.2, position="identity") + 
+        ggtitle("Distribution of yearly yields for irrigation recommendations")
+
+# Nitrogen comparative histograms
+cat1 <- array(data="Common practices", dim = length(comm_pract_full$leaching))
+cat2 <- array(data="Irrigation recommendations", dim = length(comm_pract_full$leaching))
+dat <- data.frame(Leaching=c(comm_pract_full$leaching, irr_only_full$leaching), Practices = c(cat1, cat2) )
+ggplot(dat, aes(x=Leaching, fill=Practices)) + 
+        geom_histogram(alpha=0.2, position="identity") + 
+        ggtitle("Distribution of yearly nitrogen leaching for irrigation recommendations")
+
+cat1 <- array(data="Common practices", dim = length(comm_pract_full$leaching))
+cat2 <- array(data="Nitrogen recommendations", dim = length(comm_pract_full$leaching))
+dat <- data.frame(Leaching=c(comm_pract_full$leaching, nitro_only_full$leaching), Practices = c(cat1, cat2) )
+ggplot(dat, aes(x=Leaching, fill=Practices)) + 
+        geom_histogram(alpha=0.2, position="identity") + 
+        ggtitle("Distribution of yearly nitrogen leaching for irrigation recommendations")
+
+cat1 <- array(data="Common practices", dim = length(comm_pract_full$leaching))
+cat2 <- array(data="All recommendations", dim = length(comm_pract_full$leaching))
+dat <- data.frame(Leaching=c(comm_pract_full$leaching, all_recs_full$leaching), Practices = c(cat1, cat2) )
+ggplot(dat, aes(x=Leaching, fill=Practices)) + 
+        geom_histogram(alpha=0.2, position="identity") + 
+        ggtitle("Distribution of yearly nitrogen leaching for irrigation recommendations")
+
+
+
+
+## Cumulative plotting 
 
 comm_pract_tyield <- comm_pract_full %>% group_by(run) %>% summarize(total_yield = sum(yield)) %>% pull(total_yield)
 irr_only_tyield <- irr_only_full %>% group_by(run) %>% summarize(total_yield = sum(yield)) %>% pull(total_yield)
