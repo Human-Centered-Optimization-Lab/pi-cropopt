@@ -5,9 +5,9 @@ ROOT_PATH <- "Z:/Gilgamesh/kroppian/agovization_results/validation/"
 ROOT_PATH <- "/Volumes/data/Gilgamesh/kroppian/agovization_results/validation/"
 
 COMM_PRACT_PATH           <- paste(ROOT_PATH,  "comm_pract_full.feather", sep = "")
-IRR_ONLY_RESULT_PATH      <- paste(ROOT_PATH,  "nitro_full.feather", sep = "")
-NITRO_ONLY_RESULT_PATH    <- paste(ROOT_PATH,  "all_recs_full.feather", sep = "")
-ALL_RECS_RESULT_PATH      <- paste(ROOT_PATH,  "irr_full.feather", sep = "")
+IRR_ONLY_RESULT_PATH      <- paste(ROOT_PATH,  "irr_full.feather", sep = "")
+NITRO_ONLY_RESULT_PATH    <- paste(ROOT_PATH,  "nitro_full.feather", sep = "")
+ALL_RECS_RESULT_PATH      <- paste(ROOT_PATH,  "all_recs_full.feather", sep = "")
 
 SUMMARY_OUTPUT_PATH <- paste(ROOT_PATH, "validation_summary.feather", sep = "")
 CUMUL_NET_CHANGE_OUTPUT_PATH <- paste(ROOT_PATH, "cumul_net_change.feather", sep = "")
@@ -17,6 +17,14 @@ comm_pract_full    <- arrow::read_feather(COMM_PRACT_PATH)
 irr_only_full      <- arrow::read_feather(IRR_ONLY_RESULT_PATH)  
 nitro_only_full    <- arrow::read_feather(NITRO_ONLY_RESULT_PATH)
 all_recs_full      <- arrow::read_feather(ALL_RECS_RESULT_PATH)
+
+## Preprocessing
+
+comm_pract_full <- comm_pract_full %>% mutate(wat_eff = yield/total_wat)
+irr_only_full   <- irr_only_full   %>% mutate(wat_eff = yield/total_wat)
+nitro_only_full <- nitro_only_full %>% mutate(wat_eff = yield/total_wat)
+all_recs_full   <- all_recs_full   %>% mutate(wat_eff = yield/total_wat)
+
 
 
 ## Year-by-year plotting
@@ -36,7 +44,11 @@ hist(irr_only_full$leaching  , 20, main="Irr only year-by-year leaching")
 hist(nitro_only_full$leaching, 20, main="Nitro only year-by-year leaching")
 hist(all_recs_full$leaching  , 20, main="All recs year-by-year leaching")
 
-
+# Water efficiency
+hist(comm_pract_full$wat_eff, 20, main="Common practices year-by-year water efficiency")
+hist(irr_only_full$wat_eff  , 20, main="Irr only year-by-year water efficiency")
+hist(nitro_only_full$wat_eff, 20, main="Nitro only year-by-year water efficiency")
+hist(all_recs_full$wat_eff  , 20, main="All recs year-by-year water efficiency")
 
 ## Cumulative plotting 
 
@@ -112,6 +124,26 @@ p_all_w   <- wilcox.test(comm_pract_full$leaching, all_recs_full$leaching)
 print(p_irr_w$p.value    )
 print(p_nitro_w$p.value  )
 print(p_all_w$p.value    )
+
+print("year-by-year change in water efficiency")
+
+print("t.test")
+p_irr_t   <- t.test(comm_pract_full$wat_eff, irr_only_full$wat_eff  )
+p_nitro_t <- t.test(comm_pract_full$wat_eff, nitro_only_full$wat_eff)
+p_all_t   <- t.test(comm_pract_full$wat_eff, all_recs_full$wat_eff  )
+print(p_irr_t$p.value    )
+print(p_nitro_t$p.value  )
+print(p_all_t$p.value    )
+
+print("Wilcoxon")
+p_irr_w   <- wilcox.test(comm_pract_full$wat_eff, irr_only_full$wat_eff)
+p_nitro_w <- wilcox.test(comm_pract_full$wat_eff, nitro_only_full$wat_eff)
+p_all_w   <- wilcox.test(comm_pract_full$wat_eff, all_recs_full$wat_eff)
+print(p_irr_w$p.value    )
+print(p_nitro_w$p.value  )
+print(p_all_w$p.value    )
+
+
 
 
 
