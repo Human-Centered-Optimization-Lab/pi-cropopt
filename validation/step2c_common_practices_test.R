@@ -153,22 +153,39 @@ hist( comm_pract_tyield, 10, col=rgb(0,0,1,1/4), xlim=c(min_l, max_l), main="Tot
 hist( all_recs_tyield, 10, col=rgb(1,0,0,1/4),   xlim=c(min_l, max_l), add=T, main="Total 30-year yields for all recommendations")  # second
 #legend(x = "topleft", legend = c("Common Practices", "All recommendations"), fill= c(rgb(0,0,1,1/4), rgb(1,0,0,1/4)))
 
+# ALLE 1
+# BAIN 2
+# BENT 3
+# BERR 4
+# CASS 5
+# DOWA
+# FENN
+# GRAN
+# HART
+# KEEL
+# LAWR
+# LAWT
+# OSHT
+# SCOT
+# SOUT
 
+# Remove Cass, as it was what the innovization is trained off of 
+comm_pract_full_nocass <- comm_pract_full %>% filter(run != 5)
 
 ## Year-by-year tests
 print("year-by-year change in yield")
 print("t.test")
-p_irr_t   <- t.test(comm_pract_full$yield, irr_only_full$yield  )
-p_nitro_t <- t.test(comm_pract_full$yield, nitro_only_full$yield)
-p_all_t   <- t.test(comm_pract_full$yield, all_recs_full$yield  )
+p_irr_t   <- t.test(comm_pract_full_nocass$yield, irr_only_full$yield  )
+p_nitro_t <- t.test(comm_pract_full_nocass$yield, nitro_only_full$yield)
+p_all_t   <- t.test(comm_pract_full_nocass$yield, all_recs_full$yield  )
 print(p_irr_t$p.value    )
 print(p_nitro_t$p.value  )
 print(p_all_t$p.value    )
 
 print("Wilcoxon")
-p_irr_w   <- wilcox.test(comm_pract_full$yield, irr_only_full$yield)
-p_nitro_w <- wilcox.test(comm_pract_full$yield, nitro_only_full$yield)
-p_all_w   <- wilcox.test(comm_pract_full$yield, all_recs_full$yield)
+p_irr_w   <- wilcox.test(comm_pract_full_nocass$yield, irr_only_full$yield)
+p_nitro_w <- wilcox.test(comm_pract_full_nocass$yield, nitro_only_full$yield)
+p_all_w   <- wilcox.test(comm_pract_full_nocass$yield, all_recs_full$yield)
 print(p_irr_w$p.value    )
 print(p_nitro_w$p.value  )
 print(p_all_w$p.value    )
@@ -176,17 +193,17 @@ print(p_all_w$p.value    )
 print("year-by-year change in leaching")
 
 print("t.test")
-p_irr_t   <- t.test(comm_pract_full$leaching, irr_only_full$leaching  )
-p_nitro_t <- t.test(comm_pract_full$leaching, nitro_only_full$leaching)
-p_all_t   <- t.test(comm_pract_full$leaching, all_recs_full$leaching  )
+p_irr_t   <- t.test(comm_pract_full_nocass$leaching, irr_only_full$leaching  )
+p_nitro_t <- t.test(comm_pract_full_nocass$leaching, nitro_only_full$leaching)
+p_all_t   <- t.test(comm_pract_full_nocass$leaching, all_recs_full$leaching  )
 print(p_irr_t$p.value    )
 print(p_nitro_t$p.value  )
 print(p_all_t$p.value    )
 
 print("Wilcoxon")
-p_irr_w   <- wilcox.test(comm_pract_full$leaching, irr_only_full$leaching)
-p_nitro_w <- wilcox.test(comm_pract_full$leaching, nitro_only_full$leaching)
-p_all_w   <- wilcox.test(comm_pract_full$leaching, all_recs_full$leaching)
+p_irr_w   <- wilcox.test(comm_pract_full_nocass$leaching, irr_only_full$leaching)
+p_nitro_w <- wilcox.test(comm_pract_full_nocass$leaching, nitro_only_full$leaching)
+p_all_w   <- wilcox.test(comm_pract_full_nocass$leaching, all_recs_full$leaching)
 print(p_irr_w$p.value    )
 print(p_nitro_w$p.value  )
 print(p_all_w$p.value    )
@@ -194,17 +211,17 @@ print(p_all_w$p.value    )
 print("year-by-year change in water efficiency")
 
 print("t.test")
-p_irr_t   <- t.test(comm_pract_full$wat_eff, irr_only_full$wat_eff  )
-p_nitro_t <- t.test(comm_pract_full$wat_eff, nitro_only_full$wat_eff)
-p_all_t   <- t.test(comm_pract_full$wat_eff, all_recs_full$wat_eff  )
+p_irr_t   <- t.test(comm_pract_full_nocass$wat_eff, irr_only_full$wat_eff  )
+p_nitro_t <- t.test(comm_pract_full_nocass$wat_eff, nitro_only_full$wat_eff)
+p_all_t   <- t.test(comm_pract_full_nocass$wat_eff, all_recs_full$wat_eff  )
 print(p_irr_t$p.value    )
 print(p_nitro_t$p.value  )
 print(p_all_t$p.value    )
 
 print("Wilcoxon")
-p_irr_w   <- wilcox.test(comm_pract_full$wat_eff, irr_only_full$wat_eff)
-p_nitro_w <- wilcox.test(comm_pract_full$wat_eff, nitro_only_full$wat_eff)
-p_all_w   <- wilcox.test(comm_pract_full$wat_eff, all_recs_full$wat_eff)
+p_irr_w   <- wilcox.test(comm_pract_full_nocass$wat_eff, irr_only_full$wat_eff)
+p_nitro_w <- wilcox.test(comm_pract_full_nocass$wat_eff, nitro_only_full$wat_eff)
+p_all_w   <- wilcox.test(comm_pract_full_nocass$wat_eff, all_recs_full$wat_eff)
 print(p_irr_w$p.value    )
 print(p_nitro_w$p.value  )
 print(p_all_w$p.value    )
