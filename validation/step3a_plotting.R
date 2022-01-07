@@ -21,18 +21,23 @@ if(! is.null(dev.list())){
   dev.off(dev.list()["RStudioGD"]) # Clears plots
 }
 
-run_summary       <- run_summary       %>% filter(run_id == 2)
-cumul_net_changes <- cumul_net_changes %>% filter(run_id == 2)
+# TODO fix me 
+#run_summary       <- run_summary       %>% filter(run_id == 2)
+#cumul_net_changes <- cumul_net_changes %>% filter(run_id == 2)
 
 ## Plot average loss/gains
 
+run_summary_bar_plot <- run_summary %>% 
+                        group_by(run_type) %>% 
+                        summarize_at(vars(avg_yield_losses,avg_yield_gains),funs(mean))
+
 # Massage data for chart
-plot_run_summary_1 <- run_summary %>% 
+plot_run_summary_1 <- run_summary_bar_plot %>% 
                       dplyr::select(run_type, avg_yield_gains) %>% 
                       dplyr::rename(change = avg_yield_gains) %>% 
                       dplyr::mutate(type = "gains")
 
-plot_run_summary_2 <- run_summary %>% 
+plot_run_summary_2 <- run_summary_bar_plot %>% 
                       dplyr::select(run_type, avg_yield_losses) %>% 
                       dplyr::rename(change = avg_yield_losses) %>% 
                       dplyr::mutate(change = change*-1) %>% 
@@ -57,19 +62,33 @@ ggsave(
 
 ## Plot cumulative net gain in yield 
 
+# Summarize the results
+
+cumul_net_changes_by_year <- cumul_net_changes %>% 
+                      group_by(year) %>%
+                      summarize_at(
+                        vars(
+                          cumul_net_yield_changes_irr,
+                          cumul_net_yield_changes_nitro,
+                          cumul_net_yield_changes_all_recs,
+                          cumul_net_leach_changes_irr,
+                          cumul_net_leach_changes_nitro,
+                          cumul_net_leach_changes_all_recs
+                          ), funs(mean))
+
 # stack them on top of each other for ggplot
-df1 <- cumul_net_changes %>% 
+df1 <- cumul_net_changes_by_year %>% 
         dplyr::select(year, cumul_net_yield_changes_irr) %>%
         rename(net_change=cumul_net_yield_changes_irr) %>%
         mutate(type="Irrigation only")
 
 
-df2 <- cumul_net_changes %>% 
+df2 <- cumul_net_changes_by_year %>% 
         dplyr::select(year, cumul_net_yield_changes_nitro) %>%
         rename(net_change=cumul_net_yield_changes_nitro) %>%
         mutate(type="Nitro only")
 
-df3 <- cumul_net_changes %>% 
+df3 <- cumul_net_changes_by_year %>% 
         dplyr::select(year, cumul_net_yield_changes_all_recs) %>%
         rename(net_change=cumul_net_yield_changes_all_recs) %>%
         mutate(type="All reccomendations")
@@ -95,25 +114,25 @@ ggsave(
 ## Plot cumulative net change in leaching 
 
 # stack them on top of each other for ggplot
-df1 <- cumul_net_changes %>% 
+df1 <- cumul_net_changes_by_year %>% 
         dplyr::select(year, cumul_net_leach_changes_irr) %>%
         rename(net_change=cumul_net_leach_changes_irr) %>%
         mutate(type="Irrigation only")
 
 
-df2 <- cumul_net_changes %>% 
+df2 <- cumul_net_changes_by_year %>% 
         dplyr::select(year, cumul_net_leach_changes_nitro) %>%
         rename(net_change=cumul_net_leach_changes_nitro) %>%
         mutate(type="Nitro only")
 
-df3 <- cumul_net_changes %>% 
+df3 <- cumul_net_changes_by_year %>% 
         dplyr::select(year, cumul_net_leach_changes_all_recs) %>%
         rename(net_change=cumul_net_leach_changes_all_recs) %>%
         mutate(type="All reccomendations")
 
 avg_leach <- 16.783
 
-df4 <- cumul_net_changes %>% 
+df4 <- cumul_net_changes_by_year %>% 
         mutate(net_change=avg_leach) %>%
         mutate(type="Average leaching in common practices") %>%
         dplyr::select(year, net_change, type)
