@@ -76,8 +76,8 @@ ROOT_PATH <- "/Volumes/data/Gilgamesh/kroppian/agovization_results/validation/"
 
 COMM_PRACT_PATH           <- paste(ROOT_PATH,  "comm_pract_full.feather", sep = "")
 IRR_ONLY_RESULT_PATH      <- paste(ROOT_PATH,  "irr_full.feather", sep = "")
-NITRO_ONLY_RESULT_PATH    <- paste(ROOT_PATH,  "all_recs_full.feather", sep = "")
-ALL_RECS_RESULT_PATH      <- paste(ROOT_PATH,  "nitro_full.feather", sep = "")
+NITRO_ONLY_RESULT_PATH    <- paste(ROOT_PATH,  "nitro_full.feather", sep = "")
+ALL_RECS_RESULT_PATH      <- paste(ROOT_PATH,  "all_recs_full.feather", sep = "")
 
 SUMMARY_OUTPUT_PATH <- paste(ROOT_PATH, "validation_summary.feather", sep = "")
 CUMUL_NET_CHANGE_OUTPUT_PATH <- paste(ROOT_PATH, "cumul_net_change.feather", sep = "")
