@@ -4,12 +4,13 @@ library(magrittr)
 
 
 INPUT_DATA_ROOT <- 'Z:/Gilgamesh/kroppian/agovization_results/validation/'
+INPUT_DATA_ROOT <- '/Volumes/data/Gilgamesh/kroppian/agovization_results/validation/'
 
 SUMMARY_INPUT_PATH <- paste(INPUT_DATA_ROOT, "validation_summary.feather", sep="")
 CUMUL_NET_CHANGE_OUTPUT_PATH <- paste(INPUT_DATA_ROOT, "cumul_net_change.feather", sep="")
 
-#PLOT_OUTPUT_PATH <- "/Users/iankropp/OneDrive - Michigan State University/Documents/Shared/todo/paper1Innovization/figures/"
 PLOT_OUTPUT_PATH <- 'C:/Users/Ian Kropp/OneDrive/OneDrive - Michigan State University/Documents/Shared/todo/paper1Innovization/figures/'
+PLOT_OUTPUT_PATH <- "/Users/iankropp/OneDrive - Michigan State University/Documents/Shared/todo/paper1Innovization/figures/"
 
 
 run_summary <- arrow::read_feather(SUMMARY_INPUT_PATH)    
@@ -20,8 +21,8 @@ if(! is.null(dev.list())){
   dev.off(dev.list()["RStudioGD"]) # Clears plots
 }
 
-run_summary       <- run_summary       %>% filter(run_id == 1)
-cumul_net_changes <- cumul_net_changes %>% filter(run_id == 1)
+run_summary       <- run_summary       %>% filter(run_id == 2)
+cumul_net_changes <- cumul_net_changes %>% filter(run_id == 2)
 
 ## Plot average loss/gains
 
