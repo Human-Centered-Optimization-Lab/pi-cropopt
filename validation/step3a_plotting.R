@@ -79,79 +79,115 @@ cumul_net_changes_by_year <- cumul_net_changes %>%
                           cumul_net_leach_changes_all_recs
                           ), funs(mean))
 
-# TODO create confidence intervals 
+# Calculate confidence intervals
+ci_upper_yield <- c()
+ci_lower_yield <- c()
+ci_years_yield <- c()
+ci_type_yield <- c()
 
-# TODO Create empty dataframes
+ci_upper_leach <- c()
+ci_lower_leach <- c()
+ci_years_leach <- c()
+ci_type_leach <- c()
 
-ci_upper <- c()
-ci_lower <- c()
-ci_years <- c()
-ci_type <- c()
+
 
 for(current_year in min_year:max_year){
  
-  # Calculate confidence intervals
   # ---- Irrigation only yield ----
-  vals <- cumul_net_changes %>% filter(year == current_year) %>% pull(irr_only_net_yield) 
+  vals <- cumul_net_changes %>% filter(year == current_year) %>% pull(cumul_net_yield_changes_irr) 
   
   reps <- boot(vals, statistic=samplemean, R=1000)
   boot_res <- boot.ci(reps, type="basic")
 
-  ci_upper <- append(ci_upper, boot_res$basic[1,5])
-  ci_lower <- append(ci_lower, boot_res$basic[1,4])
-  ci_years <- append(ci_years, current_year)
-  ci_type  <- append(ci_type, "Irrigation only")
+  ci_upper_yield <- append(ci_upper_yield, boot_res$basic[1,5])
+  ci_lower_yield <- append(ci_lower_yield, boot_res$basic[1,4])
+  ci_years_yield <- append(ci_years_yield, current_year)
+  ci_type_yield  <- append(ci_type_yield, "Irrigation recommendations")
   
   
   # ---- Nitrogen only yield ----
-  vals <- cumul_net_changes %>% filter(year == current_year) %>% pull(nitro_only_net_yield) 
+  vals <- cumul_net_changes %>% filter(year == current_year) %>% pull(cumul_net_yield_changes_nitro) 
   reps <- boot(vals, statistic=samplemean, R=1000)
   boot_res <- boot.ci(reps, type="basic")
   
-  ci_upper <- append(ci_upper, boot_res$basic[1,5])
-  ci_lower <- append(ci_lower, boot_res$basic[1,4])
-  ci_years <- append(ci_years, current_year)
-  ci_type  <- append(ci_type, "Nitro only")
+  ci_upper_yield <- append(ci_upper_yield, boot_res$basic[1,5])
+  ci_lower_yield <- append(ci_lower_yield, boot_res$basic[1,4])
+  ci_years_yield <- append(ci_years_yield, current_year)
+  ci_type_yield  <- append(ci_type_yield, "Nitrogen recommendations")
   
   
   # ---- All recs yield ----
-  vals <- cumul_net_changes %>% filter(year == current_year) %>% pull(all_rec_net_yield) 
+  vals <- cumul_net_changes %>% filter(year == current_year) %>% pull(cumul_net_yield_changes_all_recs) 
   reps <- boot(vals, statistic=samplemean, R=1000)
   boot_res <- boot.ci(reps, type="basic")
   
-  ci_upper <- append(ci_upper, boot_res$basic[1,5])
-  ci_lower <- append(ci_lower, boot_res$basic[1,4])
-  ci_years <- append(ci_years, current_year)
-  ci_type  <- append(ci_type, "All reccomendations")
+  ci_upper_yield <- append(ci_upper_yield, boot_res$basic[1,5])
+  ci_lower_yield <- append(ci_lower_yield, boot_res$basic[1,4])
+  ci_years_yield <- append(ci_years_yield, current_year)
+  ci_type_yield  <- append(ci_type_yield, "All reccomendations")
  
   
-   
-  cumul_net_leach_ci_irr <- 1
-  cumul_net_leach_ci_nitro <- 1
-  cumul_net_leach_ci_all_recs <- 1
+  # ---- Irrigation only leaching ----
+  vals <- cumul_net_changes %>% filter(year == current_year) %>% pull(cumul_net_leach_changes_irr) 
+  
+  reps <- boot(vals, statistic=samplemean, R=1000)
+  boot_res <- boot.ci(reps, type="basic")
+
+  ci_upper_leach <- append(ci_upper_leach, boot_res$basic[1,5])
+  ci_lower_leach <- append(ci_lower_leach, boot_res$basic[1,4])
+  ci_years_leach <- append(ci_years_leach, current_year)
+  ci_type_leach  <- append( ci_type_leach, "Irrigation recommendations")
+  
+  
+  # ---- Nitrogen only yield ----
+  vals <- cumul_net_changes %>% filter(year == current_year) %>% pull(cumul_net_leach_changes_nitro) 
+  reps <- boot(vals, statistic=samplemean, R=1000)
+  boot_res <- boot.ci(reps, type="basic")
+  
+  ci_upper_leach <- append(ci_upper_leach, boot_res$basic[1,5])
+  ci_lower_leach <- append(ci_lower_leach, boot_res$basic[1,4])
+  ci_years_leach <- append(ci_years_leach, current_year)
+  ci_type_leach  <- append( ci_type_leach, "Nitrogen recommendations")
+  
+  
+  # ---- All recs yield ----
+  vals <- cumul_net_changes %>% filter(year == current_year) %>% pull(cumul_net_leach_changes_all_recs) 
+  reps <- boot(vals, statistic=samplemean, R=1000)
+  boot_res <- boot.ci(reps, type="basic")
+  
+  ci_upper_leach <- append(ci_upper_leach, boot_res$basic[1,5])
+  ci_lower_leach <- append(ci_lower_leach, boot_res$basic[1,4])
+  ci_years_leach <- append(ci_years_leach, current_year)
+  ci_type_leach  <- append( ci_type_leach, "All reccomendations")
   
 }
 
-cis <- data.frame(
-  upper=ci_upper,
-  lower=ci_lower,
-  year=ci_years,
-  type=ci_type
+cis_yield <- data.frame(
+  upper=ci_upper_yield,
+  lower=ci_lower_yield,
+  year=ci_years_yield,
+  type=ci_type_yield
 )
 
-
+cis_leach <- data.frame(
+  upper=ci_upper_leach,
+  lower=ci_lower_leach,
+  year= ci_years_leach,
+  type= ci_type_leach
+)
 
 
 # stack them on top of each other for ggplot
 df1 <- cumul_net_changes_by_year %>% 
         dplyr::select(year, cumul_net_yield_changes_irr) %>%
         rename(net_change=cumul_net_yield_changes_irr) %>%
-        mutate(type="Irrigation only")
+        mutate(type="Irrigation recommendations")
 
 df2 <- cumul_net_changes_by_year %>% 
         dplyr::select(year, cumul_net_yield_changes_nitro) %>%
         rename(net_change=cumul_net_yield_changes_nitro) %>%
-        mutate(type="Nitro only")
+        mutate(type="Nitrogen recommendations")
 
 df3 <- cumul_net_changes_by_year %>% 
         dplyr::select(year, cumul_net_yield_changes_all_recs) %>%
@@ -161,10 +197,15 @@ df3 <- cumul_net_changes_by_year %>%
 
 cumul_net_yield_changes_plot <- rbind(df1, df2, df3)
 
+# Add confidence intervals
+cumul_net_yield_changes_plot <- cumul_net_yield_changes_plot %>% 
+                                full_join(cis_yield)
+
+
 p2 <- ggplot(data=cumul_net_yield_changes_plot, aes(x=year, y=net_change, group=type)) + 
       geom_line(aes(color=type)) +
       geom_point(aes(shape=type)) + 
-      geom_polygon(data=ci_polys, aes(x = x, y = y), group = id) +
+      geom_ribbon(aes(ymin = lower, ymax = upper, fill=type), alpha = 0.25) + 
       ylab("Cumulative net yield increase (kg/ha)") 
      
  
@@ -185,31 +226,35 @@ ggsave(
 df1 <- cumul_net_changes_by_year %>% 
         dplyr::select(year, cumul_net_leach_changes_irr) %>%
         rename(net_change=cumul_net_leach_changes_irr) %>%
-        mutate(type="Irrigation only")
+        mutate(type="Irrigation recommendations")
 
 
 df2 <- cumul_net_changes_by_year %>% 
         dplyr::select(year, cumul_net_leach_changes_nitro) %>%
         rename(net_change=cumul_net_leach_changes_nitro) %>%
-        mutate(type="Nitro only")
+        mutate(type="Nitrogen recommendations")
 
 df3 <- cumul_net_changes_by_year %>% 
         dplyr::select(year, cumul_net_leach_changes_all_recs) %>%
         rename(net_change=cumul_net_leach_changes_all_recs) %>%
         mutate(type="All reccomendations")
 
-avg_leach <- 16.783
+#avg_leach <- 16.783
+#
+#df4 <- cumul_net_changes_by_year %>% 
+#        mutate(net_change=avg_leach) %>%
+#        mutate(type="Average leaching in common practices") %>%
+#        dplyr::select(year, net_change, type)
+#
+#cumul_net_leach_changes_plot <- rbind(df1, df2, df3, df4)
+cumul_net_leach_changes_plot <- rbind(df1, df2, df3)
 
-df4 <- cumul_net_changes_by_year %>% 
-        mutate(net_change=avg_leach) %>%
-        mutate(type="Average leaching in common practices") %>%
-        dplyr::select(year, net_change, type)
-
-cumul_net_leach_changes_plot <- rbind(df1, df2, df3, df4)
+cumul_net_leach_changes_plot <- cumul_net_leach_changes_plot %>% full_join(cis_leach)
 
 p3 <- ggplot(data=cumul_net_leach_changes_plot, aes(x=year, y=net_change, group=type)) + 
       geom_line(aes(color=type)) +
       geom_point(aes(shape=type)) + 
+      geom_ribbon(aes(ymin = lower, ymax = upper, fill=type), alpha = 0.25) + 
       ylab("Cumulative net leaching increase (kg/ha)") 
       
 plot(p3)
