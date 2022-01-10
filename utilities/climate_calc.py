@@ -9,8 +9,13 @@ START_YEAR = 1989
 END_YEAR = 2018
 STUDY_SITE = "CASS"
 
-files = sys.argv[1:]
+output_path = sys.argv[1]
+files = sys.argv[2:]
 gdd_tab = pd.read_csv(GDD_TAB_CSV)
+
+if output_path[-7:].lower() != "feather":
+    print("Usage: %s OUTPUTFILE.feather WEATHER_FILE1.WTH [WEATHER_FILE2.WTH ... WEATHER_FILEN.WTH]" % sys.argv[0])
+    sys.exit(1)
 
 # Functions
 def get_seasonal_rain(study_site_wth, year, gdd_tab):
@@ -83,8 +88,9 @@ for station in weather_stations.keys():
         raw_tab["clim"].append(clim)
 
        
-print(pd.DataFrame(raw_tab))
-        
+result = pd.DataFrame(raw_tab)
+
+result.to_feather(output_path)
 
 
 
