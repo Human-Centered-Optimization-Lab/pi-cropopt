@@ -73,40 +73,67 @@ strategies     <- c("Irrigation recommendations", "Nitrogen recommendations", "A
 
 
 ## Year-by-year tests
+# ------------------------------------------------------
 print("year-by-year change in yield -- all years")
-p_irr_w   <- wilcox.test(comm_pract_full_nocass %>% pull(yield), irr_only_full   %>% pull(yield))
-p_nitro_w <- wilcox.test(comm_pract_full_nocass %>% pull(yield), nitro_only_full %>% pull(yield))
-p_all_w   <- wilcox.test(comm_pract_full_nocass %>% pull(yield), all_recs_full   %>% pull(yield))
-print(p_irr_w$p.value    )
-print(p_nitro_w$p.value  )
-print(p_all_w$p.value    )
+
+yield_comm_pract <- comm_pract_full_nocass %>% pull(yield)
+yield_irr_only   <- irr_only_full   %>% pull(yield)
+yield_nitro_only <- nitro_only_full %>% pull(yield)  
+yield_all_recs   <- all_recs_full   %>% pull(yield)  
+  
+p_irr_w   <- wilcox.test(yield_comm_pract, yield_irr_only   )
+p_nitro_w <- wilcox.test(yield_comm_pract, yield_nitro_only )
+p_all_w   <- wilcox.test(yield_comm_pract, yield_all_recs   )
+print(p_irr_w$p.value  )
+print(p_nitro_w$p.value)
+print(p_all_w$p.value  )
 
 pvals_yield <- c(p_irr_w$p.value, p_nitro_w$p.value, p_all_w$p.value)
 
+# ------------------------------------------------------
 print("year-by-year change in yield -- dry years")
-p_irr_w   <- wilcox.test(comm_pract_full_nocass %>% filter(climate == 0) %>% pull(yield), irr_only_full   %>% filter(climate == 0) %>% pull(yield))
-p_nitro_w <- wilcox.test(comm_pract_full_nocass %>% filter(climate == 0) %>% pull(yield), nitro_only_full %>% filter(climate == 0) %>% pull(yield))
-p_all_w   <- wilcox.test(comm_pract_full_nocass %>% filter(climate == 0) %>% pull(yield), all_recs_full   %>% filter(climate == 0) %>% pull(yield))
+
+yield_comm_pract <- comm_pract_full_nocass %>% filter(climate == 0) %>% pull(yield)
+yield_irr_only   <- irr_only_full   %>% filter(climate == 0) %>% pull(yield)
+yield_nitro_only <- nitro_only_full %>% filter(climate == 0) %>% pull(yield)
+yield_all_recs   <- all_recs_full   %>% filter(climate == 0) %>% pull(yield)
+
+p_irr_w   <- wilcox.test(yield_comm_pract, yield_irr_only   )
+p_nitro_w <- wilcox.test(yield_comm_pract, yield_nitro_only )
+p_all_w   <- wilcox.test(yield_comm_pract, yield_all_recs   )
 print(p_irr_w$p.value    )
 print(p_nitro_w$p.value  )
 print(p_all_w$p.value    )
 
 pvals_yield_dry <- c(p_irr_w$p.value, p_nitro_w$p.value, p_all_w$p.value)
 
+# ------------------------------------------------------
 print("year-by-year change in yield -- normal years")
-p_irr_w   <- wilcox.test(comm_pract_full_nocass %>% filter(climate == 1) %>% pull(yield), irr_only_full   %>% filter(climate == 1) %>% pull(yield))
-p_nitro_w <- wilcox.test(comm_pract_full_nocass %>% filter(climate == 1) %>% pull(yield), nitro_only_full %>% filter(climate == 1) %>% pull(yield))
-p_all_w   <- wilcox.test(comm_pract_full_nocass %>% filter(climate == 1) %>% pull(yield), all_recs_full   %>% filter(climate == 1) %>% pull(yield))
+yield_comm_pract <- comm_pract_full_nocass %>% filter(climate == 1) %>% pull(yield)
+yield_irr_only   <- irr_only_full   %>% filter(climate == 1) %>% pull(yield)
+yield_nitro_only <- nitro_only_full %>% filter(climate == 1) %>% pull(yield)
+yield_all_recs   <- all_recs_full   %>% filter(climate == 1) %>% pull(yield)
+
+p_irr_w   <- wilcox.test(yield_comm_pract, yield_irr_only   )
+p_nitro_w <- wilcox.test(yield_comm_pract, yield_nitro_only )
+p_all_w   <- wilcox.test(yield_comm_pract, yield_all_recs   )
 print(p_irr_w$p.value    )
 print(p_nitro_w$p.value  )
 print(p_all_w$p.value    )
 
 pvals_yield_norm <- c(p_irr_w$p.value, p_nitro_w$p.value, p_all_w$p.value)
 
+# ------------------------------------------------------
 print("year-by-year change in yield -- wet years")
-p_irr_w   <- wilcox.test(comm_pract_full_nocass %>% filter(climate == 2) %>% pull(yield), irr_only_full   %>% filter(climate == 2) %>% pull(yield))
-p_nitro_w <- wilcox.test(comm_pract_full_nocass %>% filter(climate == 2) %>% pull(yield), nitro_only_full %>% filter(climate == 2) %>% pull(yield))
-p_all_w   <- wilcox.test(comm_pract_full_nocass %>% filter(climate == 2) %>% pull(yield), all_recs_full   %>% filter(climate == 2) %>% pull(yield))
+
+yield_comm_pract <-  comm_pract_full_nocass %>% filter(climate == 2) %>% pull(yield)
+yield_irr_only   <-  irr_only_full   %>% filter(climate == 2) %>% pull(yield)
+yield_nitro_only <-  nitro_only_full %>% filter(climate == 2) %>% pull(yield)
+yield_all_recs   <-  all_recs_full   %>% filter(climate == 2) %>% pull(yield)
+
+p_irr_w   <- wilcox.test(yield_comm_pract, yield_irr_only   )
+p_nitro_w <- wilcox.test(yield_comm_pract, yield_nitro_only )
+p_all_w   <- wilcox.test(yield_comm_pract, yield_all_recs   )
 print(p_irr_w$p.value    )
 print(p_nitro_w$p.value  )
 print(p_all_w$p.value    )
@@ -114,98 +141,142 @@ print(p_all_w$p.value    )
 pvals_yield_wet <- c(p_irr_w$p.value, p_nitro_w$p.value, p_all_w$p.value)
 
 
+# ------------------------------------------------------
 print("year-by-year change in leaching -- all years")
-p_irr_w   <- wilcox.test(comm_pract_full_nocass %>% pull(leaching), irr_only_full   %>% pull(leaching))
-p_nitro_w <- wilcox.test(comm_pract_full_nocass %>% pull(leaching), nitro_only_full %>% pull(leaching))
-p_all_w   <- wilcox.test(comm_pract_full_nocass %>% pull(leaching), all_recs_full   %>% pull(leaching))
+
+yield_comm_pract <-  comm_pract_full_nocass %>% pull(leaching)
+yield_irr_only   <-  irr_only_full   %>% pull(leaching)
+yield_nitro_only <-  nitro_only_full %>% pull(leaching)
+yield_all_recs   <-  all_recs_full   %>% pull(leaching)
+
+p_irr_w   <- wilcox.test(yield_comm_pract, yield_irr_only   )
+p_nitro_w <- wilcox.test(yield_comm_pract, yield_nitro_only )
+p_all_w   <- wilcox.test(yield_comm_pract, yield_all_recs   )
 print(p_irr_w$p.value    )
 print(p_nitro_w$p.value  )
 print(p_all_w$p.value    )
 
 pvals_leaching <- c(p_irr_w$p.value, p_nitro_w$p.value, p_all_w$p.value)
 
+# ------------------------------------------------------
 print("year-by-year change in leaching -- dry years")
-p_irr_w   <- wilcox.test(comm_pract_full_nocass %>% filter(climate == 0) %>% pull(leaching), irr_only_full   %>% filter(climate == 0)  %>% pull(leaching))
-p_nitro_w <- wilcox.test(comm_pract_full_nocass %>% filter(climate == 0) %>% pull(leaching), nitro_only_full %>% filter(climate == 0)  %>% pull(leaching))
-p_all_w   <- wilcox.test(comm_pract_full_nocass %>% filter(climate == 0) %>% pull(leaching), all_recs_full   %>% filter(climate == 0)  %>% pull(leaching))
+
+yield_comm_pract <- comm_pract_full_nocass %>% filter(climate == 0) %>% pull(leaching)
+yield_irr_only   <- irr_only_full   %>% filter(climate == 0)  %>% pull(leaching)
+yield_nitro_only <- nitro_only_full %>% filter(climate == 0)  %>% pull(leaching)
+yield_all_recs   <- all_recs_full   %>% filter(climate == 0)  %>% pull(leaching)
+
+p_irr_w   <- wilcox.test(yield_comm_pract, yield_irr_only   )
+p_nitro_w <- wilcox.test(yield_comm_pract, yield_nitro_only )
+p_all_w   <- wilcox.test(yield_comm_pract, yield_all_recs   )
 print(p_irr_w$p.value    )
 print(p_nitro_w$p.value  )
 print(p_all_w$p.value    )
 
 pvals_leaching_dry <- c(p_irr_w$p.value, p_nitro_w$p.value, p_all_w$p.value)
 
+# ------------------------------------------------------
 print("year-by-year change in leaching -- norm years")
-p_irr_w   <- wilcox.test(comm_pract_full_nocass %>% filter(climate == 1) %>% pull(leaching), irr_only_full   %>% filter(climate == 1) %>% pull(leaching))
-p_nitro_w <- wilcox.test(comm_pract_full_nocass %>% filter(climate == 1) %>% pull(leaching), nitro_only_full %>% filter(climate == 1) %>% pull(leaching))
-p_all_w   <- wilcox.test(comm_pract_full_nocass %>% filter(climate == 1) %>% pull(leaching), all_recs_full   %>% filter(climate == 1) %>% pull(leaching))
+
+yield_comm_pract <-  comm_pract_full_nocass %>% filter(climate == 1) %>% pull(leaching)
+yield_irr_only   <-  irr_only_full   %>% filter(climate == 1) %>% pull(leaching)
+yield_nitro_only <-  nitro_only_full %>% filter(climate == 1) %>% pull(leaching)
+yield_all_recs   <-  all_recs_full   %>% filter(climate == 1) %>% pull(leaching)
+
+p_irr_w   <- wilcox.test(yield_comm_pract, yield_irr_only   )
+p_nitro_w <- wilcox.test(yield_comm_pract, yield_nitro_only )
+p_all_w   <- wilcox.test(yield_comm_pract, yield_all_recs   )
 print(p_irr_w$p.value    )
 print(p_nitro_w$p.value  )
 print(p_all_w$p.value    )
 
 pvals_leaching_norm <- c(p_irr_w$p.value, p_nitro_w$p.value, p_all_w$p.value)
 
+# ------------------------------------------------------
 print("year-by-year change in leaching -- wet years")
-p_irr_w   <- wilcox.test(comm_pract_full_nocass %>% filter(climate == 2) %>% pull(leaching), irr_only_full   %>% filter(climate == 2) %>% pull(leaching))
-p_nitro_w <- wilcox.test(comm_pract_full_nocass %>% filter(climate == 2) %>% pull(leaching), nitro_only_full %>% filter(climate == 2) %>% pull(leaching))
-p_all_w   <- wilcox.test(comm_pract_full_nocass %>% filter(climate == 2) %>% pull(leaching), all_recs_full   %>% filter(climate == 2) %>% pull(leaching))
+
+yield_comm_pract <- comm_pract_full_nocass %>% filter(climate == 2) %>% pull(leaching)
+yield_irr_only   <- irr_only_full   %>% filter(climate == 2) %>% pull(leaching)
+yield_nitro_only <- nitro_only_full %>% filter(climate == 2) %>% pull(leaching)
+yield_all_recs   <- all_recs_full   %>% filter(climate == 2) %>% pull(leaching)
+
+p_irr_w   <- wilcox.test(yield_comm_pract, yield_irr_only   )
+p_nitro_w <- wilcox.test(yield_comm_pract, yield_nitro_only )
+p_all_w   <- wilcox.test(yield_comm_pract, yield_all_recs   )
 print(p_irr_w$p.value    )
 print(p_nitro_w$p.value  )
 print(p_all_w$p.value    )
 
 pvals_leaching_wet <- c(p_irr_w$p.value, p_nitro_w$p.value, p_all_w$p.value)
 
+# ------------------------------------------------------
 print("year-by-year change in water efficiency -- all years")
-p_irr_w   <- wilcox.test(comm_pract_full_nocass %>% pull(wat_eff), irr_only_full   %>% pull(wat_eff))
-p_nitro_w <- wilcox.test(comm_pract_full_nocass %>% pull(wat_eff), nitro_only_full %>% pull(wat_eff))
-p_all_w   <- wilcox.test(comm_pract_full_nocass %>% pull(wat_eff), all_recs_full   %>% pull(wat_eff))
+
+yield_comm_pract <-  comm_pract_full_nocass %>% pull(wat_eff)
+yield_irr_only   <-  irr_only_full   %>% pull(wat_eff)
+yield_nitro_only <-  nitro_only_full %>% pull(wat_eff)
+yield_all_recs   <-  all_recs_full   %>% pull(wat_eff)
+
+p_irr_w   <- wilcox.test(yield_comm_pract, yield_irr_only   )
+p_nitro_w <- wilcox.test(yield_comm_pract, yield_nitro_only )
+p_all_w   <- wilcox.test(yield_comm_pract, yield_all_recs   )
 print(p_irr_w$p.value    )
 print(p_nitro_w$p.value  )
 print(p_all_w$p.value    )
 
 pvals_wat_eff <- c(p_irr_w$p.value, p_nitro_w$p.value, p_all_w$p.value)
 
+# ------------------------------------------------------
 print("year-by-year change in water efficiency -- dry")
-p_irr_w   <- wilcox.test(comm_pract_full_nocass %>% filter(climate == 0) %>% pull(wat_eff), irr_only_full   %>% filter(climate == 0) %>% pull(wat_eff) )
-p_nitro_w <- wilcox.test(comm_pract_full_nocass %>% filter(climate == 0) %>% pull(wat_eff), nitro_only_full %>% filter(climate == 0) %>% pull(wat_eff) )
-p_all_w   <- wilcox.test(comm_pract_full_nocass %>% filter(climate == 0) %>% pull(wat_eff), all_recs_full   %>% filter(climate == 0) %>% pull(wat_eff) )
+
+
+yield_comm_pract <- comm_pract_full_nocass %>% filter(climate == 0) %>% pull(wat_eff)
+yield_irr_only   <- irr_only_full   %>% filter(climate == 0) %>% pull(wat_eff) 
+yield_nitro_only <- nitro_only_full %>% filter(climate == 0) %>% pull(wat_eff) 
+yield_all_recs   <- all_recs_full   %>% filter(climate == 0) %>% pull(wat_eff) 
+
+p_irr_w   <- wilcox.test(yield_comm_pract, yield_irr_only   )
+p_nitro_w <- wilcox.test(yield_comm_pract, yield_nitro_only )
+p_all_w   <- wilcox.test(yield_comm_pract, yield_all_recs   )
 print(p_irr_w$p.value    )
 print(p_nitro_w$p.value  )
 print(p_all_w$p.value    )
 
 pvals_wat_eff_dry <- c(p_irr_w$p.value, p_nitro_w$p.value, p_all_w$p.value)
 
+# ------------------------------------------------------
 print("year-by-year change in water efficiency -- norm")
-p_irr_w   <- wilcox.test(comm_pract_full_nocass %>% filter(climate == 1) %>% pull(wat_eff), irr_only_full   %>% filter(climate == 1) %>% pull(wat_eff))
-p_nitro_w <- wilcox.test(comm_pract_full_nocass %>% filter(climate == 1) %>% pull(wat_eff), nitro_only_full %>% filter(climate == 1) %>% pull(wat_eff))
-p_all_w   <- wilcox.test(comm_pract_full_nocass %>% filter(climate == 1) %>% pull(wat_eff), all_recs_full   %>% filter(climate == 1) %>% pull(wat_eff))
+
+yield_comm_pract <-  comm_pract_full_nocass %>% filter(climate == 1) %>% pull(wat_eff)
+yield_irr_only   <-  irr_only_full   %>% filter(climate == 1) %>% pull(wat_eff)
+yield_nitro_only <-  nitro_only_full %>% filter(climate == 1) %>% pull(wat_eff)
+yield_all_recs   <-  all_recs_full   %>% filter(climate == 1) %>% pull(wat_eff)
+
+p_irr_w   <- wilcox.test(yield_comm_pract, yield_irr_only   )
+p_nitro_w <- wilcox.test(yield_comm_pract, yield_nitro_only )
+p_all_w   <- wilcox.test(yield_comm_pract, yield_all_recs   )
 print(p_irr_w$p.value    )
 print(p_nitro_w$p.value  )
 print(p_all_w$p.value    )
 
 pvals_wat_eff_norm <- c(p_irr_w$p.value, p_nitro_w$p.value, p_all_w$p.value)
 
+# ------------------------------------------------------
 print("year-by-year change in water efficiency -- wet")
-p_irr_w   <- wilcox.test(comm_pract_full_nocass %>% filter(climate == 2) %>% pull(wat_eff), irr_only_full   %>% filter(climate == 2) %>% pull(wat_eff))
-p_nitro_w <- wilcox.test(comm_pract_full_nocass %>% filter(climate == 2) %>% pull(wat_eff), nitro_only_full %>% filter(climate == 2) %>% pull(wat_eff))
-p_all_w   <- wilcox.test(comm_pract_full_nocass %>% filter(climate == 2) %>% pull(wat_eff), all_recs_full   %>% filter(climate == 2) %>% pull(wat_eff))
+
+yield_comm_pract <- comm_pract_full_nocass %>% filter(climate == 2) %>% pull(wat_eff)
+yield_irr_only   <- irr_only_full   %>% filter(climate == 2) %>% pull(wat_eff)
+yield_nitro_only <- nitro_only_full %>% filter(climate == 2) %>% pull(wat_eff)
+yield_all_recs   <- all_recs_full   %>% filter(climate == 2) %>% pull(wat_eff)
+
+p_irr_w   <- wilcox.test(yield_comm_pract, yield_irr_only   )
+p_nitro_w <- wilcox.test(yield_comm_pract, yield_nitro_only )
+p_all_w   <- wilcox.test(yield_comm_pract, yield_all_recs   )
 print(p_irr_w$p.value    )
 print(p_nitro_w$p.value  )
 print(p_all_w$p.value    )
 
 pvals_wat_eff_wet <- c(p_irr_w$p.value, p_nitro_w$p.value, p_all_w$p.value)
-## Cumulative tests
-
-print("Cumulative change in yield")
-p_irr_w   <- wilcox.test(comm_pract_full %>% pull(yield), irr_only_full   %>% pull(yield))
-p_nitro_w <- wilcox.test(comm_pract_full %>% pull(yield), nitro_only_full %>% pull(yield))
-p_all_w   <- wilcox.test(comm_pract_full %>% pull(yield), all_recs_full   %>% pull(yield))
-print(p_irr_w$p.value    )
-print(p_nitro_w$p.value  )
-print(p_all_w$p.value    )
-
-
-
-
 
 ## Build pvalue table
 
