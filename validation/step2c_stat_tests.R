@@ -4,7 +4,7 @@ library("ggplot2")
 num2station <- function(numbers){
   
   result <- c() 
- 
+  
   for(num in numbers){
     
     if (num == 1 )      { result <- append(result, "ALLE")    } 
@@ -70,6 +70,7 @@ comm_pract_full_nocass <- comm_pract_full %>% filter(station != "CASS")
 
 # Initialize what will be our pvalue table
 strategies     <- c("Irrigation recommendations", "Nitrogen recommendations", "All recommendations")
+median_strategies     <- c("Common practices","Irrigation recommendations", "Nitrogen recommendations", "All recommendations")
 
 
 ## Year-by-year tests
@@ -80,7 +81,7 @@ comm_pract <- comm_pract_full_nocass %>% pull(yield)
 irr_only   <- irr_only_full   %>% pull(yield)
 nitro_only <- nitro_only_full %>% pull(yield)  
 all_recs   <- all_recs_full   %>% pull(yield)  
-  
+
 p_irr_w   <- wilcox.test(comm_pract, irr_only   )
 p_nitro_w <- wilcox.test(comm_pract, nitro_only )
 p_all_w   <- wilcox.test(comm_pract, all_recs   )
@@ -89,6 +90,9 @@ print(p_nitro_w$p.value)
 print(p_all_w$p.value  )
 
 pvals_yield <- c(p_irr_w$p.value, p_nitro_w$p.value, p_all_w$p.value)
+
+median_yield <- c(median(comm_pract),    median(irr_only  ), median(nitro_only), median(all_recs  ))
+
 
 # ------------------------------------------------------
 print("year-by-year change in yield -- dry years")
@@ -107,6 +111,9 @@ print(p_all_w$p.value    )
 
 pvals_yield_dry <- c(p_irr_w$p.value, p_nitro_w$p.value, p_all_w$p.value)
 
+median_yield_dry <- c(median(comm_pract),     median(irr_only  ), median(nitro_only), median(all_recs  ))
+
+
 # ------------------------------------------------------
 print("year-by-year change in yield -- normal years")
 comm_pract <- comm_pract_full_nocass %>% filter(climate == 1) %>% pull(yield)
@@ -122,6 +129,9 @@ print(p_nitro_w$p.value  )
 print(p_all_w$p.value    )
 
 pvals_yield_norm <- c(p_irr_w$p.value, p_nitro_w$p.value, p_all_w$p.value)
+
+median_yield_norm <-  c(median(comm_pract),   median(irr_only  ), median(nitro_only), median(all_recs  ))
+
 
 # ------------------------------------------------------
 print("year-by-year change in yield -- wet years")
@@ -139,6 +149,9 @@ print(p_nitro_w$p.value  )
 print(p_all_w$p.value    )
 
 pvals_yield_wet <- c(p_irr_w$p.value, p_nitro_w$p.value, p_all_w$p.value)
+
+median_yield_wet <-  c(median(comm_pract),   median(irr_only  ), median(nitro_only), median(all_recs  ))
+
 
 
 # ------------------------------------------------------
@@ -158,6 +171,10 @@ print(p_all_w$p.value    )
 
 pvals_leaching <- c(p_irr_w$p.value, p_nitro_w$p.value, p_all_w$p.value)
 
+median_leaching <-  c(median(comm_pract),   median(irr_only  ), median(nitro_only), median(all_recs  ))
+
+
+
 # ------------------------------------------------------
 print("year-by-year change in leaching -- dry years")
 
@@ -174,6 +191,10 @@ print(p_nitro_w$p.value  )
 print(p_all_w$p.value    )
 
 pvals_leaching_dry <- c(p_irr_w$p.value, p_nitro_w$p.value, p_all_w$p.value)
+
+median_leaching_dry <-  c(median(comm_pract),   median(irr_only  ), median(nitro_only), median(all_recs  ))
+
+
 
 # ------------------------------------------------------
 print("year-by-year change in leaching -- norm years")
@@ -192,6 +213,10 @@ print(p_all_w$p.value    )
 
 pvals_leaching_norm <- c(p_irr_w$p.value, p_nitro_w$p.value, p_all_w$p.value)
 
+median_leaching_norm <-  c(median(comm_pract),   median(irr_only  ), median(nitro_only), median(all_recs  ))
+
+
+
 # ------------------------------------------------------
 print("year-by-year change in leaching -- wet years")
 
@@ -209,6 +234,10 @@ print(p_all_w$p.value    )
 
 pvals_leaching_wet <- c(p_irr_w$p.value, p_nitro_w$p.value, p_all_w$p.value)
 
+median_leaching_wet <-  c(median(comm_pract),   median(irr_only  ), median(nitro_only), median(all_recs  ))
+
+
+
 # ------------------------------------------------------
 print("year-by-year change in water efficiency -- all years")
 
@@ -225,6 +254,10 @@ print(p_nitro_w$p.value  )
 print(p_all_w$p.value    )
 
 pvals_wat_eff <- c(p_irr_w$p.value, p_nitro_w$p.value, p_all_w$p.value)
+
+median_wat_eff <-  c(median(comm_pract),   median(irr_only  ), median(nitro_only), median(all_recs  ))
+
+
 
 # ------------------------------------------------------
 print("year-by-year change in water efficiency -- dry")
@@ -244,6 +277,10 @@ print(p_all_w$p.value    )
 
 pvals_wat_eff_dry <- c(p_irr_w$p.value, p_nitro_w$p.value, p_all_w$p.value)
 
+median_wat_eff_dry <-  c(median(comm_pract),   median(irr_only  ), median(nitro_only), median(all_recs  ))
+
+
+
 # ------------------------------------------------------
 print("year-by-year change in water efficiency -- norm")
 
@@ -260,6 +297,10 @@ print(p_nitro_w$p.value  )
 print(p_all_w$p.value    )
 
 pvals_wat_eff_norm <- c(p_irr_w$p.value, p_nitro_w$p.value, p_all_w$p.value)
+
+median_wat_eff_norm <-  c(median(comm_pract),  median(irr_only  ), median(nitro_only), median(all_recs  ))
+
+
 
 # ------------------------------------------------------
 print("year-by-year change in water efficiency -- wet")
@@ -278,11 +319,23 @@ print(p_all_w$p.value    )
 
 pvals_wat_eff_wet <- c(p_irr_w$p.value, p_nitro_w$p.value, p_all_w$p.value)
 
+median_wat_eff_wet <-  c(median(comm_pract),   median(irr_only  ), median(nitro_only), median(all_recs  ))
+
+
+
 ## Build pvalue table
 
-pval_tab      <- data.frame(strategies, pvals_yield, pvals_leaching, pvals_wat_eff)
+pval_tab      <- data.frame(strategies, pvals_yield,      pvals_leaching,      pvals_wat_eff     )
 pval_tab_dry  <- data.frame(strategies, pvals_yield_dry , pvals_leaching_dry , pvals_wat_eff_dry )
 pval_tab_norm <- data.frame(strategies, pvals_yield_norm, pvals_leaching_norm, pvals_wat_eff_norm)
 pval_tab_wet  <- data.frame(strategies, pvals_yield_wet , pvals_leaching_wet , pvals_wat_eff_wet )
+
+# Build median table
+median_tab       <- data.frame(median_strategies, median_yield,      median_leaching,      median_wat_eff     )  
+median_tab_dry   <- data.frame(median_strategies, median_yield_dry , median_leaching_dry , median_wat_eff_dry )  
+median_tab_norm  <- data.frame(median_strategies, median_yield_norm, median_leaching_norm, median_wat_eff_norm)  
+median_tab_wet   <- data.frame(median_strategies, median_yield_wet , median_leaching_wet , median_wat_eff_wet )  
+
+
 
 
