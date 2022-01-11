@@ -49,10 +49,14 @@ plot_run_summary_2 <- run_summary_bar_plot %>%
 
 plot_run_summary <- rbind(plot_run_summary_1, plot_run_summary_2)
 
+# Clean up the data a bit
+plot_run_summary$run_type = factor(plot_run_summary$run_type, levels = c("Irrigation", "Nitrogen", "All"))
+
 p1 <- ggplot(data=plot_run_summary, aes(x=run_type, y=change, fill=type)) + 
     geom_bar(stat="identity", position=position_dodge()) + 
     labs(x = "", fill = "Change type") + 
-    ylab("Average change in yield (2010-2018) (kg/ha)") 
+    ylab("Average change in yield (2010-2018) (kg/ha)")  + 
+    xlab("Strategy")  
 
 plot(p1)
 
@@ -200,7 +204,6 @@ cumul_net_yield_changes_plot <- rbind(df1, df2, df3)
 # Add confidence intervals
 cumul_net_yield_changes_plot <- cumul_net_yield_changes_plot %>% 
                                 full_join(cis_yield)
-
 
 p2 <- ggplot(data=cumul_net_yield_changes_plot, aes(x=year, y=net_change, group=type)) + 
       geom_line(aes(color=type)) +

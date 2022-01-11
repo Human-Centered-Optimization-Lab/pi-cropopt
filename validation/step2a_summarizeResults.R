@@ -145,7 +145,7 @@ for (run_id in run_ids){
   all_recs_summary <- summarize(all_recs_result)
   
   # Create summarized results table
-  run_type <- c("Irr recs only", "Nitro recs only", "Irr and Nitro recs")
+  run_type <- c("Irrigation", "Nitrogen", "All")
   
   # Start - Yearly yield summaries
   percent_yield_impr <- c(
