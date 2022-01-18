@@ -37,22 +37,22 @@ calc_avg_yield_gain <- function(summ_tab){
   return(avg_gain)  
 }
 
-calc_med_wat_eff_loss <- function(summ_tab){
-  med_loss <- summ_tab %>% 
+calc_avg_wat_eff_loss <- function(summ_tab){
+  avg_loss <- summ_tab %>% 
                 filter(worse_wat_eff) %>% 
-                summarise(a = median(loss_wat_eff)) %>% 
+                summarise(a = mean(loss_wat_eff)) %>% 
                 pull(a)
   
-  return(med_loss)
+  return(avg_loss)
 }
 
-calc_med_wat_eff_gain <- function(summ_tab){
-  med_gain <- summ_tab %>% 
+calc_avg_wat_eff_gain <- function(summ_tab){
+  avg_gain <- summ_tab %>% 
                 filter(imprv_wat_eff) %>% 
-                summarise(a = median(gain_wat_eff)) %>% 
+                summarise(a = mean(gain_wat_eff)) %>% 
                 pull(a)
   
-  return(med_gain)
+  return(avg_gain)
 }
 
 calc_avg_leaching_imprv <- function(summ_tab){
@@ -296,16 +296,16 @@ for (run_id in run_ids){
   )
   
   
-  med_wat_eff_losses <- c(
-                        calc_med_wat_eff_loss(irr_only_summary),
-                        calc_med_wat_eff_loss(nitro_only_summary),
-                        calc_med_wat_eff_loss(all_recs_summary)
+  avg_wat_eff_losses <- c(
+                        calc_avg_wat_eff_loss(irr_only_summary),
+                        calc_avg_wat_eff_loss(nitro_only_summary),
+                        calc_avg_wat_eff_loss(all_recs_summary)
   )
   
-  med_wat_eff_gain <- c(
-                        calc_med_wat_eff_gain(irr_only_summary),
-                        calc_med_wat_eff_gain(nitro_only_summary),
-                        calc_med_wat_eff_gain(all_recs_summary)
+  avg_wat_eff_gain <- c(
+                        calc_avg_wat_eff_gain(irr_only_summary),
+                        calc_avg_wat_eff_gain(nitro_only_summary),
+                        calc_avg_wat_eff_gain(all_recs_summary)
   )
   
   # End - Yearly water use  summaries
@@ -397,7 +397,7 @@ for (run_id in run_ids){
   run_summary <- data.frame(run_type, percent_yield_impr, avg_yield_losses, 
                             avg_yield_gains, max_yield_loss, min_yield_loss, 
                             max_yield_gain, min_yield_gain, percent_wat_eff_impr,
-                            med_wat_eff_losses, med_wat_eff_gain, min_wat_eff_gain, 
+                            avg_wat_eff_losses, avg_wat_eff_gain, min_wat_eff_gain, 
                             max_wat_eff_gain, max_wat_eff_loss, min_wat_eff_loss,
                             percent_leaching_impr, max_leaching_imprv, 
                             min_leaching_imprv, max_leaching_worsening, 
@@ -522,7 +522,36 @@ for (run_id in run_ids){
 }
 
 
+
 ## ------- End - Output results -------
+
+## ------- Start - Create further condensed table -------
+
+
+df1 <- run_summaries %>% 
+  dplyr::group_by(run_type) %>% 
+  dplyr::summarize_at(
+    vars(avg_yield_losses,
+         avg_yield_gains, 
+         percent_yield_impr,
+         avg_wat_eff_gain,
+         avg_wat_eff_losses,
+         percent_wat_eff_impr
+         ),funs(mean))
+
+df2 <- run_summaries %>% 
+  dplyr::group_by(run_type) %>% 
+  dplyr::summarize_at(
+    vars(max_yield_gain,
+         max_yield_loss,
+         max_leaching_imprv,
+         max_leaching_worsening
+         ),funs(max))
+
+run_summaries_condensed <- df1 %>% full_join(df2)
+
+
+## ------- End - Create further condensed table -------
 
 arrow::write_feather(run_summaries, SUMMARY_OUTPUT_PATH)
 arrow::write_feather(cumul_net_changes, CUMUL_NET_CHANGE_OUTPUT_PATH)
