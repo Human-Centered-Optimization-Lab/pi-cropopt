@@ -88,11 +88,15 @@ ci_upper_yield <- c()
 ci_lower_yield <- c()
 ci_years_yield <- c()
 ci_type_yield <- c()
+minimum_cum_yield <- c()
+maximum_cum_yield <- c()
 
 ci_upper_leach <- c()
 ci_lower_leach <- c()
 ci_years_leach <- c()
 ci_type_leach <- c()
+minimum_cum_leach <- c()
+maximum_cum_leach <- c()
 
 
 
@@ -108,7 +112,9 @@ for(current_year in min_year:max_year){
   ci_lower_yield <- append(ci_lower_yield, boot_res$basic[1,4])
   ci_years_yield <- append(ci_years_yield, current_year)
   ci_type_yield  <- append(ci_type_yield, "Irrigation recommendations")
-  
+  minimum_cum_yield <- append(minimum_cum_yield, min(vals))
+  maximum_cum_yield <- append(maximum_cum_yield, max(vals))
+   
   
   # ---- Nitrogen only yield ----
   vals <- cumul_net_changes %>% filter(year == current_year) %>% pull(cumul_net_yield_changes_nitro) 
@@ -119,6 +125,8 @@ for(current_year in min_year:max_year){
   ci_lower_yield <- append(ci_lower_yield, boot_res$basic[1,4])
   ci_years_yield <- append(ci_years_yield, current_year)
   ci_type_yield  <- append(ci_type_yield, "Nitrogen recommendations")
+  minimum_cum_yield <- append(minimum_cum_yield, min(vals))
+  maximum_cum_yield <- append(maximum_cum_yield, max(vals))
   
   
   # ---- All recs yield ----
@@ -130,6 +138,8 @@ for(current_year in min_year:max_year){
   ci_lower_yield <- append(ci_lower_yield, boot_res$basic[1,4])
   ci_years_yield <- append(ci_years_yield, current_year)
   ci_type_yield  <- append(ci_type_yield, "All reccomendations")
+  minimum_cum_yield <- append(minimum_cum_yield, min(vals))
+  maximum_cum_yield <- append(maximum_cum_yield, max(vals))
  
   
   # ---- Irrigation only leaching ----
@@ -142,6 +152,8 @@ for(current_year in min_year:max_year){
   ci_lower_leach <- append(ci_lower_leach, boot_res$basic[1,4])
   ci_years_leach <- append(ci_years_leach, current_year)
   ci_type_leach  <- append( ci_type_leach, "Irrigation recommendations")
+  minimum_cum_leach <- append(minimum_cum_leach, min(vals))
+  maximum_cum_leach <- append(maximum_cum_leach, max(vals))
   
   
   # ---- Nitrogen only yield ----
@@ -153,6 +165,8 @@ for(current_year in min_year:max_year){
   ci_lower_leach <- append(ci_lower_leach, boot_res$basic[1,4])
   ci_years_leach <- append(ci_years_leach, current_year)
   ci_type_leach  <- append( ci_type_leach, "Nitrogen recommendations")
+  minimum_cum_leach <- append(minimum_cum_leach, min(vals))
+  maximum_cum_leach <- append(maximum_cum_leach, max(vals))
   
   
   # ---- All recs yield ----
@@ -164,6 +178,8 @@ for(current_year in min_year:max_year){
   ci_lower_leach <- append(ci_lower_leach, boot_res$basic[1,4])
   ci_years_leach <- append(ci_years_leach, current_year)
   ci_type_leach  <- append( ci_type_leach, "All reccomendations")
+  minimum_cum_leach <- append(minimum_cum_leach, min(vals))
+  maximum_cum_leach <- append(maximum_cum_leach, max(vals))
   
 }
 
@@ -171,14 +187,18 @@ cis_yield <- data.frame(
   upper=ci_upper_yield,
   lower=ci_lower_yield,
   year=ci_years_yield,
-  type=ci_type_yield
+  type=ci_type_yield,
+  mini=minimum_cum_yield,
+  maxi=maximum_cum_yield
 )
 
 cis_leach <- data.frame(
   upper=ci_upper_leach,
   lower=ci_lower_leach,
   year= ci_years_leach,
-  type= ci_type_leach
+  type= ci_type_leach,
+  mini= minimum_cum_leach,
+  maxi= maximum_cum_leach
 )
 
 
@@ -209,6 +229,7 @@ p2 <- ggplot(data=cumul_net_yield_changes_plot, aes(x=year, y=net_change, group=
       geom_line(aes(color=type)) +
       geom_point(aes(shape=type)) + 
       geom_ribbon(aes(ymin = lower, ymax = upper, fill=type), alpha = 0.25) + 
+      labs(fill = "95% Confidence intervals") + 
       ylab("Cumulative net yield increase (kg/ha)") 
      
  
