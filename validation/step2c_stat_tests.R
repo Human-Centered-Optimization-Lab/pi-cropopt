@@ -54,16 +54,16 @@ climate            <- arrow::read_feather(CLIM_PATH)
 
 climate <- climate %>% rename(climate = clim)
 
-comm_pract_full <- comm_pract_full %>% mutate(wat_eff = yield/total_wat) %>% mutate(station = num2station(run)) %>% select(-run)    
-irr_only_full   <- irr_only_full   %>% mutate(wat_eff = yield/total_wat) %>% mutate(station = num2station(run)) %>% select(-run) 
-nitro_only_full <- nitro_only_full %>% mutate(wat_eff = yield/total_wat) %>% mutate(station = num2station(run)) %>% select(-run) 
-all_recs_full   <- all_recs_full   %>% mutate(wat_eff = yield/total_wat) %>% mutate(station = num2station(run)) %>% select(-run) 
+comm_pract_full <- comm_pract_full %>% mutate(wat_eff = yield/total_wat) %>% mutate(station = num2station(run)) %>% dplyr::select(-run)    
+irr_only_full   <- irr_only_full   %>% mutate(wat_eff = yield/total_wat) %>% mutate(station = num2station(run)) %>% dplyr::select(-run) 
+nitro_only_full <- nitro_only_full %>% mutate(wat_eff = yield/total_wat) %>% mutate(station = num2station(run)) %>% dplyr::select(-run) 
+all_recs_full   <- all_recs_full   %>% mutate(wat_eff = yield/total_wat) %>% mutate(station = num2station(run)) %>% dplyr::select(-run) 
 
 
-comm_pract_full <- comm_pract_full %>% select(-climate) %>% full_join(climate)
-irr_only_full   <- irr_only_full   %>% select(-climate) %>% full_join(climate)
-nitro_only_full <- nitro_only_full %>% select(-climate) %>% full_join(climate)
-all_recs_full   <- all_recs_full   %>% select(-climate) %>% full_join(climate)
+comm_pract_full <- comm_pract_full %>% dplyr::select(-climate) %>% full_join(climate)
+irr_only_full   <- irr_only_full   %>% dplyr::select(-climate) %>% full_join(climate)
+nitro_only_full <- nitro_only_full %>% dplyr::select(-climate) %>% full_join(climate)
+all_recs_full   <- all_recs_full   %>% dplyr::select(-climate) %>% full_join(climate)
 
 # Remove Cass, as it was what the innovization is trained off of 
 comm_pract_full_nocass <- comm_pract_full %>% filter(station != "CASS")
@@ -321,6 +321,28 @@ pvals_wat_eff_wet <- c(p_irr_w$p.value, p_nitro_w$p.value, p_all_w$p.value)
 
 median_wat_eff_wet <-  c(median(comm_pract),   median(irr_only  ), median(nitro_only), median(all_recs  ))
 
+
+## -----------------------------------------
+print("Difference between the ALL REC strategy and the IRR ONLY strategy")
+irr_only   <- irr_only_full   %>% pull(yield)
+all_recs   <- all_recs_full   %>% pull(yield)  
+p_val   <- wilcox.test(all_recs, irr_only   )
+print(paste("Yield:", p_val$p.value))
+
+irr_only   <- irr_only_full   %>% pull(leaching)
+all_recs   <- all_recs_full   %>% pull(leaching)  
+p_val   <- wilcox.test(all_recs, irr_only   )
+print(paste("Leaching:", p_val$p.value))
+
+irr_only   <- irr_only_full   %>% pull(wat_eff)
+all_recs   <- all_recs_full   %>% pull(wat_eff)  
+p_val   <- wilcox.test(all_recs, irr_only   )
+print(paste("Water use efficiency:", p_val$p.value))
+
+
+#irr_only   <- irr_only_full   %>% pull()
+#all_recs   <- all_recs_full   %>% pull(yield)  
+#p_val   <- wilcox.test(all_recs, irr_only   )
 
 
 ## Build pvalue table
