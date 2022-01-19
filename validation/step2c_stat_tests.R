@@ -1,4 +1,7 @@
-library("ggplot2")
+library(ggplot2)
+library(magrittr)
+library(dplyr)
+
 
 ## Functions
 num2station <- function(numbers){
@@ -30,8 +33,8 @@ num2station <- function(numbers){
 
 ## Get data 
 
-ROOT_PATH <- "Z:/Gilgamesh/kroppian/agovization_results/validation/"
 ROOT_PATH <- "/Volumes/data/Gilgamesh/kroppian/agovization_results/validation/"
+ROOT_PATH <- "Z:/Gilgamesh/kroppian/agovization_results/validation/"
 
 COMM_PRACT_PATH           <- paste(ROOT_PATH,  "comm_pract_full.feather", sep = "")
 IRR_ONLY_RESULT_PATH      <- paste(ROOT_PATH,  "irr_full.feather", sep = "")
@@ -70,7 +73,7 @@ comm_pract_full_nocass <- comm_pract_full %>% filter(station != "CASS")
 
 # Initialize what will be our pvalue table
 strategies     <- c("Irrigation recommendations", "Nitrogen recommendations", "All recommendations")
-median_strategies     <- c("Common practices","Irrigation recommendations", "Nitrogen recommendations", "All recommendations")
+mean_strategies     <- c("Common practices","Irrigation recommendations", "Nitrogen recommendations", "All recommendations")
 
 
 ## Year-by-year tests
@@ -91,7 +94,7 @@ print(p_all_w$p.value  )
 
 pvals_yield <- c(p_irr_w$p.value, p_nitro_w$p.value, p_all_w$p.value)
 
-median_yield <- c(median(comm_pract),    median(irr_only  ), median(nitro_only), median(all_recs  ))
+mean_yield <- c(mean(comm_pract),    mean(irr_only  ), mean(nitro_only), mean(all_recs  ))
 
 
 # ------------------------------------------------------
@@ -111,7 +114,7 @@ print(p_all_w$p.value    )
 
 pvals_yield_dry <- c(p_irr_w$p.value, p_nitro_w$p.value, p_all_w$p.value)
 
-median_yield_dry <- c(median(comm_pract),     median(irr_only  ), median(nitro_only), median(all_recs  ))
+mean_yield_dry <- c(mean(comm_pract),     mean(irr_only  ), mean(nitro_only), mean(all_recs  ))
 
 
 # ------------------------------------------------------
@@ -130,7 +133,7 @@ print(p_all_w$p.value    )
 
 pvals_yield_norm <- c(p_irr_w$p.value, p_nitro_w$p.value, p_all_w$p.value)
 
-median_yield_norm <-  c(median(comm_pract),   median(irr_only  ), median(nitro_only), median(all_recs  ))
+mean_yield_norm <-  c(mean(comm_pract),   mean(irr_only  ), mean(nitro_only), mean(all_recs  ))
 
 
 # ------------------------------------------------------
@@ -150,7 +153,7 @@ print(p_all_w$p.value    )
 
 pvals_yield_wet <- c(p_irr_w$p.value, p_nitro_w$p.value, p_all_w$p.value)
 
-median_yield_wet <-  c(median(comm_pract),   median(irr_only  ), median(nitro_only), median(all_recs  ))
+mean_yield_wet <-  c(mean(comm_pract),   mean(irr_only  ), mean(nitro_only), mean(all_recs  ))
 
 
 
@@ -171,7 +174,7 @@ print(p_all_w$p.value    )
 
 pvals_leaching <- c(p_irr_w$p.value, p_nitro_w$p.value, p_all_w$p.value)
 
-median_leaching <-  c(median(comm_pract),   median(irr_only  ), median(nitro_only), median(all_recs  ))
+mean_leaching <-  c(mean(comm_pract),   mean(irr_only  ), mean(nitro_only), mean(all_recs  ))
 
 
 
@@ -192,7 +195,7 @@ print(p_all_w$p.value    )
 
 pvals_leaching_dry <- c(p_irr_w$p.value, p_nitro_w$p.value, p_all_w$p.value)
 
-median_leaching_dry <-  c(median(comm_pract),   median(irr_only  ), median(nitro_only), median(all_recs  ))
+mean_leaching_dry <-  c(mean(comm_pract), mean(irr_only  ), mean(nitro_only), mean(all_recs  ))
 
 
 
@@ -213,7 +216,7 @@ print(p_all_w$p.value    )
 
 pvals_leaching_norm <- c(p_irr_w$p.value, p_nitro_w$p.value, p_all_w$p.value)
 
-median_leaching_norm <-  c(median(comm_pract),   median(irr_only  ), median(nitro_only), median(all_recs  ))
+mean_leaching_norm <-  c(mean(comm_pract),   mean(irr_only  ), mean(nitro_only), mean(all_recs  ))
 
 
 
@@ -234,7 +237,7 @@ print(p_all_w$p.value    )
 
 pvals_leaching_wet <- c(p_irr_w$p.value, p_nitro_w$p.value, p_all_w$p.value)
 
-median_leaching_wet <-  c(median(comm_pract),   median(irr_only  ), median(nitro_only), median(all_recs  ))
+mean_leaching_wet <-  c(mean(comm_pract),   mean(irr_only  ), mean(nitro_only), mean(all_recs  ))
 
 
 
@@ -255,7 +258,7 @@ print(p_all_w$p.value    )
 
 pvals_wat_eff <- c(p_irr_w$p.value, p_nitro_w$p.value, p_all_w$p.value)
 
-median_wat_eff <-  c(median(comm_pract),   median(irr_only  ), median(nitro_only), median(all_recs  ))
+mean_wat_eff <-  c(mean(comm_pract), mean(irr_only  ), mean(nitro_only), mean(all_recs  ))
 
 
 
@@ -277,7 +280,7 @@ print(p_all_w$p.value    )
 
 pvals_wat_eff_dry <- c(p_irr_w$p.value, p_nitro_w$p.value, p_all_w$p.value)
 
-median_wat_eff_dry <-  c(median(comm_pract),   median(irr_only  ), median(nitro_only), median(all_recs  ))
+mean_wat_eff_dry <-  c(mean(comm_pract), mean(irr_only), mean(nitro_only), mean(all_recs  ))
 
 
 
@@ -298,7 +301,7 @@ print(p_all_w$p.value    )
 
 pvals_wat_eff_norm <- c(p_irr_w$p.value, p_nitro_w$p.value, p_all_w$p.value)
 
-median_wat_eff_norm <-  c(median(comm_pract),  median(irr_only  ), median(nitro_only), median(all_recs  ))
+mean_wat_eff_norm <-  c(mean(comm_pract),  mean(irr_only  ), mean(nitro_only), mean(all_recs  ))
 
 
 
@@ -319,7 +322,7 @@ print(p_all_w$p.value    )
 
 pvals_wat_eff_wet <- c(p_irr_w$p.value, p_nitro_w$p.value, p_all_w$p.value)
 
-median_wat_eff_wet <-  c(median(comm_pract),   median(irr_only  ), median(nitro_only), median(all_recs  ))
+mean_wat_eff_wet <-  c(mean(comm_pract),   mean(irr_only  ), mean(nitro_only), mean(all_recs  ))
 
 
 ## -----------------------------------------
@@ -352,11 +355,25 @@ pval_tab_dry  <- data.frame(strategies, pvals_yield_dry , pvals_leaching_dry , p
 pval_tab_norm <- data.frame(strategies, pvals_yield_norm, pvals_leaching_norm, pvals_wat_eff_norm)
 pval_tab_wet  <- data.frame(strategies, pvals_yield_wet , pvals_leaching_wet , pvals_wat_eff_wet )
 
-# Build median table
-median_tab       <- data.frame(median_strategies, median_yield,      median_leaching,      median_wat_eff     )  
-median_tab_dry   <- data.frame(median_strategies, median_yield_dry , median_leaching_dry , median_wat_eff_dry )  
-median_tab_norm  <- data.frame(median_strategies, median_yield_norm, median_leaching_norm, median_wat_eff_norm)  
-median_tab_wet   <- data.frame(median_strategies, median_yield_wet , median_leaching_wet , median_wat_eff_wet )  
+# Build means table
+mean_tab       <- data.frame(mean_strategies, mean_yield,      mean_leaching,      mean_wat_eff     )  
+mean_tab_dry   <- data.frame(mean_strategies, mean_yield_dry , mean_leaching_dry , mean_wat_eff_dry )  
+mean_tab_norm  <- data.frame(mean_strategies, mean_yield_norm, mean_leaching_norm, mean_wat_eff_norm)  
+mean_tab_wet   <- data.frame(mean_strategies, mean_yield_wet , mean_leaching_wet , mean_wat_eff_wet )  
+
+
+
+# Figure out how many dry, wet, and normal years we're dealing with 
+
+
+climate_nocass <- climate %>% filter(station != "CASS") 
+
+dry_year_count <- length(climate_nocass %>% filter(climate == 0) %>% pull(climate))
+norm_year_count <- length(climate_nocass %>% filter(climate == 1) %>% pull(climate))
+wet_year_count <- length(climate_nocass %>% filter(climate == 2) %>% pull(climate))
+
+
+
 
 
 
