@@ -1,4 +1,6 @@
-library("ggplot2")
+library(ggplot2)
+library(magrittr)
+library(dplyr)
 
 ## Functions
 num2station <- function(numbers){
@@ -93,45 +95,52 @@ hist(all_recs_full$wat_eff  , 20, main="All recs year-by-year water efficiency")
 cat1 <- array(data="Common practices", dim = length(comm_pract_full$yield))
 cat2 <- array(data="Irrigation recommendations", dim = length(comm_pract_full$yield))
 dat <- data.frame(Yield=c(comm_pract_full$yield, irr_only_full$yield), Practices = c(cat1, cat2) )
+dat$Practices = factor(dat$Practices, levels = c("Irrigation recommendations", "Common practices"))
 ggplot(dat, aes(x=Yield, fill=Practices)) + 
         geom_histogram(alpha=0.2, position="identity") + 
-        ggtitle("Distribution of yearly yields for irrigation recommendations")
+        ggtitle("Distribution of yearly yields for irrigation recommendations strategy")
 
 cat1 <- array(data="Common practices", dim = length(comm_pract_full$yield))
 cat2 <- array(data="Nitrogen recommendations", dim = length(comm_pract_full$yield))
 dat <- data.frame(Yield=c(comm_pract_full$yield, nitro_only_full$yield), Practices = c(cat1, cat2) )
+dat$Practices = factor(dat$Practices, levels = c("Nitrogen recommendations", "Common practices"))
 ggplot(dat, aes(x=Yield, fill=Practices)) + 
         geom_histogram(alpha=0.2, position="identity") + 
-        ggtitle("Distribution of yearly yields for irrigation recommendations")
+        ggtitle("Distribution of yearly yields for nitrogen recommendations strategy")
+
 
 cat1 <- array(data="Common practices", dim = length(comm_pract_full$yield))
 cat2 <- array(data="All recommendations", dim = length(comm_pract_full$yield))
 dat <- data.frame(Yield=c(comm_pract_full$yield, all_recs_full$yield), Practices = c(cat1, cat2) )
+dat$Practices = factor(dat$Practices, levels = c("All recommendations", "Common practices"))
 ggplot(dat, aes(x=Yield, fill=Practices)) + 
         geom_histogram(alpha=0.2, position="identity") + 
-        ggtitle("Distribution of yearly yields for irrigation recommendations")
+        ggtitle("Distribution of yearly yields for all recommendations strategy")
 
 # Nitrogen comparative histograms
 cat1 <- array(data="Common practices", dim = length(comm_pract_full$leaching))
 cat2 <- array(data="Irrigation recommendations", dim = length(comm_pract_full$leaching))
 dat <- data.frame(Leaching=c(comm_pract_full$leaching, irr_only_full$leaching), Practices = c(cat1, cat2) )
+dat$Practices = factor(dat$Practices, levels = c("Irrigation recommendations", "Common practices"))
 ggplot(dat, aes(x=Leaching, fill=Practices)) + 
         geom_histogram(alpha=0.2, position="identity") + 
-        ggtitle("Distribution of yearly nitrogen leaching for irrigation recommendations")
+        ggtitle("Distribution of yearly nitrogen leaching for irrigation recommendations strategy")
 
 cat1 <- array(data="Common practices", dim = length(comm_pract_full$leaching))
 cat2 <- array(data="Nitrogen recommendations", dim = length(comm_pract_full$leaching))
 dat <- data.frame(Leaching=c(comm_pract_full$leaching, nitro_only_full$leaching), Practices = c(cat1, cat2) )
+dat$Practices = factor(dat$Practices, levels = c("Nitrogen recommendations", "Common practices"))
 ggplot(dat, aes(x=Leaching, fill=Practices)) + 
         geom_histogram(alpha=0.2, position="identity") + 
-        ggtitle("Distribution of yearly nitrogen leaching for irrigation recommendations")
+        ggtitle("Distribution of yearly nitrogen leaching for nitrogen recommendations strategy")
 
 cat1 <- array(data="Common practices", dim = length(comm_pract_full$leaching))
 cat2 <- array(data="All recommendations", dim = length(comm_pract_full$leaching))
 dat <- data.frame(Leaching=c(comm_pract_full$leaching, all_recs_full$leaching), Practices = c(cat1, cat2) )
+dat$Practices = factor(dat$Practices, levels = c("All recommendations", "Common practices"))
 ggplot(dat, aes(x=Leaching, fill=Practices)) + 
         geom_histogram(alpha=0.2, position="identity") + 
-        ggtitle("Distribution of yearly nitrogen leaching for irrigation recommendations")
+        ggtitle("Distribution of yearly nitrogen leaching for all recommendations strategy")
 
 # Water efficiency comparative histograms
 cat1 <- array(data="Common practices", dim = length(comm_pract_full$wat_eff))
@@ -139,21 +148,28 @@ cat2 <- array(data="Irrigation recommendations", dim = length(comm_pract_full$wa
 dat <- data.frame(Wat_Eff=c(comm_pract_full$wat_eff, irr_only_full$wat_eff), Practices = c(cat1, cat2) )
 ggplot(dat, aes(x=Wat_Eff, fill=Practices)) + 
         geom_histogram(alpha=0.2, position="identity") + 
-        ggtitle("Distribution of yearly nitrogen wat_eff for irrigation recommendations")
+        xlab("Water use efficiency") +
+        ggtitle("Distribution of yearly water efficiency for irrigation recommendations")
 
 cat1 <- array(data="Common practices", dim = length(comm_pract_full$wat_eff))
 cat2 <- array(data="Nitrogen recommendations", dim = length(comm_pract_full$wat_eff))
 dat <- data.frame(Wat_Eff=c(comm_pract_full$wat_eff, nitro_only_full$wat_eff), Practices = c(cat1, cat2) )
 ggplot(dat, aes(x=Wat_Eff, fill=Practices)) + 
         geom_histogram(alpha=0.2, position="identity") + 
-        ggtitle("Distribution of yearly nitrogen wat_eff for irrigation recommendations")
+        xlab("Water use efficiency") +
+        ggtitle("Distribution of yearly water efficiency for irrigation recommendations")
 
 cat1 <- array(data="Common practices", dim = length(comm_pract_full$wat_eff))
 cat2 <- array(data="All recommendations", dim = length(comm_pract_full$wat_eff))
 dat <- data.frame(Wat_Eff=c(comm_pract_full$wat_eff, all_recs_full$wat_eff), Practices = c(cat1, cat2))
 ggplot(dat, aes(x=Wat_Eff, fill=Practices)) + 
         geom_histogram(alpha=0.2, position="identity") + 
-        ggtitle("Distribution of yearly nitrogen wat_eff for irrigation recommendations")
+        xlab("Water use efficiency") +
+        ggtitle("Distribution of yearly water efficiency for irrigation recommendations")
+
+
+
+
 
 
 
@@ -169,7 +185,6 @@ hist(comm_pract_tyield, 10, main="Total 30-year yields for common practices")
 hist(nitro_only_tyield, 10, main="Total 30-year yields for nitrogen recommendations")
 hist(all_recs_tyield, 10, main="Total 30-year yields for all recommendations")
 hist(irr_only_tyield, 10, main="Total 30-year yields irrigation recommendations")
-
 
 # comm vs irr
 max_l <- max(max(comm_pract_tyield), max(irr_only_tyield))*1.05
