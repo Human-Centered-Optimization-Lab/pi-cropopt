@@ -18,4 +18,13 @@ output
 *.pkl
 *.xlsx
 
-.Rproj.user
+*.Rproj.user
+*.Rproj
+*.Rhistory
+*.RDataTmp
+*.RData
+*.Rproj
+
+
+*.feather
+
