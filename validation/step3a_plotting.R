@@ -61,11 +61,12 @@ p1 <- ggplot(data=plot_run_summary, aes(x=run_type, y=change, fill=type)) +
 plot(p1)
 
 ggsave(
-  paste(PLOT_OUTPUT_PATH, "/averageChangeYield.png", sep=""),
+  paste(PLOT_OUTPUT_PATH, "/averageChangeYield.tiff", sep=""),
   p1,
   width = 5,
   height = 4,
-  dpi = 1200
+  dpi = 600,
+  device = "tiff" 
 )
 
 ## Plot cumulative net gain in yield 
@@ -237,11 +238,12 @@ p2 <- ggplot(data=cumul_net_yield_changes_plot, aes(x=year, y=net_change, group=
 plot(p2)
 
 ggsave(
-  paste(PLOT_OUTPUT_PATH, "/cumulYieldChange.png", sep=""),
+  paste(PLOT_OUTPUT_PATH, "/cumulYieldChange.tiff", sep=""),
   p2,
   width = 6,
   height = 4,
-  dpi = 1200
+  dpi = 600,
+  device = "tiff" 
 )
 
 ## Plot cumulative net change in leaching 
@@ -284,9 +286,10 @@ p3 <- ggplot(data=cumul_net_leach_changes_plot, aes(x=year, y=net_change, group=
 plot(p3)
 
 ggsave(
-  paste(PLOT_OUTPUT_PATH, "/cumulLeachChange.png", sep=""),
+  paste(PLOT_OUTPUT_PATH, "/cumulLeachChange.tiff", sep=""),
   p3,
   width = 6,
   height = 4,
-  dpi = 1200
+  dpi = 600,
+  device = "tiff" 
 )
