@@ -1,0 +1,43 @@
+#!/bin/bash
+
+prefix=${1}
+
+
+cat "${prefix}8401.WTH" 
+cat "${prefix}8501.WTH" | grep '^85' 
+cat "${prefix}8601.WTH" | grep '^86' 
+cat "${prefix}8701.WTH" | grep '^87' 
+cat "${prefix}8801.WTH" | grep '^88' 
+cat "${prefix}8901.WTH" | grep '^89' 
+cat "${prefix}9001.WTH" | grep '^90' 
+cat "${prefix}9101.WTH" | grep '^91' 
+cat "${prefix}9201.WTH" | grep '^92' 
+cat "${prefix}9301.WTH" | grep '^93' 
+cat "${prefix}9401.WTH" | grep '^94' 
+cat "${prefix}9501.WTH" | grep '^95' 
+cat "${prefix}9601.WTH" | grep '^96' 
+cat "${prefix}9701.WTH" | grep '^97' 
+cat "${prefix}9801.WTH" | grep '^98' 
+cat "${prefix}9901.WTH" | grep '^99' 
+cat "${prefix}0001.WTH" | grep '^00' 
+cat "${prefix}0101.WTH" | grep '^01' 
+cat "${prefix}0201.WTH" | grep '^02' 
+cat "${prefix}0301.WTH" | grep '^03'   
+cat "${prefix}0401.WTH" | grep '^04' 
+cat "${prefix}0501.WTH" | grep '^05' 
+cat "${prefix}0601.WTH" | grep '^06' 
+cat "${prefix}0701.WTH" | grep '^07' 
+cat "${prefix}0801.WTH" | grep '^08' 
+cat "${prefix}0901.WTH" | grep '^09' 
+cat "${prefix}1001.WTH" | grep '^10' 
+cat "${prefix}1101.WTH" | grep '^11' 
+cat "${prefix}1201.WTH" | grep '^12' 
+cat "${prefix}1301.WTH" | grep '^13' 
+cat "${prefix}1401.WTH" | grep '^14' 
+cat "${prefix}1501.WTH" | grep '^15' 
+cat "${prefix}1601.WTH" | grep '^16' 
+cat "${prefix}1701.WTH" | grep '^17' 
+cat "${prefix}1801.WTH" | grep '^18' 
+cat "${prefix}1901.WTH" | grep '^19' 
+cat "${prefix}2001.WTH" | grep '^20' 
+
