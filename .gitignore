@@ -6,4 +6,25 @@ Makefile
 *.mod
 *.so
 build
+__pycache__
+
+
+*.OUT
+*swp
+.vscode
+
+v4.7.5.30
+output
+*.pkl
+*.xlsx
+
+*.Rproj.user
+*.Rproj
+*.Rhistory
+*.RDataTmp
+*.RData
+*.Rproj
+
+
+*.feather
 
