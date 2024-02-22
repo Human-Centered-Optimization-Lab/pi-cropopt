@@ -1,10 +1,9 @@
 import pandas as pd
 import numpy as np
-from cropopt import CropOpt
-from cropover import Cropover
-from sps import SPS
-from pymoo.algorithms.nsga3 import NSGA3
-from pymoo.factory import get_reference_directions
+from pico.cropopt.cropopt import CropOpt
+from pico.cropopt.vssps import VSSPS
+from pymoo.algorithms.moo.nsga3 import NSGA3
+from pymoo.util.ref_dirs import get_reference_directions
 from pymoo.optimize import minimize
 import sys
 from pathlib import Path
