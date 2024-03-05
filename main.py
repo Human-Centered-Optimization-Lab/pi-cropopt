@@ -5,6 +5,7 @@ from pico.cropopt.vssps import VSSPS
 from pymoo.algorithms.moo.nsga3 import NSGA3
 from pymoo.util.ref_dirs import get_reference_directions
 from pymoo.optimize import minimize
+from pymoo.operators.sampling.rnd import FloatRandomSampling
 import sys
 from pathlib import Path
 from datetime import datetime
@@ -27,20 +28,20 @@ if __name__ == "__main__":
 
     year = int(sys.argv[1])
 
-    reps = 30
+    reps = 5
     plant_date = 135
 
     total_nitro = 200
 
     # dssat parameters 
-    home_dir = "/work/ian/"
+    home_dir = "/home/ian/"
 
-    dssat_home = "%s/Projects/agovization/dhome" % home_dir
-    dssat_exe = "%s/Projects/agovization/dhome/dscsm047-linux" % home_dir
-    dssat_inp = "%s/Projects/agovization/dhome/DSSAT47.INP" % home_dir
-    output_dir = "%s/Projects/agovization/output/" % home_dir
+    dssat_home = "%s/Projects/pi-cropopt/dhome" % home_dir
+    dssat_exe  = "%s/Projects/pi-cropopt/dhome/dscsm047-linux" % home_dir
+    dssat_inp  = "%s/Projects/pi-cropopt/dhome/DSSAT47.INP" % home_dir
+    output_dir = "%s/Projects/pi-cropopt/output/" % home_dir
 
-    tmp_dir = "/tmp/"
+    tmp_dir = "/dev/shm/"
 
     # Runtime optimization parameters
     threads = 20
@@ -115,15 +116,15 @@ if __name__ == "__main__":
 
         nutrient_inds = [a[1] for a in nutrient_inds]
 
-        sps_sampler = SPS(initial_sparsity, sampled_mask=nutrient_inds)
-
-        cropover = Cropover(eta=30, prob=1.0)
+        vssps = VSSPS(FloatRandomSampling, nz_indices=nutrient_inds)
 
         algorithm = NSGA3(pop_size=pop_size, 
-                ref_dirs=ref_dirs,
-                eliminate_duplicates=True,
-        #        crossover=cropover,
-                sampling=sps_sampler)
+                          ref_dirs=ref_dirs,
+                          eliminate_duplicates=True,
+                          sampling=vssps)
+        #algorithm = NSGA3(pop_size=pop_size, 
+        #                  ref_dirs=ref_dirs,
+        #                  eliminate_duplicates=True)
 
         res = minimize(prob,
                        algorithm,
