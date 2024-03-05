@@ -176,8 +176,15 @@ class Dssat4Dum():
 
         res = sp.run([self.exe_path, "D", "DSSAT47.INP"], check=True)
 
-        # TODO check for errors
-       
+        # Check for errors
+        reader = open("WARNING.OUT", "r", errors="ignore")
+        raw_txt = "".join(reader.readlines())
+      
+        error = re.search("\s*\w*\s+Error\s+([^\*]+)\s+", raw_txt).group(1)
+        if len(error) != 0: 
+            print("Error! %s"  % error) 
+            sys.exit(1)
+
         # Read yield
         reader = open("OVERVIEW.OUT", "r", errors="ignore")
 
@@ -536,12 +543,12 @@ if __name__ == "__main__":
 
        
 
-    home_dir = "/Users/iankropp"
+    home_dir = "/home/ian/"
 
     dssat_home = "%s/Projects/agovization/dhome" % home_dir
-    dssat_exe = "%s/Projects/agovization/dhome/dscsm047-macos" % home_dir
+    dssat_exe = "%s/Projects/agovization/dhome/dscsm047-linux" % home_dir
     fileio = "%s/Projects/agovization/dhome/DSSAT47.INP" % home_dir
-    tmp_dir = "/tmp/"
+    tmp_dir = "/dev/shm/"
 
     runner = Dssat4Dum(dssat_home, fileio, dssat_exe, tmp_dir)
 
@@ -550,7 +557,7 @@ if __name__ == "__main__":
     updates = { 'pdate': 1980136, 'sdate': 1980135, 'icdat': 1980135 }
 
 
-    print(runner.run_batch(appsched3, threads, updates=updates))
+    print(runner.run_batch(appsched1, threads, updates=updates))
 
     
     #print(runner.generate_report())
