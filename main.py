@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from pico.cropopt.cropopt import CropOpt
 from pico.cropopt.vssps import VSSPS
+from pico.dash.Dashboard import Dashboard
 from pymoo.algorithms.moo.nsga3 import NSGA3
 from pymoo.util.ref_dirs import get_reference_directions
 from pymoo.optimize import minimize
@@ -28,7 +29,7 @@ if __name__ == "__main__":
 
     year = int(sys.argv[1])
 
-    reps = 5
+    reps = 1
     plant_date = 135
 
     total_nitro = 200
@@ -130,6 +131,7 @@ if __name__ == "__main__":
                        algorithm,
                        ('n_gen', generations),
                        seed=seed,
+                       callback=Dashboard(),
                        save_history=True,
                        verbose=True)
 
