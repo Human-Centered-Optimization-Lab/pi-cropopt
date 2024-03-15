@@ -7,6 +7,11 @@ import os, re, sys
 import json
 import pandas as pd
 
+class DSSATProcessError(sp.CalledProcessError):
+    def __str__(self):
+        return f"DSSAT had an error. See WARNING.OUT:\n***\n{self.stderr}\n***"
+
+
 class DssatCode():
 
     def __init__(self, section, row, col):
@@ -73,7 +78,7 @@ class Dssat4Dum():
 
         sched_key = json.dumps(appsched_list_cleaned)
 
-        (yld, leaching) = self._runDssat(rundir, fileio_temp)
+        (yld, leaching) = self._runDssat(rundir)
 
         return (yld, leaching, sched_key)
 
@@ -170,20 +175,16 @@ class Dssat4Dum():
         return "%s\n" % "".join(chunks)
 
 
-    def _runDssat(self, dssat_path, fileio):
+    def _runDssat(self, dssat_path):
                 
         os.chdir(dssat_path)
+
+        args = [self.exe_path, "D", "DSSAT47.INP"]
 
         res = sp.run([self.exe_path, "D", "DSSAT47.INP"], check=True)
 
         # Check for errors
-        reader = open("WARNING.OUT", "r", errors="ignore")
-        raw_txt = "".join(reader.readlines())
-      
-        error = re.search("\s*\w*\s+Error\s+([^\*]+)\s+", raw_txt).group(1)
-        if len(error) != 0: 
-            print("Error! %s"  % error) 
-            sys.exit(1)
+        self._checkAndHandleErrors(dssat_path, args)
 
         # Read yield
         reader = open("OVERVIEW.OUT", "r", errors="ignore")
@@ -199,6 +200,23 @@ class Dssat4Dum():
         leaching = re.search("N leached\s+(\d+\.?\d*)",raw_txt).group(1)
 
         return (float(yld), float(leaching))
+
+    def _checkAndHandleErrors(self, dssat_path, args): 
+
+        os.chdir(dssat_path)
+
+        reader = open("WARNING.OUT", "r", errors="ignore")
+        warning_file_txt = "".join(reader.readlines())
+     
+        searchResults = re.search("Simulation will end", warning_file_txt)
+
+        if searchResults is not None: 
+            
+            raise DSSATProcessError(
+                    returncode=1,
+                    cmd=args,
+                    stderr=warning_file_txt)
+
 
     def _setupDirectory(self, home, temp_dir, runid):
 
@@ -545,9 +563,9 @@ if __name__ == "__main__":
 
     home_dir = "/home/ian/"
 
-    dssat_home = "%s/Projects/agovization/dhome" % home_dir
-    dssat_exe = "%s/Projects/agovization/dhome/dscsm047-linux" % home_dir
-    fileio = "%s/Projects/agovization/dhome/DSSAT47.INP" % home_dir
+    dssat_home = "%s/Projects/pi-cropopt/dhome" % home_dir
+    dssat_exe = "%s/Projects/pi-cropopt/dhome/dscsm047-linux" % home_dir
+    fileio = "%s/Projects/pi-cropopt/dhome/DSSAT47.INP" % home_dir
     tmp_dir = "/dev/shm/"
 
     runner = Dssat4Dum(dssat_home, fileio, dssat_exe, tmp_dir)
@@ -557,7 +575,7 @@ if __name__ == "__main__":
     updates = { 'pdate': 1980136, 'sdate': 1980135, 'icdat': 1980135 }
 
 
-    print(runner.run_batch(appsched1, threads, updates=updates))
+    print(runner.run_batch(appsched2, threads, updates=updates))
 
     
     #print(runner.generate_report())
