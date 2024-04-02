@@ -29,7 +29,7 @@ if __name__ == "__main__":
 
     year = int(sys.argv[1])
 
-    reps = 1
+    reps = 60
     plant_date = 135
 
     total_nitro = 200

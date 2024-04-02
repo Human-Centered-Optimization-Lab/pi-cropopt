@@ -24,6 +24,10 @@ class CropOpt(Problem):
     IRR_APP_TYPE = 0
     NUT_APP_TYPE = 1
 
+    def nadir_point(self):
+        return np.array([0, 1000, 1000])
+
+
     #
     # threads       -- Number of threads for optimization
     # dssat_home    -- Where all of your dssat files are

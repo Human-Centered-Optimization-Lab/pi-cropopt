@@ -43,9 +43,6 @@ class Dashboard(Callback):
 
 
         self.overview_fields = ['algorithm', 'problem', 'generation', 'seed', 'pop_size']
-
-        print("Press enter to start optimization.")
-        input() 
         
 
     def notify(self, algorithm):
