@@ -19,3 +19,4 @@ SoilWatBal.OUT     Seasonal soil water balance
 Summary.OUT        Seasonal summary output file                      
 INFO.OUT           Information output file                           
 WARNING.OUT        Warning messages                                  
+LUN.LST            List of output files generated                    

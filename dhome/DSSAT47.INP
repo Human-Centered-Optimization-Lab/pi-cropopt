@@ -1,18 +1,18 @@
-*MODEL INPUT FILE            A     1     1     1     1     0
+*MODEL INPUT FILE            A    32     1    32    32     0
 *FILES              
 MODEL          MZCER047
-FILEX          CASS1701.MZX                                                                                 
-FILEA          CASS1701.MZA                                                                                 
-FILET          CASS1701.MZT                                                                                 
+FILEX          CASS0001.MZX                                                                                 
+FILEA          CASS0001.MZA                                                                                 
+FILET          CASS0001.MZT                                                                                 
 SPECIES        MZCER047.SPE ./Genotype/                                                                     
 ECOTYPE        MZCER047.ECO ./Genotype/                                                                     
 CULTIVAR       MZCER047.CUL ./Genotype/                                                                     
 PESTS          MZCER047.PST ./Pest/                                                                         
 SOILS          SOIL.SOL     ./Soil/                                                                         
-WEATHER        CASSREPR.WTH ./Weather/                                                                      
+WEATHERW       CASS.WTH                                                                                     
 OUTPUT         OVERVIEW
 *SIMULATION CONTROL 
-                   1     1     S 2017135  2150 N X IRRIGATION, GAINESVI 
+                   1     1     S 2000136  2150 N X IRRIGATION, GAINESVI 
                    Y     Y     N     N     N     N     N     Y     M
                    M     M     E     R     S     R     R     1     G     R     2     D     0
                    R     R     R     N     M
@@ -24,38 +24,32 @@ OUTPUT         OVERVIEW
                 100.     1   20.
                      0     -99  100.    0.
 *EXP.DETAILS        
-  1CASS1701 MZ CORN FIELD EXPERIMENT                                       
+  1CASS0001 MZ CORN FIELD EXPERIMENT                                       
 *TREATMENTS         
-  1 1 0 0 RAINFED HIGH NITROGEN    
+ 32 1 0 0 2000a10i5sV14eR2|V6:1.00 
 *CULTIVARS          
    MZ PC0001 MI              
 *FIELDS             
-   CASS1701 CASSREPR   0.0    0. DR000    0. 100.0 00000 SL     180. IB00000009
+   CASS8001 CASS.WTH   0.0    0. DR000    0. 100.0 00000 SL     180. IB00000009
           29.63000       -82.37000     40.00               1.0  100.   1.0   0.0   -99   -99
 *INITIAL CONDITIONS 
-   MZ    2017135   100     0  1.00  1.00   0.0  1000  0.80  0.00  100.   15.
+   MZ    1980135   100     0  1.00  1.00   0.0  1000  0.80  0.00  100.   15.
       5. 0.086 0.500 0.100
      15. 0.086 0.500 0.100
      30. 0.086 0.500 0.100
      45. 0.086 0.500 0.100
      60. 0.086 0.500 0.100
 *PLANTING DETAILS   
-   2017135     -99   7.2   7.2     S     R   61.    0.   7.0  -99.  -99. -99.0 -99.0   0.0
+   2000136     -99   7.2   7.2     S     R   61.    0.   7.0  -99.  -99. -99.0 -99.0   0.0
 *IRRIGATION         
    1.000   30.   75.  -99. GS000 IR001   0.0
-   2017150 IR001  10.0
-   2017161 IR001  10.0
-   2017171 IR001  10.0
-   2017181 IR001  10.0
-   2017191 IR001  10.0
-   2017201 IR001  10.0
-   2017211 IR001  10.0
-   2017222 IR001  10.0
-   2017232 IR001  10.0
-   2017242 IR001  10.0
+   2000219 IR001  10.0
+   2000224 IR001  10.0
+   2000229 IR001  10.0
+   2000234 IR001  10.0
+   2000239 IR001  10.0
 *FERTILIZERS        
-   2017135 FE001 AP001   10.   70.   10.    4.    0.    0.   -99
-   2017196 FE001 AP001   10.  200.    0.    0.    0.    0.   -99
+   2000136 FE001 AP002   10.  200.  -99.  -99.  -99.  -99.   -99
 *RESIDUES           
 *CHEMICALS          
 *TILLAGE            

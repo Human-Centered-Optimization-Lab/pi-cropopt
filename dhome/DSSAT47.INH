@@ -1,8 +1,8 @@
-*EXP.DETAILS: CASS1701MZ CORN FIELD EXPERIMENT                                       
+*EXP.DETAILS: CASS0001MZ CORN FIELD EXPERIMENT                                       
 
 *FILES
 @N  EXP.DATA    AFILE        ADIR
-  1 EXP         CASS1701.MZA                                                                                 
+  1 EXP         CASS0001.MZA                                                                                 
 @N  SPECIES     SPFILE       SPDIR
   1 SPE         MZCER047.SPE ./Genotype/                                                                     
 @N  ECOTYPE     EFILE        EDIR
@@ -12,11 +12,11 @@
 @N  SOIL        SFILE        SDIR
   1 SOIL        SOIL.SOL     ./Soil/                                                                         
 @N  WEATHER     WFILE        WDIR
-  1 WEATH       CASS1701.WTH ./Weather/                                                                      
+  1 WEATH       CASS.WTH                                                                                     
 
 *SIMULATION CONTROL
 @N  GENERAL     NYERS NREPS START   SDATE RSEED SNAME.................... MODEL...
-  1 GE              1     1     S 2017135  2150 N X IRRIGATION, GAINESVI  MZCER047
+  1 GE              1     1     S 2000136  2150 N X IRRIGATION, GAINESVI  MZCER047
 @N  OPTIONS     WATER NITRO SYMBI PHOSP POTAS DISES  CHEM  TILL   CO2
   1 OP              Y     Y     N     N     N     N     N     Y     M
 @N  METHODS     WTHER INCON LIGHT EVAPO INFIL PHOTO HYDRO NSWIT SOMDY MESEV MESOL METMP MEGHG
@@ -40,7 +40,7 @@
 
 *TREATMENTS
 @N   R O C TNAME....................  CU  FL  SA  IC  MP  MI  MF  MR  MC  MT  ME  MH  SM
-  1  1 0 0 RAINFED HIGH NITROGEN       1   1   0   1   1   1   1   0   0   0   0   0   1
+ 32  1 0 0 2000a10i5sV14eR2|V6:1.00    1   1   0   1   1  32  32   0   0   0   0   0   1
 
 *CULTIVARS
 @C  CR INGENO CNAME
@@ -48,13 +48,13 @@
 
 *FIELDS
 @L  ID_FIELD WSTA....  FLSA  FLOB  FLDT  FLDD  FLDS  FLST SLTX   SLDP ID_SOIL
-  1 CASS1701 CASS1701   0.0    0. DR000    0.  100. 00000 SL     180. IB00000009
+  1 CASS8001 CASS.WTH   0.0    0. DR000    0.  100. 00000 SL     180. IB00000009
 @L             XCRD            YCRD      ELEV              AREA  SLEN  FLWR  SLAS PRMGT
   1        29.63000       -82.37000     40.00               1.0  100.   1.0   0.0   -99   -99
 
 *INITIAL CONDITIONS
 @C  PCR     ICDAT  ICRT  ICND  ICRN  ICRE  ICWD ICRES ICREN ICREP ICRIP ICRID
-  1 MZ    2017135   100     0  1.00  1.00   0.0  1000  0.80  0.00  100.   15.
+  1 MZ    1980135   100     0  1.00  1.00   0.0  1000  0.80  0.00  100.   15.
 @C   ICBL  SH2O  SNH4  SNO3
   1    5. 0.086   0.5   0.1
   1   15. 0.086   0.5   0.1
@@ -64,27 +64,21 @@
 
 *PLANTING DETAILS
 @P    PDATE   EDATE  PPOP  PPOE  PLME  PLDS  PLRS  PLRD  PLDP  PLWT  PAGE  PENV  PLPH  SPRL
-  1 2017135     -99   7.2   7.2     S     R   61.    0.   7.0  -99.  -99. -99.0 -99.0   0.0
+  1 2000136     -99   7.2   7.2     S     R   61.    0.   7.0  -99.  -99. -99.0 -99.0   0.0
 
 *IRRIGATION
 @I   IEFF  IDEP  ITHR  IEPT  IOFF  IAME  IAMT
-  1 1.000   30.   75.  -99. GS000 IR001   0.0
+ 32 1.000   30.   75.  -99. GS000 IR001   0.0
 @I    IDATE  IROP IRVAL
-  1 2017150 IR001  10.0
-  1 2017161 IR001  10.0
-  1 2017171 IR001  10.0
-  1 2017181 IR001  10.0
-  1 2017191 IR001  10.0
-  1 2017201 IR001  10.0
-  1 2017211 IR001  10.0
-  1 2017222 IR001  10.0
-  1 2017232 IR001  10.0
-  1 2017242 IR001  10.0
+ 32 2000219 IR001  10.0
+ 32 2000224 IR001  10.0
+ 32 2000229 IR001  10.0
+ 32 2000234 IR001  10.0
+ 32 2000239 IR001  10.0
 
 *FERTILIZERS
 @F    FDATE  FMCD  FACD  FDEP  FAMN  FAMP  FAMK  FAMC  FAMO  FOCD
-  1 2017135 FE001 AP001   10.   70.   10.    4.    0.    0.   -99
-  1 2017196 FE001 AP001   10.  200.    0.    0.    0.    0.   -99
+ 32 2000136 FE001 AP002   10.  200.  -99.  -99.  -99.  -99.   -99
 
 *RESIDUES
 @R    RDATE  RCOD  RAMT  RESN  RESP  RESK  RINP  RDEP  RMET
