@@ -12,6 +12,64 @@ import sys
 from pathlib import Path
 from datetime import datetime
 import pickle
+from pymoo.visualization.scatter import Scatter
+
+from pico.pinsga2.pinsga2 import PINSGA2
+from pico.pinsga2 import value_functions as mvf
+
+
+
+def plot_eta_F(context, algorithm):
+
+   
+    # Next highlight the eta selctions
+    if len(algorithm.eta_F) > 0:
+
+        # Plot the historical PO fronts
+        plot = Scatter().add(algorithm.historical_F * -1, facecolors= '#f5f5f5', edgecolors='#f5f5f5')
+
+        # The current PO front 
+        plot.add(algorithm.paused_F * -1)
+
+        # Starred items for the DM
+        plot.add(algorithm.eta_F * -1, s=500, marker='*', facecolors='red')
+        
+
+    else: 
+        F = algorithm.pop.get("F")
+        plot = Scatter().add(F * -1)
+
+
+    plot.plot_if_not_done_yet()
+
+    return plot.fig
+ 
+
+def plot_vf(context, algorithm):
+
+    if not algorithm.vf_plot_flag and algorithm.vf_plot: 
+        return algorithm.vf_plot
+
+    elif len(algorithm.eta_F) > 0 and (algorithm.vf_res is not None) and algorithm.vf_plot_flag:
+        plot = mvf.plot_vf(algorithm.eta_F * -1, algorithm.vf_res.vf, show=False)
+        
+        algorithm.vf_plot_flag = False;
+        
+        algorithm.vf_plot = plot.gcf()
+
+        return plot.gcf()
+    
+    else: 
+        F = algorithm.pop.get("F")
+        plot = Scatter().add(F * -1)
+        plot.plot_if_not_done_yet()
+        
+        algorithm.vf_plot = plot.fig
+
+        return plot.fig
+
+
+
 
 if __name__ == "__main__":
 
@@ -24,11 +82,12 @@ if __name__ == "__main__":
     app_man_csv = "management_dates.csv"
     app_man = pd.read_csv(app_man_csv)
 
-    if len(sys.argv) != 2: 
-        print("Usage: %s YEAR" % sys.argv[0])
+    if len(sys.argv) != 3: 
+        print("Usage: %s YEAR [nsga2|pinsga2]" % sys.argv[0])
         sys.exit(1)
 
     year = int(sys.argv[1])
+    method = sys.argv[2]
 
     reps = 60
     plant_date = 135
@@ -49,7 +108,6 @@ if __name__ == "__main__":
     threads = 20
     initial_sparsity = 0.2
     pop_size = 100
-    ref_dirs = get_reference_directions("energy", 3, 90, seed=1)
     generations = 200
 
     ## Derived parameters 
@@ -117,15 +175,32 @@ if __name__ == "__main__":
 
         vssps = VSSPS(FloatRandomSampling)
 
-        algorithm = NSGA2(pop_size=pop_size, 
-                          eliminate_duplicates=True,
-                          sampling=vssps)
+        algorithm = None
+        dashboard = None
+        if method == "nsga2": 
+            algorithm = NSGA2(pop_size=pop_size, 
+                              eliminate_duplicates=True,
+                              sampling=vssps)
+
+            dashboard = Dashboard()
+        elif method == "pinsga2":
+            algorithm = PINSGA2(pop_size=pop_size, 
+                              eliminate_duplicates=True,
+                              sampling=vssps)
+
+            dashboard = Dashboard(plot_eta_F=plot_eta_F, plot_vf=plot_vf)
+
+
+        else: 
+            print("Unrecognized method")
+            sys.exit(1)
+
 
         res = minimize(prob,
                        algorithm,
                        ('n_gen', generations),
                        seed=seed,
-                       callback=Dashboard(),
+                       callback=dashboard,
                        save_history=True,
                        verbose=True)
 
