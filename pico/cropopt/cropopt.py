@@ -25,7 +25,7 @@ class CropOpt(Problem):
     NUT_APP_TYPE = 1
 
     def nadir_point(self):
-        return np.array([0, 1000, 1000])
+        return np.array([0, 1000])
 
 
     #
@@ -52,7 +52,6 @@ class CropOpt(Problem):
 
         # Separate the nutrient apps from the irrigation apps
         irrigation_ranges = date_ranges[date_ranges[:,2] == self.IRR_APP_TYPE]
-        nutrient_ranges   = date_ranges[date_ranges[:,2] == self.NUT_APP_TYPE]
 
 
         # Count irrigation dates
@@ -61,9 +60,6 @@ class CropOpt(Problem):
                 irrigation_ranges[:,self.MAX_DATE] - irrigation_ranges[:,self.MIN_DATE] + 1
                 ) 
 
-        # Count nutrient applications 
-        nutrient_app_count = np.size(nutrient_ranges,0)
-        day_count += nutrient_app_count
 
         mins = np.ones(day_count) * -1
         maxs = np.ones(day_count) * -1
@@ -77,13 +73,6 @@ class CropOpt(Problem):
 
             mins[minindex:maxindex] = date_ranges[periodInd, self.MIN_IRR_APP]
             maxs[minindex:maxindex] = date_ranges[periodInd, self.MAX_IRR_APP]
-        
-        for period in nutrient_period_indices:
-
-            (periodInd, indx) = period
-
-            mins[indx] = date_ranges[periodInd, self.MIN_DATE]
-            maxs[indx] = date_ranges[periodInd, self.MAX_DATE]
 
         # Set up a dssat runner that will handle the batch
         self.runner = Dssat4Dum(self.dssat_home, self.dssat_inp, self.dssat_exe, 
@@ -91,7 +80,7 @@ class CropOpt(Problem):
 
         # TODO constraints? 
         super().__init__(n_var=day_count,
-                         n_obj=3,           # (Yield, leaching, total irrigation)
+                         n_obj=2,           # (Yield, total irrigation)
                          n_constr=0,
                          xl=mins,
                          xu=maxs)
@@ -110,8 +99,6 @@ class CropOpt(Problem):
         yield_and_leaching = self.runner.run_batch(irrapps, self.threads, updates=self.updates)
  
         yld = yield_and_leaching[:,0][np.newaxis]
-
-        leaching = yield_and_leaching[:,1][np.newaxis]
 
         # Calc irrigation indices 
         ranges = self.calc_period_indices(self.date_ranges)[0]
@@ -132,8 +119,8 @@ class CropOpt(Problem):
 
         x_rounded[x_rounded != 0] = 1
 
-        # First column of results are yield, second is leaching
-        objectives = np.concatenate((-yld, leaching, irr_totals), axis=0).T
+        # First column of results are yield
+        objectives = np.concatenate((-yld, irr_totals), axis=0).T
         
         self.generation = self.generation + 1
 
@@ -239,28 +226,6 @@ class CropOpt(Problem):
             scheds[:,startInd:endInd, 3 ] = 0
             scheds[:,startInd:endInd, 4 ] = 0
 
-
-        # Translate the nutrient dates 
-        for period in nut_period_inds:
-
-            (periodInd, indx) = period
-           
-            date = np.around(x[:,indx])
-            n_amount = date_ranges[periodInd, self.N_APP]
-            phos_amount = date_ranges[periodInd, self.PHOS_APP]
-            pot_amount = date_ranges[periodInd, self.POT_APP]
-
-            # Empty irrigation value
-            scheds[:, indx, 1]  = 0
-
-            if np.sum(np.isnan(date)) != 0:
-                sys.exit("Whoops")
-
-            # Fill in nutrient values
-            scheds[:, indx, 0]  = date
-            scheds[:, indx, 2]  = n_amount
-            scheds[:, indx, 3]  = phos_amount
-            scheds[:, indx, 4]  = pot_amount
 
         if np.sum(scheds == -1) != 0:
             sys.exit("Schedule not properly built")

@@ -4,6 +4,7 @@ from pico.cropopt.cropopt import CropOpt
 from pico.cropopt.vssps import VSSPS
 from pico.dash.Dashboard import Dashboard
 from pymoo.algorithms.moo.nsga3 import NSGA3
+from pymoo.algorithms.moo.nsga2 import NSGA2
 from pymoo.util.ref_dirs import get_reference_directions
 from pymoo.optimize import minimize
 from pymoo.operators.sampling.rnd import FloatRandomSampling
@@ -113,19 +114,12 @@ if __name__ == "__main__":
 
         print("Starting run %d" % run)
 
-        nutrient_inds = CropOpt.calc_period_indices(CropOpt, date_ranges)[1]
 
-        nutrient_inds = [a[1] for a in nutrient_inds]
+        vssps = VSSPS(FloatRandomSampling)
 
-        vssps = VSSPS(FloatRandomSampling, nz_indices=nutrient_inds)
-
-        algorithm = NSGA3(pop_size=pop_size, 
-                          ref_dirs=ref_dirs,
+        algorithm = NSGA2(pop_size=pop_size, 
                           eliminate_duplicates=True,
                           sampling=vssps)
-        #algorithm = NSGA3(pop_size=pop_size, 
-        #                  ref_dirs=ref_dirs,
-        #                  eliminate_duplicates=True)
 
         res = minimize(prob,
                        algorithm,
