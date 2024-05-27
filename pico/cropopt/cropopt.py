@@ -52,7 +52,7 @@ class CropOpt(Problem):
 
         # Separate the nutrient apps from the irrigation apps
         irrigation_ranges = date_ranges[date_ranges[:,2] == self.IRR_APP_TYPE]
-
+        nutrient_ranges   = date_ranges[date_ranges[:,2] == self.NUT_APP_TYPE]
 
         # Count irrigation dates
         # +1 to avoid fencepost error
@@ -60,6 +60,9 @@ class CropOpt(Problem):
                 irrigation_ranges[:,self.MAX_DATE] - irrigation_ranges[:,self.MIN_DATE] + 1
                 ) 
 
+        # Count nutrient applications
+        nutrient_app_count = np.size(nutrient_ranges,0)
+        day_count += nutrient_app_count
 
         mins = np.ones(day_count) * -1
         maxs = np.ones(day_count) * -1
@@ -73,6 +76,15 @@ class CropOpt(Problem):
 
             mins[minindex:maxindex] = date_ranges[periodInd, self.MIN_IRR_APP]
             maxs[minindex:maxindex] = date_ranges[periodInd, self.MAX_IRR_APP]
+
+
+        for period in nutrient_period_indices:
+
+            (periodInd, indx) = period
+
+            mins[indx] = date_ranges[periodInd, self.MIN_DATE]
+            maxs[indx] = date_ranges[periodInd, self.MAX_DATE]
+
 
         # Set up a dssat runner that will handle the batch
         self.runner = Dssat4Dum(self.dssat_home, self.dssat_inp, self.dssat_exe, 
@@ -225,6 +237,28 @@ class CropOpt(Problem):
             scheds[:,startInd:endInd, 2 ] = 0
             scheds[:,startInd:endInd, 3 ] = 0
             scheds[:,startInd:endInd, 4 ] = 0
+
+        # Translate the nutrient dates
+        for period in nut_period_inds:
+
+            (periodInd, indx) = period
+
+            date = np.around(x[:,indx])
+            n_amount = date_ranges[periodInd, self.N_APP]
+            phos_amount = date_ranges[periodInd, self.PHOS_APP]
+            pot_amount = date_ranges[periodInd, self.POT_APP]
+
+            # Empty irrigation value
+            scheds[:, indx, 1]  = 0
+
+            if np.sum(np.isnan(date)) != 0:
+                sys.exit("Whoops")
+
+            # Fill in nutrient values
+            scheds[:, indx, 0]  = date
+            scheds[:, indx, 2]  = n_amount
+            scheds[:, indx, 3]  = phos_amount
+            scheds[:, indx, 4]  = pot_amount
 
 
         if np.sum(scheds == -1) != 0:

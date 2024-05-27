@@ -89,7 +89,7 @@ if __name__ == "__main__":
     year = int(sys.argv[1])
     method = sys.argv[2]
 
-    reps = 60
+    reps = 1
     plant_date = 135
 
     total_nitro = 200
@@ -172,8 +172,11 @@ if __name__ == "__main__":
 
         print("Starting run %d" % run)
 
+        nutrient_inds = CropOpt.calc_period_indices(CropOpt, date_ranges)[1]
 
-        vssps = VSSPS(FloatRandomSampling)
+        nutrient_inds = [a[1] for a in nutrient_inds]
+
+        vssps = VSSPS(FloatRandomSampling, nz_indices=nutrient_inds)
 
         algorithm = None
         dashboard = None
