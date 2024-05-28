@@ -107,7 +107,9 @@ class PINSGA2(GeneticAlgorithm):
 
         super()._advance(infills=infills, **kwargs)
 
-        F = self.pop.get("F")
+        rank, F = self.pop.get("rank", "F")
+
+        F = F[rank == 0]
 
         if self.historical_F is not None:
             self.historical_F = np.vstack((self.historical_F, F)) 
@@ -115,7 +117,7 @@ class PINSGA2(GeneticAlgorithm):
             self.historical_F = F
 
         # Eta is the number of solutions displayed to the DM
-        eta_F_indices = select_points_with_maximum_distance(self.pop.get("F"), self.eta)
+        eta_F_indices = select_points_with_maximum_distance(F, self.eta)
 
         self.eta_F = F[eta_F_indices]
         self.eta_F = self.eta_F[self.eta_F[:,0].argsort()]
