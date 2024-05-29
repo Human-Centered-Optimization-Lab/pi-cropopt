@@ -119,8 +119,12 @@ class PINSGA2(GeneticAlgorithm):
         # Eta is the number of solutions displayed to the DM
         eta_F_indices = select_points_with_maximum_distance(F, self.eta)
 
+
         self.eta_F = F[eta_F_indices]
         self.eta_F = self.eta_F[self.eta_F[:,0].argsort()]
+
+        # Remove duplicate rows
+        self.eta_F = np.unique(self.eta_F, axis=0)
 
         # A frozen view of the optimization each 10 generations 
         self.paused_F = F
