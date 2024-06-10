@@ -63,6 +63,7 @@ class PINSGA2(GeneticAlgorithm):
         self.vf_plot_flag = False
         self.vf_plot = None
         self.historical_F = None
+        self.prev_pop = None
 
     @staticmethod
     def _prompt_for_ranks(F):
@@ -101,6 +102,16 @@ class PINSGA2(GeneticAlgorithm):
 
         return ranks;                         
     
+    def _reset_dm_preference(self):
+
+            print("Back-tracking and removing DM preference from search.")
+
+            self.eta_F = []
+            self.vf_res = None
+            self.v2 = None
+            self.vf_plot_flag = False
+            self.vf_plot = None
+            self.pop = self.prev_pop
 
 
     def _advance(self, infills=None, **kwargs):
@@ -116,9 +127,10 @@ class PINSGA2(GeneticAlgorithm):
         else: 
             self.historical_F = F
 
-        # Eta is the number of solutions displayed to the DM
-        eta_F_indices = select_points_with_maximum_distance(F, self.eta)
+        to_find = self.eta if F.shape[0] >= self.eta else F.shape[0] 
 
+        # Eta is the number of solutions displayed to the DM
+        eta_F_indices = select_points_with_maximum_distance(F, to_find)
 
         self.eta_F = F[eta_F_indices]
         self.eta_F = self.eta_F[self.eta_F[:,0].argsort()]
@@ -129,12 +141,36 @@ class PINSGA2(GeneticAlgorithm):
         # A frozen view of the optimization each 10 generations 
         self.paused_F = F
 
-        if self.n_gen % 10 == 0:
+        # Record the previous population in case we need to back track 
+        self.prev_pop = self.pop
 
-            ranks = PINSGA2._get_ranks(self.eta_F)
+        dm_time = self.n_gen % 10 == 0
+
+        # Check whether we have more than one solution
+        if dm_time and len(self.eta_F) < 2: 
+
+            print("Population only contains one non-dominated solution. ")
+
+            self._reset_dm_preference()
+
+
+
+
+        elif dm_time:
+
+            dm_ranks = PINSGA2._get_ranks(self.eta_F)
+
+            if len(set(rank)) == 0: 
+
+                print("No preference between any two points provided.")
+
+                self._reset_dm_preference()
+
+                return 
+
 
             # ES or scimin
-            approach = "ES"
+            approach = "scimin"
 
             # linear or poly
             fnc_type = "poly"
@@ -144,20 +180,29 @@ class PINSGA2(GeneticAlgorithm):
 
             if fnc_type == "linear":
 
-                vf_res = mvf.create_linear_vf(self.eta_F * -1, ranks, approach, minimize)
+                vf_res = mvf.create_linear_vf(self.eta_F * -1, dm_ranks, approach, minimize)
 
             elif fnc_type == "poly":
 
-                vf_res = mvf.create_poly_vf(self.eta_F * -1, ranks, approach, minimize)
+                vf_res = mvf.create_poly_vf(self.eta_F * -1, dm_ranks, approach, minimize)
 
             else:
 
                 print("function not supported")
 
-            self.vf_res = vf_res
-            self.vf_plot_flag = True
-            self.v2 = self.vf_res.vf(self.eta_F[ranks.index(2), :] * -1).item()
+            # check if we were able to model the VF
+            if vf_res.fit: 
+
+                self.vf_res = vf_res
+                self.vf_plot_flag = True
+                self.v2 = self.vf_res.vf(self.eta_F[dm_ranks.index(2), :] * -1).item()
+                print("v2 = %d" % self.v2)
             
+            else: 
+               
+                print("Could not fit a function to the DM preference")
+                # If not, reset and use normal domination
+                self._reset_dm_preference()
 
 parse_doc_string(PINSGA2.__init__)
 
