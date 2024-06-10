@@ -238,6 +238,8 @@ def plot_vf(P, vf, show=True):
 
     plt.contour(x,y,z, levels=values_at_P)
 
+    plt.colorbar()
+
     if show: 
         plt.show()
 
