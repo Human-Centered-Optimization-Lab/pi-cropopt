@@ -198,7 +198,7 @@ class PINSGA2(GeneticAlgorithm):
                 
                 self.vf_res = vf_res
                 self.vf_plot_flag = True
-                self.v2 = self.vf_res.vf(eta_F[dm_ranks[1], :] * -1).item()
+                self.v2 = self.vf_res.vf(eta_F[dm_ranks[1] - 1] * -1).item()
                 print(self.vf_res.params) 
                 #break
 
@@ -218,10 +218,10 @@ class PINSGA2(GeneticAlgorithm):
                     eta_F = eta_F[ np.array(dm_ranks) != 1]
 
                     print("Attempting to remove the least preferred solution from the fit.")
-                       
-                        
+                           
+                            
 
-                    
+                        
 
 
 parse_doc_string(PINSGA2.__init__)
