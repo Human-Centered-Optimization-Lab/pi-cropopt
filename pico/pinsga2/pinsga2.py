@@ -170,56 +170,57 @@ class PINSGA2(GeneticAlgorithm):
 
             eta_F = self.eta_F
 
-            #while eta_F.shape[0] > 1: 
+            while eta_F.shape[0] > 1: 
 
-            # ES or scimin
-            approach = "ES"
+                # ES or scimin
+                approach = "ES"
 
-            # linear or poly
-            fnc_type = "poly"
+                # linear or poly
+                fnc_type = "poly"
 
-            # max (False) or min (True)
-            minimize = False
+                # max (False) or min (True)
+                minimize = False
 
-            if fnc_type == "linear":
+                if fnc_type == "linear":
 
-                vf_res = mvf.create_linear_vf(eta_F * -1, dm_ranks.tolist(), approach, minimize)
+                    vf_res = mvf.create_linear_vf(eta_F * -1, dm_ranks.tolist(), approach, minimize)
 
-            elif fnc_type == "poly":
+                elif fnc_type == "poly":
 
-                vf_res = mvf.create_poly_vf(eta_F * -1, dm_ranks.tolist(), approach, minimize)
+                    vf_res = mvf.create_poly_vf(eta_F * -1, dm_ranks.tolist(), approach, minimize)
 
-            else:
+                else:
 
-                print("function not supported")
+                    print("function not supported")
 
-            # check if we were able to model the VF
-            if vf_res.fit: 
-                
-                self.vf_res = vf_res
-                self.vf_plot_flag = True
-                self.v2 = self.vf_res.vf(eta_F[dm_ranks[1] - 1] * -1).item()
-                print(self.vf_res.params) 
-                #break
-
-            else: 
-               
-                # If we didn't the model, try to remove the least preferred point and try to refit
-                print("Could not fit a function to the DM preference")
-
-                if eta_F.shape[0] == 2:
-
-                    # If not, reset and use normal domination
-                    print("Removing DM preference")
-                    self._reset_dm_preference()
+                # check if we were able to model the VF
+                if vf_res.fit: 
+                    
+                    self.vf_res = vf_res
+                    self.vf_plot_flag = True
+                    self.v2 = self.vf_res.vf(eta_F[dm_ranks[1] - 1] * -1).item()
+                    print(self.vf_res.params) 
+                    break
 
                 else: 
-                
-                    eta_F = eta_F[ np.array(dm_ranks) != 1]
+                   
+                    # If we didn't the model, try to remove the least preferred point and try to refit
+                    print("Could not fit a function to the DM preference")
 
-                    print("Attempting to remove the least preferred solution from the fit.")
-                           
-                            
+                    if eta_F.shape[0] == 2:
+
+                        # If not, reset and use normal domination
+                        print("Removing DM preference")
+                        self._reset_dm_preference()
+
+                    else: 
+
+                        print("Removing the least preferred solution from the fit.")
+                    
+                        eta_F = np.delete(eta_F, dm_ranks[-1] - 1, axis=0)
+                        dm_ranks = dm_ranks[0:-1] - 1
+                               
+                                
 
                         
 
