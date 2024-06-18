@@ -100,7 +100,7 @@ class PINSGA2(GeneticAlgorithm):
 
                 ranks = PINSGA2._prompt_for_ranks(F)
 
-        return ranks;                         
+        return np.array(ranks);                         
     
     def _reset_dm_preference(self):
 
@@ -168,9 +168,12 @@ class PINSGA2(GeneticAlgorithm):
 
                 return 
 
+            eta_F = self.eta_F
+
+            #while eta_F.shape[0] > 1: 
 
             # ES or scimin
-            approach = "scimin"
+            approach = "ES"
 
             # linear or poly
             fnc_type = "poly"
@@ -180,11 +183,11 @@ class PINSGA2(GeneticAlgorithm):
 
             if fnc_type == "linear":
 
-                vf_res = mvf.create_linear_vf(self.eta_F * -1, dm_ranks, approach, minimize)
+                vf_res = mvf.create_linear_vf(eta_F * -1, dm_ranks.tolist(), approach, minimize)
 
             elif fnc_type == "poly":
 
-                vf_res = mvf.create_poly_vf(self.eta_F * -1, dm_ranks, approach, minimize)
+                vf_res = mvf.create_poly_vf(eta_F * -1, dm_ranks.tolist(), approach, minimize)
 
             else:
 
@@ -192,17 +195,34 @@ class PINSGA2(GeneticAlgorithm):
 
             # check if we were able to model the VF
             if vf_res.fit: 
-
+                
                 self.vf_res = vf_res
                 self.vf_plot_flag = True
-                self.v2 = self.vf_res.vf(self.eta_F[dm_ranks.index(2), :] * -1).item()
-                print("v2 = %d" % self.v2)
-            
+                self.v2 = self.vf_res.vf(eta_F[dm_ranks[1], :] * -1).item()
+                print(self.vf_res.params) 
+                #break
+
             else: 
                
+                # If we didn't the model, try to remove the least preferred point and try to refit
                 print("Could not fit a function to the DM preference")
-                # If not, reset and use normal domination
-                self._reset_dm_preference()
+
+                if eta_F.shape[0] == 2:
+
+                    # If not, reset and use normal domination
+                    print("Removing DM preference")
+                    self._reset_dm_preference()
+
+                else: 
+                
+                    eta_F = eta_F[ np.array(dm_ranks) != 1]
+
+                    print("Attempting to remove the least preferred solution from the fit.")
+                       
+                        
+
+                    
+
 
 parse_doc_string(PINSGA2.__init__)
 
