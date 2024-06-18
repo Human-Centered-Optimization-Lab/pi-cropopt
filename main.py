@@ -60,8 +60,8 @@ def plot_vf(context, algorithm):
         return plot.gcf()
     
     else: 
-        F = algorithm.pop.get("F")
-        plot = Scatter().add(F * -1)
+
+        plot = Scatter().add(np.array([[10000, -50]]), facecolors="#ffffff", edgecolors="#ffffff")
         plot.plot_if_not_done_yet()
         
         algorithm.vf_plot = plot.fig
