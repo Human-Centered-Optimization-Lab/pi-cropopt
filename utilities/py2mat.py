@@ -32,7 +32,7 @@ for line in lines:
         if solution[1].endswith('.'):
             solution[1] = solution[1][:-1]
 
-        solutions.append([int(solution[0]), int(solution[1])])
+        solutions.append([float(solution[0]), float(solution[1])])
         
     elif line.startswith('Ranks'):
         ranks = line.split(': ')[1].split()
@@ -40,7 +40,8 @@ for line in lines:
 
 solutions = np.array(solutions)
 
-solutions[:,0]  = -solutions[:,0]
+#solutions[:,0]  = -solutions[:,0]
+#solutions[:,1]  = -solutions[:,1] + 500
 
 # Make the ranks the third column 
 solutions = np.c_[solutions, ranks]
@@ -48,22 +49,29 @@ solutions = np.c_[solutions, ranks]
 # Sort the solutions by the ranks
 solutions = solutions[solutions[:,2].argsort()]
 
-
 # Convert the solutions to a string
 sol_str = solutions.__str__()
-sol_str = sol_str.replace('\n', '')
+mat_sol_str = sol_str
 
+# print solutions to be copied and pasted as a numpy array
+sol_str = sol_str.replace(']', '],')
+sol_str = sol_str.replace('],],', ']]')
+print("P = np.array(")
 print(sol_str)
+print(")")
 
-sol_str = sol_str.replace('[[', '[')
-sol_str = sol_str.replace(' [', '')
-sol_str = sol_str.replace(']', ';')
-sol_str = sol_str.replace(';;', '];')
+
+# Process and print for matlab 
+mat_sol_str = mat_sol_str.replace('\n', '')
+mat_sol_str = mat_sol_str.replace('[[', '[')
+mat_sol_str = mat_sol_str.replace(' [', '')
+mat_sol_str = mat_sol_str.replace(']', ';')
+mat_sol_str = mat_sol_str.replace(';;', '];')
 
 # Remove newlines
 
 
-print("obj = " + sol_str)
+print("obj = " + mat_sol_str)
 
 
 
