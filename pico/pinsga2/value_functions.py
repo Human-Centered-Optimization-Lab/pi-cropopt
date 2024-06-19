@@ -152,8 +152,14 @@ def create_vf_pymoo_linear(P, ranks, minimize=True):
         seed=1)
 
     vf = lambda P_in: linear_vf(P_in, res.X[0:-1])
-    params = res.X[0:-1]
-    epsilon = res.X[-1]
+
+    if res.X is not None:
+        params = res.X[0:-1]
+        epsilon = res.X[-1]
+    else: 
+        params = None
+        epsilon = -1000
+
 
     return vfResults(vf, params, epsilon)
 
@@ -170,8 +176,13 @@ def create_vf_pymoo_poly(P, ranks, minimize=True):
         seed=1)
 
     vf = lambda P_in: poly_vf(P_in, res.X[0:-1])
-    params = res.X[0:-1]
-    epsilon = res.X[-1]
+
+    if res.X is not None:
+        params = res.X[0:-1]
+        epsilon = res.X[-1]
+    else: 
+        params = None
+        epsilon = -1000
 
     return vfResults(vf, params, epsilon)
 
