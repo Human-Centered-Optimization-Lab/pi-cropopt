@@ -1,24 +1,27 @@
 
 
 # Take in two csvs with Pareto fronts and plot them on the same graph 
-
+from pymoo.util.nds.non_dominated_sorting import NonDominatedSorting
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import sys
 
-# Validate the input
-if len(sys.argv) == 5 or len(sys.argv) == 3:
-    output_format = "show"
-elif len(sys.argv) == 4 or len(sys.argv) == 2:
-    output_format = "save"
-else: 
+
+if len(sys.argv) < 2:
     print("Usage: python comparePlots.py [GEN] <LABEL1> <LABEL2> <CSV1> <CSV2>")
     sys.exit(1)
+# Validate the input
+elif len(sys.argv) % 2 == 1:
+    output_format = "show"
+else:
+    output_format = "save"
 
 
 labels = []
 dfs = []
+facecolors = ['none', 'green', 'purple', 'orange']
+edgecolors = ['black', 'green', 'purple', 'orange']
 
 if output_format == "save": 
     gen = sys.argv[1]    
@@ -34,11 +37,24 @@ for (a, arg) in enumerate(args):
     else:
         dfs.append(pd.read_csv(arg))
 
+
+
 for (d, df) in enumerate(dfs): 
 
-    # Plot the data (first column is f1, second column is f2)
-    plt.scatter(df.iloc[:,1], df.iloc[:,0]*-1,  label=labels[d])
+    # Perform non-dominated sorting
+    nds = NonDominatedSorting()
+    fronts = nds.do(df.values, only_non_dominated_front=True)
 
+    # Get the Pareto front      
+    pf = df.iloc[fronts,:]
+    
+    # Plot the data (first column is f1, second column is f2) 
+    plt.scatter(pf.iloc[:,1], pf.iloc[:,0]*-1,  
+                label=labels[d], 
+                marker='o', 
+                facecolors=facecolors[d], 
+                edgecolors=edgecolors[d])
+    
 
     
 plt.xlabel("Irrigation (mm)")
