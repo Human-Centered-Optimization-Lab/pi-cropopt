@@ -69,8 +69,8 @@ class VFDominator:
 
             vf = self.algorithm.vf_res.vf
 
-            F_vf = vf(F)[:,np.newaxis]
-            _F_vf = vf(_F)[:,np.newaxis]
+            F_vf = vf(F * -1)[:,np.newaxis]
+            _F_vf = vf(_F * -1)[:,np.newaxis]
 
             Lv = np.repeat(F_vf, m, axis=0)
             Rv = np.tile(_F_vf, (n, 1))
