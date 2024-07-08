@@ -13,9 +13,11 @@ from pymoo.util.display.multi import MultiObjectiveOutput
 from pymoo.util.dominator import Dominator
 from pymoo.util.misc import has_feasible
 from pymoo.util.reference_direction import select_points_with_maximum_distance
+
 from pico.pinsga2.non_dominated_sorting import NonDominatedSorting
 from pico.pinsga2 import value_functions as mvf
 from pico.pinsga2.vf_dominator import VFDominator
+
 
 from pymoo.algorithms.moo.nsga2 import binary_tournament
 from pymoo.algorithms.moo.nsga2 import RankAndCrowdingSurvival
@@ -37,9 +39,11 @@ class PINSGA2(GeneticAlgorithm):
                  output=MultiObjectiveOutput(),
                  tau=10,
                  eta=4,
+                 opt_method="trust-constr",
+                 vf_type="poly",
                  **kwargs):
         
-        self.survival = survival=RankAndCrowding(nds=NonDominatedSorting(dominator=VFDominator(self)))
+        self.survival = RankAndCrowding(nds=NonDominatedSorting(dominator=VFDominator(self)))
 
         super().__init__(
             pop_size=pop_size,
@@ -55,6 +59,8 @@ class PINSGA2(GeneticAlgorithm):
         self.termination = DefaultMultiObjectiveTermination()
         self.tournament_type = 'comp_by_dom_and_crowding'
 
+        self.vf_type = vf_type
+        self.opt_method = opt_method
         self.tau = tau
         self.eta = eta
         self.eta_F = []
@@ -64,6 +70,7 @@ class PINSGA2(GeneticAlgorithm):
         self.vf_plot = None
         self.historical_F = None
         self.prev_pop = None
+        self.fronts = []
 
     @staticmethod
     def _prompt_for_ranks(F):
@@ -120,6 +127,8 @@ class PINSGA2(GeneticAlgorithm):
 
         rank, F = self.pop.get("rank", "F")
 
+        self.fronts = rank
+
         F = F[rank == 0]
 
         if self.historical_F is not None:
@@ -172,26 +181,17 @@ class PINSGA2(GeneticAlgorithm):
 
             while eta_F.shape[0] > 1:
 
-                # ES or scimin
-                approach = "ES"
+                if self.vf_type == "linear":
 
-                # linear or poly
-                fnc_type = "poly"
+                    vf_res = mvf.create_linear_vf(eta_F * -1, dm_ranks.tolist(), self.opt_method)
 
-                # max (False) or min (True)
-                minimize = False
+                elif self.vf_type == "poly":
 
-                if fnc_type == "linear":
-
-                    vf_res = mvf.create_linear_vf(eta_F * -1, dm_ranks.tolist(), approach, minimize)
-
-                elif fnc_type == "poly":
-
-                    vf_res = mvf.create_poly_vf(eta_F * -1, dm_ranks.tolist(), approach, minimize)
+                    vf_res = mvf.create_poly_vf(eta_F * -1, dm_ranks.tolist(), self.opt_method)
 
                 else:
-
-                    print("function not supported")
+                    
+                    raise ValueError("Value function %s not supported" % self.vf_type)
 
                 # check if we were able to model the VF
                 if vf_res.fit:
@@ -199,7 +199,6 @@ class PINSGA2(GeneticAlgorithm):
                     self.vf_res = vf_res
                     self.vf_plot_flag = True
                     self.v2 = self.vf_res.vf(eta_F[dm_ranks[1] - 1] * -1).item()
-                    print(self.vf_res.params)
                     break
 
                 else:

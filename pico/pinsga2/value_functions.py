@@ -2,68 +2,67 @@ import numpy as np
 from pymoo.optimize import minimize as moomin
 from scipy.optimize import minimize as scimin
 from pymoo.core.problem import Problem
-import pymoo.algorithms.soo.nonconvex.ga
 import matplotlib.pyplot as plt
 from scipy.optimize import NonlinearConstraint
 from scipy.optimize import Bounds
 from pymoo.algorithms.soo.nonconvex.es import ES
+from pymoo.algorithms.soo.nonconvex.ga import GA
 import math 
 from operator import mul
 from functools import reduce
 from pymoo.termination.default import DefaultSingleObjectiveTermination
 import sys
 
-# Notes: 
-# I'm using the suffix _vf to denote variables used in the value-function optimization 
-# This is to avoid confuse it with variables being optimized in the main function 
+# _ineq_constr_1D_linear
+# _ineq_constr_2D_linear
+# _ineq_constr_1D_poly
+# _ineq_constr_2D_poly
 
 # Input 1: A list of non-dominated points 
 # Input 2: The ranking of the given non-dominated points 
 # Input 3: constraint function for optimizing the value func
 # Input 4: the skeleton utility function that we're trying to optimize
-def create_vf(P, ranks, ineq_constr, vf="linear", algorithm="scimin", minimize=True): 
+def create_vf(P, ranks, ineq_constr, vf="linear", delta=0.1, method="trust-constr"): 
 
     if vf == "linear":
-        res = create_linear_vf(P, ranks, algorithm, minimize)
-        # TODO validate results 
+        res = create_linear_vf(P, ranks, delta, method)
         res.fit = _validate_vf(res)
         return res
     else:
         raise ValueError("Value function '%d' not supported." % vf) 
-    
 
     return lambda f_new:  np.sum(f_new)
 
-def create_poly_vf(P, ranks, algorithm="scimin", minimize=True):
+def create_poly_vf(P, ranks, delta=0.1, method="trust-constr"):
     
-    if algorithm == "scimin": 
-        res = create_vf_scipy_poly(P, ranks, minimize)
+    if method == "trust-constr" or method == "SLSQP": 
+        res = create_vf_scipy_poly(P, ranks, delta, method=method)
         res.fit = _validate_vf(res)
         return res
-    elif algorithm == "ES": 
-        res = create_vf_pymoo_poly(P, ranks, minimize)
+    elif method == "ES": 
+        res = create_vf_pymoo_poly(P, ranks, delta, method=method)
         res.fit = _validate_vf(res)
         return res
     else: 
-        raise ValueError("Algorithm %s not supported" % algorithm) 
+        raise ValueError("Optimization method %s not supported" % method) 
 
 
 
-def create_linear_vf(P, ranks, algorithm="scimin", minimize=True): 
+def create_linear_vf(P, ranks, delta=0.1, method="trust-constr"): 
     
-    if algorithm == "scimin": 
-        res = create_vf_scipy_linear(P, ranks, minimize)
+    if method == "trust-constr" or method == "SLSQP": 
+        res = create_vf_scipy_linear(P, ranks, delta, method)
         res.fit = _validate_vf(res)
         return res
-    elif algorithm == "ES": 
-        res = create_vf_pymoo_linear(P, ranks, minimize)
+    elif method == "ES": 
+        res = create_vf_pymoo_linear(P, ranks, delta, method)
         res.fit = _validate_vf(res)
         return res
     else: 
-        raise ValueError("Algorithm %s not supported" % algorithm) 
+        raise ValueError("Optimization method %s not supported" % method) 
 
 
-def create_vf_scipy_poly(P, ranks, minimize=True):
+def create_vf_scipy_poly(P, ranks, delta,  method="trust-constr"):
 
     # Gathering basic info
     M = P.shape[1]
@@ -84,8 +83,9 @@ def create_vf_scipy_poly(P, ranks, minimize=True):
         ineq_ub.append(0)
 
     P_sorted = _sort_P(P, ranks)
+    ranks.sort() 
 
-    constr = NonlinearConstraint(_build_constr_poly(P_sorted, poly_vf, minimize), ineq_lb, ineq_ub)
+    constr = NonlinearConstraint(_build_constr_poly(P_sorted, poly_vf, ranks, delta), ineq_lb, ineq_ub)
   
     # Bounds on x 
     x_lb = []
@@ -105,7 +105,18 @@ def create_vf_scipy_poly(P, ranks, minimize=True):
 
     x0 = [1] * (M**2 + M + 1)
 
-    res = scimin(_obj_func, x0, constraints= constr, bounds = bounds)
+    if method == 'trust-constr':
+        # The trust-constr method always finds the decision space linear
+        hess = lambda x: np.zeros((len(x0), len(x0)))
+    else: 
+        hess = None
+
+    res = scimin(_obj_func, 
+                 x0, 
+                 constraints=constr, 
+                 bounds=bounds, 
+                 method=method, 
+                 hess=hess)
 
     # package up results 
     vf =  lambda P_in: poly_vf(P_in, res.x[0:-1])
@@ -115,7 +126,7 @@ def create_vf_scipy_poly(P, ranks, minimize=True):
     return vfResults(vf, params, epsilon)
 
 
-def create_vf_scipy_linear(P, ranks, minimize=True): 
+def create_vf_scipy_linear(P, ranks, delta, method="trust-constr"): 
 
     # Inequality constraints
     lb = [-np.inf] * (P.shape[0] - 1)
@@ -126,8 +137,9 @@ def create_vf_scipy_linear(P, ranks, minimize=True):
     ub.append(0)
 
     P_sorted = _sort_P(P, ranks)
+    ranks.sort()
 
-    constr = NonlinearConstraint(_build_constr_linear(P_sorted, linear_vf, minimize), lb, ub)
+    constr = NonlinearConstraint(_build_constr_linear(P_sorted, linear_vf, ranks, delta), lb, ub)
 
     x0 = [0.5, 0.5, 0.5]
 
@@ -140,11 +152,16 @@ def create_vf_scipy_linear(P, ranks, minimize=True):
 
     return vfResults(vf, params, epsilon)
 
-def create_vf_pymoo_linear(P, ranks, minimize=True): 
+def create_vf_pymoo_linear(P, ranks, delta, method="ES"): 
 
-    vf_prob = OptimizeLinearVF(P, ranks, linear_vf, minimize)
+    vf_prob = OptimizeLinearVF(P, ranks, delta, linear_vf)
 
-    algorithm = ES()
+    if method == "ES":
+        algorithm = ES()
+    elif method == "GA": 
+        algorithm = GA()
+    else: 
+        raise ValueError("Optimization method %s not supported" % method) 
 
     res = moomin(vf_prob,
         algorithm,
@@ -164,11 +181,16 @@ def create_vf_pymoo_linear(P, ranks, minimize=True):
     return vfResults(vf, params, epsilon)
 
 
-def create_vf_pymoo_poly(P, ranks, minimize=True):
+def create_vf_pymoo_poly(P, ranks, delta, method="trust-constr"):
 
-    vf_prob = OptimizePolyVF(P, ranks, poly_vf, minimize)
+    vf_prob = OptimizePolyVF(P, ranks, delta, poly_vf)
 
-    algorithm = ES()
+    if method == "ES":
+        algorithm = ES()
+    elif method == "GA": 
+        algorithm = GA()
+    else: 
+        raise ValueError("Optimization method %s not supported" % method) 
 
     res = moomin(vf_prob,
         algorithm,
@@ -260,16 +282,16 @@ def plot_vf(P, vf, show=True):
 
 ## ---------------- Polynomial VF creation functions ------------------
 
-def _ineq_constr_poly(x, P, vf, minimize=True):
+def _ineq_constr_poly(x, P, vf, ranks, delta):
     if len(x.shape) == 1:
-        return _ineq_constr_1D_poly(x, P, vf, minimize)
+        return _ineq_constr_1D_poly(x, P, vf, ranks, delta)
     else: 
-        return _ineq_constr_2D_poly(x, P, vf, minimize)
+        return _ineq_constr_2D_poly(x, P, vf, ranks, delta)
 
 
-def _build_ineq_constr_poly(P, vf, minimize=True):
+def _build_ineq_constr_poly(P, vf, ranks, delta):
 
-    ineq_func = lambda x : _ineq_constr_poly(x, P, vf, minimize)
+    ineq_func = lambda x : _ineq_constr_poly(x, P, vf, ranks, delta)
 
     return ineq_func
 
@@ -303,14 +325,14 @@ def _eq_constr_poly(x):
     return result
 
 
-def _build_constr_poly(P, vf, minimize=True): 
+def _build_constr_poly(P, vf, ranks, delta): 
 
-    ineq_constr_func = _build_ineq_constr_poly(P, vf, minimize)
+    ineq_constr_func = _build_ineq_constr_poly(P, vf, ranks, delta)
 
     return lambda x : np.append(ineq_constr_func(x), _eq_constr_poly(x))
 
 
-def _ineq_constr_2D_poly(x, P, vf, minimize=True):
+def _ineq_constr_2D_poly(x, P, vf, ranks, delta):
 
     pop_size = np.size(x,0)
 
@@ -324,12 +346,12 @@ def _ineq_constr_2D_poly(x, P, vf, minimize=True):
    
     for xi in range(pop_size): 
     
-        G[xi, :] = _ineq_constr_1D_poly(x[xi, :], P, vf, minimize)
+        G[xi, :] = _ineq_constr_1D_poly(x[xi, :], P, vf, ranks, delta)
 
     return G
 
 
-def _ineq_constr_1D_poly(x, P, vf, minimize=True):
+def _ineq_constr_1D_poly(x, P, vf, ranks, delta):
 
     ep = x[-1]
 
@@ -356,36 +378,41 @@ def _ineq_constr_1D_poly(x, P, vf, minimize=True):
         current_P_val = vf(P[[p],:], x[0:-1])
         next_P_val = vf(P[[p+1],:], x[0:-1])
 
-        if minimize: 
-            G[:,[p + S_constr_len]] = -(next_P_val - current_P_val) + ep
+        current_rank = ranks[p]
+        next_rank = ranks[p+1]
+
+        if current_rank == next_rank: 
+            # Handle ties
+            G[:,[p + S_constr_len]] = np.abs(current_P_val - next_P_val) - delta*ep
         else: 
             G[:,[p + S_constr_len]] = -(current_P_val - next_P_val) + ep
+
 
     return G
 
 ## ---------------- Linear VF creation functions ------------------
 
-def _build_ineq_constr_linear(P, vf, minimize=True):
+def _build_ineq_constr_linear(P, vf, ranks, delta):
 
-    ineq_func = lambda x : _ineq_constr_linear(x, P, vf, minimize)
+    ineq_func = lambda x : _ineq_constr_linear(x, P, vf, ranks, delta)
 
     return ineq_func
 
-def _build_constr_linear(P, vf, minimize=True):
+def _build_constr_linear(P, vf, ranks, delta):
 
-    ineq_constr_func = _build_ineq_constr_linear(P, vf, minimize);
+    ineq_constr_func = _build_ineq_constr_linear(P, vf, ranks, delta);
 
     return lambda x : np.append(ineq_constr_func(x), _eq_constr_linear(x))
 
 
-def _ineq_constr_linear(x, P, vf, minimize=True):
+def _ineq_constr_linear(x, P, vf, ranks, delta):
     if len(x.shape) == 1:
-        return _ineq_constr_1D_linear(x, P, vf, minimize)
+        return _ineq_constr_1D_linear(x, P, vf, ranks, delta)
     else: 
-        return _ineq_constr_2D_linear(x, P, vf, minimize)
+        return _ineq_constr_2D_linear(x, P, vf, ranks, delta)
 
 
-def _ineq_constr_2D_linear(x, P, vf, minimize=True):
+def _ineq_constr_2D_linear(x, P, vf, ranks, delta):
 
     ep = np.column_stack([x[:,-1]]) 
     pop_size = np.size(x,0)
@@ -400,17 +427,23 @@ def _ineq_constr_2D_linear(x, P, vf, minimize=True):
         current_P_val = vf(P[[p],:], x[:, 0:-1])
         next_P = vf(P[[p+1],:], x[:, 0:-1])
 
-        # As vf returns, each column is an value of P for a given x in the population
-        # We transpose to make each ROW the value of P
-        if minimize: 
-            G[:,[p]] = -(next_P.T - current_P_val.T) - ep
+        current_rank = ranks[p]
+        next_rank = ranks[p+1]
+
+        
+        if current_rank == next_rank: 
+            # Handle ties 
+            G[:,[p]] = np.abs(current_P_val.T - next_P.T) - delta*ep
         else: 
+            # As vf returns, each column is an value of P for a given x in the population
+            # We transpose to make each ROW the value of P
             G[:,[p]] = -(current_P_val.T - next_P.T) + ep
+
 
     return G
 
 
-def _ineq_constr_1D_linear(x, P, vf, minimize=True):
+def _ineq_constr_1D_linear(x, P, vf, ranks, delta):
 
     ep = x[-1]
 
@@ -423,10 +456,16 @@ def _ineq_constr_1D_linear(x, P, vf, minimize=True):
         current_P_val = vf(P[[p],:], x[0:-1])
         next_P = vf(P[[p+1],:], x[0:-1])
 
-        if minimize: 
-            G[:,[p]] = -(next_P - current_P_val) - ep
+        current_rank = ranks[p]
+        next_rank = ranks[p+1]
+
+        if current_rank == next_rank: 
+            # Handle ties 
+            G[:,[p]] = np.abs(current_P_val - next_P) - delta*ep
         else: 
             G[:,[p]] = -(current_P_val - next_P) + ep
+        
+
 
     return G
 
@@ -500,7 +539,7 @@ def vf_comparator(vf, P_rank_2, P):
 
 class OptimizeLinearVF(Problem): 
 
-    def __init__(self, P, ranks, vf, minimize=True):
+    def __init__(self, P, ranks, delta, vf):
        
         # One var for each dimension of the object space, plus epsilon 
         n_var_vf = np.size(P, 1) + 1
@@ -517,11 +556,15 @@ class OptimizeLinearVF(Problem):
 
         # TODO start everything at 0.5
 
-        self.minimize = minimize
-
         self.P = _sort_P(P, ranks)
 
+        self.ranks = ranks
+        self.ranks.sort()
+
         self.vf = vf
+
+        self.ranks = ranks
+        self.delta = delta
 
         super().__init__(n_var_vf, n_obj=1, n_ieq_constr=n_ieq_c_vf, n_eq_constr=1, xl=xl_vf, xu=xu_vf)
 
@@ -537,9 +580,8 @@ class OptimizeLinearVF(Problem):
         out["F"] = obj
 
         ## Inequality
-        # TODO for now, assuming there are no ties in the ranks
 
-        ineq_func = _build_ineq_constr_linear(self.P, self.vf, self.minimize)
+        ineq_func = _build_ineq_constr_linear(self.P, self.vf, self.ranks, self.delta)
 
         out["G"] = ineq_func(x)
             
@@ -558,7 +600,7 @@ def _validate_vf(res):
 
 class OptimizePolyVF(Problem): 
 
-    def __init__(self, P, ranks, vf, minimize=True):
+    def __init__(self, P, ranks, delta, vf):
       
         M = P.shape[1]
 
@@ -580,10 +622,14 @@ class OptimizePolyVF(Problem):
 
         # TODO start everything at 0.5
 
-        self.minimize = minimize 
         self.P = _sort_P(P, ranks)
 
+        self.ranks = ranks
+        self.ranks.sort()
+
         self.vf = vf
+
+        self.delta = delta
 
         super().__init__(n_var_vf, n_obj=1, n_ieq_constr=n_ieq_c_vf, n_eq_constr=M, xl=xl_vf, xu=xu_vf)
 
@@ -599,9 +645,7 @@ class OptimizePolyVF(Problem):
         out["F"] = obj
 
         ## Inequality
-        # TODO for now, assuming there are no ties in the ranks
-
-        ineq_func = _build_ineq_constr_poly(self.P, self.vf, self.minimize)
+        ineq_func = _build_ineq_constr_poly(self.P, self.vf, self.ranks, self.delta)
 
         out["G"] = ineq_func(x)
             
