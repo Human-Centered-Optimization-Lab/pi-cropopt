@@ -107,8 +107,16 @@ if __name__ == "__main__":
     # Runtime optimization parameters
     threads = 20
     initial_sparsity = 0.2
-    pop_size = 100
     generations = 200
+    if method == "nsga2": 
+        pop_size = 120
+    elif method == "pinsga2": 
+        pop_size = 30
+    else: 
+        print("Unrecognized method")
+        sys.exit(1)
+
+
 
     ## Derived parameters 
     first_nut_app = plant_date
