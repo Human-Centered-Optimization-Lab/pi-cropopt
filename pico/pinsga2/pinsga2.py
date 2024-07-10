@@ -64,13 +64,21 @@ class PINSGA2(GeneticAlgorithm):
         self.tau = tau
         self.eta = eta
         self.eta_F = []
+        self.current_vf_res = None
         self.vf_res = None
+        self.dm_calls = 0
         self.v2 = None
         self.vf_plot_flag = False
+        self.current_vf_plot_flag = False
         self.vf_plot = None
+        self.current_vf_plot = None
         self.historical_F = None
         self.prev_pop = None
         self.fronts = []
+
+        self.running_param_sum = None
+
+    
 
     @staticmethod
     def _prompt_for_ranks(F):
@@ -114,7 +122,7 @@ class PINSGA2(GeneticAlgorithm):
             print("Back-tracking and removing DM preference from search.")
 
             self.eta_F = []
-            self.vf_res = None
+            self.current_vf_res = None
             self.v2 = None
             self.vf_plot_flag = False
             self.vf_plot = None
@@ -183,22 +191,52 @@ class PINSGA2(GeneticAlgorithm):
 
                 if self.vf_type == "linear":
 
-                    vf_res = mvf.create_linear_vf(eta_F * -1, dm_ranks.tolist(), self.opt_method)
+                    new_vf_res = mvf.create_linear_vf(eta_F * -1, dm_ranks.tolist(), self.opt_method)
 
                 elif self.vf_type == "poly":
 
-                    vf_res = mvf.create_poly_vf(eta_F * -1, dm_ranks.tolist(), self.opt_method)
+                    new_vf_res = mvf.create_poly_vf(eta_F * -1, dm_ranks.tolist(), self.opt_method)
 
                 else:
                     
                     raise ValueError("Value function %s not supported" % self.vf_type)
 
                 # check if we were able to model the VF
-                if vf_res.fit:
+                if new_vf_res.fit:
 
-                    self.vf_res = vf_res
+                    # Update our running average parameters.
+                    # Basically keep track of the sum of parameters, and then 
+                    # divide by the number of dm calls
+
+                    if self.running_param_sum is None:
+
+                        n_obj = F.shape[1]
+
+                        if self.vf_type == "linear":
+                            self.running_param_sum = np.zeros((n_obj))
+                        elif self.vf_type == "poly":
+                            self.running_param_sum = np.zeros((n_obj**n_obj + n_obj))
+                        else:
+                            raise ValueError("Value function %s not supported" % self.vf_type)
+
+                    self.dm_calls += 1
+                    self.current_vf_res = new_vf_res
+                    self.running_param_sum += self.current_vf_res.params
+           
+                    running_param = self.running_param_sum / self.dm_calls
+
+                    running_vf =  lambda P_in: mvf.poly_vf(P_in, running_param)  
+
+                    self.vf_res = mvf.vfResults(running_vf, running_param, None)
+
+                    print(f"Running: {str(self.vf_res.params)}")
+                    print(f"Current: {self.current_vf_res.params}")
+
                     self.vf_plot_flag = True
+                    self.current_vf_plot_flag = True
+
                     self.v2 = self.vf_res.vf(eta_F[dm_ranks[1] - 1] * -1).item()
+
                     break
 
                 else:

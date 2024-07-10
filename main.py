@@ -45,12 +45,13 @@ def plot_eta_F(context, algorithm):
     return plot.fig
  
 
-def plot_vf(context, algorithm):
+def running_plot_vf(context, algorithm):
 
     if not algorithm.vf_plot_flag and algorithm.vf_plot: 
         return algorithm.vf_plot
 
     elif len(algorithm.eta_F) > 0 and (algorithm.vf_res is not None) and algorithm.vf_plot_flag:
+
         plot = mvf.plot_vf(algorithm.eta_F * -1, algorithm.vf_res.vf, show=False)
         
         algorithm.vf_plot_flag = False;
@@ -61,6 +62,7 @@ def plot_vf(context, algorithm):
     
     else: 
 
+        # Plot empty axis
         plot = Scatter().add(np.array([[10000, -50]]), facecolors="#ffffff", edgecolors="#ffffff")
         plot.plot_if_not_done_yet()
         
@@ -68,6 +70,32 @@ def plot_vf(context, algorithm):
 
         return plot.fig
 
+ 
+
+def current_plot_vf(context, algorithm):
+
+    if not algorithm.current_vf_plot_flag and algorithm.current_vf_plot: 
+        return algorithm.current_vf_plot
+
+    elif len(algorithm.eta_F) > 0 and (algorithm.current_vf_res is not None) and algorithm.current_vf_plot_flag:
+
+        plot = mvf.plot_vf(algorithm.eta_F * -1, algorithm.current_vf_res.vf, show=False)
+        
+        algorithm.current_vf_plot_flag = False;
+        
+        algorithm.current_vf_plot = plot.gcf()
+
+        return plot.gcf()
+    
+    else: 
+
+        # Plot empty axis
+        plot = Scatter().add(np.array([[10000, -50]]), facecolors="#ffffff", edgecolors="#ffffff")
+        plot.plot_if_not_done_yet()
+        
+        algorithm.vf_plot = plot.fig
+
+        return plot.fig
 
 
 
@@ -199,7 +227,7 @@ if __name__ == "__main__":
                               eliminate_duplicates=True,
                               sampling=vssps)
 
-            dashboard = Dashboard(plot_eta_F=plot_eta_F, plot_vf=plot_vf)
+            dashboard = Dashboard(plot_eta_F=plot_eta_F, running_plot_vf=running_plot_vf, current_plot_vf=current_plot_vf)
 
 
         else: 
