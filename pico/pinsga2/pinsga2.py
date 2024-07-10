@@ -56,6 +56,7 @@ class PINSGA2(GeneticAlgorithm):
             advance_after_initial_infill=True,
             **kwargs)
 
+
         self.termination = DefaultMultiObjectiveTermination()
         self.tournament_type = 'comp_by_dom_and_crowding'
 
@@ -191,11 +192,11 @@ class PINSGA2(GeneticAlgorithm):
 
                 if self.vf_type == "linear":
 
-                    new_vf_res = mvf.create_linear_vf(eta_F * -1, dm_ranks.tolist(), self.opt_method)
+                    new_vf_res = mvf.create_linear_vf(eta_F * -1, dm_ranks.tolist(), method=self.opt_method)
 
                 elif self.vf_type == "poly":
 
-                    new_vf_res = mvf.create_poly_vf(eta_F * -1, dm_ranks.tolist(), self.opt_method)
+                    new_vf_res = mvf.create_poly_vf(eta_F * -1, dm_ranks.tolist(), method = self.opt_method)
 
                 else:
                     
