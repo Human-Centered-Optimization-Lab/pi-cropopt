@@ -28,6 +28,30 @@ from pymoo.algorithms.moo.nsga2 import RankAndCrowdingSurvival
 # =========================================================================================================
 
 
+class ObjBounds(): 
+
+    def __init__(self, n_obj=None): 
+
+        if n_obj is None: 
+            self.bounds = None
+        else: 
+            self.bounds = np.zeros(2, n_obj)
+
+    def updateBounds(self, F):
+
+        new_min_max = np.column_stack((np.min(F, axis=0), np.max(F, axis=0))).T
+    
+        if self.bounds is None: 
+            self.bounds = new_min_max
+        else:
+
+            new_min = np.min((self.bounds[0,:], new_min_max[0,:]), axis=0)
+            new_max = np.max((self.bounds[1,:], new_min_max[1,:]), axis=0)
+    
+            self.bounds = np.column_stack((new_min, new_max)).T     
+
+
+
 class PINSGA2(GeneticAlgorithm):
 
     def __init__(self,
@@ -67,6 +91,7 @@ class PINSGA2(GeneticAlgorithm):
         self.eta_F = []
         self.current_vf_res = None
         self.vf_res = None
+        self.vf_res_ensemble = []
         self.dm_calls = 0
         self.v2 = None
         self.vf_plot_flag = False
@@ -77,9 +102,23 @@ class PINSGA2(GeneticAlgorithm):
         self.prev_pop = None
         self.fronts = []
 
+        self.objBounds = ObjBounds()
+
         self.running_param_sum = None
 
-    
+    @staticmethod
+    def average_vf(vf_ensemble, x):
+   
+        val = 0 
+        for vf_res in vf_ensemble: 
+        
+            raw_results = vf_res.vf(x)
+
+
+            val += vf_res.vf(x)
+
+        return val/len(vf_ensemble)
+
 
     @staticmethod
     def _prompt_for_ranks(F):
@@ -135,6 +174,8 @@ class PINSGA2(GeneticAlgorithm):
         super()._advance(infills=infills, **kwargs)
 
         rank, F = self.pop.get("rank", "F")
+   
+        self.objBounds.updateBounds(F)
 
         self.fronts = rank
 
@@ -209,29 +250,13 @@ class PINSGA2(GeneticAlgorithm):
                     # Basically keep track of the sum of parameters, and then 
                     # divide by the number of dm calls
 
-                    if self.running_param_sum is None:
+                    self.vf_res_ensemble.append(new_vf_res)                                                
 
-                        n_obj = F.shape[1]
-
-                        if self.vf_type == "linear":
-                            self.running_param_sum = np.zeros((n_obj))
-                        elif self.vf_type == "poly":
-                            self.running_param_sum = np.zeros((n_obj**n_obj + n_obj))
-                        else:
-                            raise ValueError("Value function %s not supported" % self.vf_type)
-
-                    self.dm_calls += 1
                     self.current_vf_res = new_vf_res
-                    self.running_param_sum += self.current_vf_res.params
            
-                    running_param = self.running_param_sum / self.dm_calls
+                    running_vf = lambda P : PINSGA2.average_vf(self.vf_res_ensemble, P)
 
-                    running_vf =  lambda P_in: mvf.poly_vf(P_in, running_param)  
-
-                    self.vf_res = mvf.vfResults(running_vf, running_param, None)
-
-                    print(f"Running: {str(self.vf_res.params)}")
-                    print(f"Current: {self.current_vf_res.params}")
+                    self.vf_res = mvf.vfResults(running_vf, None, None)
 
                     self.vf_plot_flag = True
                     self.current_vf_plot_flag = True
