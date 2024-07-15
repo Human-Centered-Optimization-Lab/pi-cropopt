@@ -78,7 +78,9 @@ class PINSGA2(GeneticAlgorithm):
         for (e, f) in enumerate(F):
             print("Solution %d %s" % (e + 1, f))   
 
-        raw_ranks = input("Ranks (e.g., 3, 2, ..., 1): ")
+        dim = F.shape[0]                                                                                 
+
+        raw_ranks = input(f"Ranks (e.g., \"3, {dim}, ..., 1\" for 3rd best, {dim}th best, ..., 1st best): ")
 
         ranks = [int(raw_rank) for raw_rank in raw_ranks.split()  ] 
 
@@ -89,7 +91,9 @@ class PINSGA2(GeneticAlgorithm):
 
         ranks_invalid = True
 
-        print("Rank the given solutions from highest to lowest preference:")
+        dim = F.shape[0]                                                                                 
+                                                                                                          
+        print(f"Give each solution a ranking, with 1 being the highest score, and {dim} being the lowest score:")        
 
         ranks = PINSGA2._prompt_for_ranks(F)
 
@@ -97,7 +101,7 @@ class PINSGA2(GeneticAlgorithm):
 
             fc = F.shape[0]
 
-            if sorted(ranks) == list(range(1,fc+1)):
+            if max(ranks) <= fc and min(ranks) >= 1:
 
                 ranks_invalid = False 
 
