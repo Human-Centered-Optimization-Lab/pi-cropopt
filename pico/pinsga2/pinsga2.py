@@ -187,11 +187,11 @@ class PINSGA2(GeneticAlgorithm):
 
                 if self.vf_type == "linear":
 
-                    vf_res = mvf.create_linear_vf(eta_F * -1, dm_ranks.tolist(), self.opt_method)
+                    vf_res = mvf.create_linear_vf(eta_F * -1, dm_ranks.tolist(), method=self.opt_method)
 
                 elif self.vf_type == "poly":
 
-                    vf_res = mvf.create_poly_vf(eta_F * -1, dm_ranks.tolist(), self.opt_method)
+                    vf_res = mvf.create_poly_vf(eta_F * -1, dm_ranks.tolist(), method=self.opt_method)
 
                 else:
                     

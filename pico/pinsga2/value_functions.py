@@ -13,10 +13,6 @@ from functools import reduce
 from pymoo.termination.default import DefaultSingleObjectiveTermination
 import sys
 
-# _ineq_constr_1D_linear
-# _ineq_constr_2D_linear
-# _ineq_constr_1D_poly
-# _ineq_constr_2D_poly
 
 # Input 1: A list of non-dominated points 
 # Input 2: The ranking of the given non-dominated points 
@@ -34,7 +30,7 @@ def create_vf(P, ranks, ineq_constr, vf="linear", delta=0.1, method="trust-const
     return lambda f_new:  np.sum(f_new)
 
 def create_poly_vf(P, ranks, delta=0.1, method="trust-constr"):
-    
+
     if method == "trust-constr" or method == "SLSQP": 
         res = create_vf_scipy_poly(P, ranks, delta, method=method)
         res.fit = _validate_vf(res)
