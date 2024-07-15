@@ -199,6 +199,7 @@ class PINSGA2(GeneticAlgorithm):
                     self.vf_res = vf_res
                     self.vf_plot_flag = True
                     self.v2 = self.vf_res.vf(eta_F[dm_ranks[1] - 1] * -1).item()
+
                     break
 
                 else:
@@ -217,10 +218,10 @@ class PINSGA2(GeneticAlgorithm):
                         print("Removing the second best preferred solution from the fit.")
 
                         # ranks start at 1, not zero
-                        rank_to_remove = dm_ranks[1] 
+                        rank_to_remove = dm_ranks[-2] 
                         eta_F = np.delete(eta_F, rank_to_remove - 1, axis=0)
 
-                        dm_ranks = np.concatenate(([dm_ranks[0]], dm_ranks[2:]))
+                        dm_ranks = np.concatenate((dm_ranks[0:-2], [dm_ranks[-1]]))
                         
                         # update the ranks, since we just removed one
                         dm_ranks[dm_ranks > rank_to_remove] = dm_ranks[dm_ranks > rank_to_remove] - 1 
