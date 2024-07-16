@@ -18,25 +18,30 @@ import sys
 # Input 2: The ranking of the given non-dominated points 
 # Input 3: constraint function for optimizing the value func
 # Input 4: the skeleton utility function that we're trying to optimize
-def create_vf(P, ranks, ineq_constr, vf="linear", delta=0.1, method="trust-constr"): 
+def create_vf(P, ranks, ineq_constr, vf="linear", delta=0.1, eps_max=1000, method="trust-constr"): 
 
     if vf == "linear":
-        res = create_linear_vf(P, ranks, delta, method)
+        res = create_linear_vf(P, ranks, delta, eps_max, method)
         res.fit = _validate_vf(res)
         return res
+    elif vf == "poly":
+        res = create_poly_vf(P, ranks, delta, eps_max, method)
+        res.fit = _validate_vf(res)
+        return res
+
     else:
         raise ValueError("Value function '%d' not supported." % vf) 
 
     return lambda f_new:  np.sum(f_new)
 
-def create_poly_vf(P, ranks, delta=0.1, method="trust-constr"):
+def create_poly_vf(P, ranks, delta=0.1, eps_max=1000, method="trust-constr"):
 
     if method == "trust-constr" or method == "SLSQP": 
-        res = create_vf_scipy_poly(P, ranks, delta, method=method)
+        res = create_vf_scipy_poly(P, ranks, delta, eps_max, method=method)
         res.fit = _validate_vf(res)
         return res
     elif method == "ES": 
-        res = create_vf_pymoo_poly(P, ranks, delta, method=method)
+        res = create_vf_pymoo_poly(P, ranks, delta, eps_max, method=method)
         res.fit = _validate_vf(res)
         return res
     else: 
@@ -44,21 +49,21 @@ def create_poly_vf(P, ranks, delta=0.1, method="trust-constr"):
 
 
 
-def create_linear_vf(P, ranks, delta=0.1, method="trust-constr"): 
+def create_linear_vf(P, ranks, delta=0.1, eps_max=1000, method="trust-constr"): 
     
     if method == "trust-constr" or method == "SLSQP": 
-        res = create_vf_scipy_linear(P, ranks, delta, method)
+        res = create_vf_scipy_linear(P, ranks, delta, eps_max, method)
         res.fit = _validate_vf(res)
         return res
     elif method == "ES": 
-        res = create_vf_pymoo_linear(P, ranks, delta, method)
+        res = create_vf_pymoo_linear(P, ranks, delta, eps_max, method)
         res.fit = _validate_vf(res)
         return res
     else: 
         raise ValueError("Optimization method %s not supported" % method) 
 
 
-def create_vf_scipy_poly(P, ranks, delta,  method="trust-constr"):
+def create_vf_scipy_poly(P, ranks, delta, eps_max, method="trust-constr"):
 
     # Gathering basic info
     M = P.shape[1]
@@ -95,10 +100,11 @@ def create_vf_scipy_poly(P, ranks, delta,  method="trust-constr"):
         x_ub.append(1000)
 
     x_lb.append(-1000)
-    x_ub.append(1000)
+    x_ub.append(eps_max)
    
     bounds = Bounds(x_lb, x_ub)
 
+    # Initial position
     x0 = [1] * (M**2 + M + 1)
 
     if method == 'trust-constr':
@@ -122,7 +128,11 @@ def create_vf_scipy_poly(P, ranks, delta,  method="trust-constr"):
     return vfResults(vf, params, epsilon)
 
 
-def create_vf_scipy_linear(P, ranks, delta, method="trust-constr"): 
+def create_vf_scipy_linear(P, ranks, delta, eps_max, method="trust-constr"): 
+
+    # Sort P
+    P_sorted = _sort_P(P, ranks)
+    ranks.sort()
 
     # Inequality constraints
     lb = [-np.inf] * (P.shape[0] - 1)
@@ -132,14 +142,36 @@ def create_vf_scipy_linear(P, ranks, delta, method="trust-constr"):
     lb.append(0)
     ub.append(0)
 
-    P_sorted = _sort_P(P, ranks)
-    ranks.sort()
-
     constr = NonlinearConstraint(_build_constr_linear(P_sorted, linear_vf, ranks, delta), lb, ub)
 
-    x0 = [0.5, 0.5, 0.5]
+    # Bounds on x
+    x_lb = []
+    x_ub = []
 
-    res = scimin(_obj_func, x0, constraints= constr)
+    for m in range(M): 
+        x_lb.append(0)
+        x_ub.append(1)
+
+    x_lb.append(-1000)
+    x_ub.append(eps_max)
+   
+    bounds = Bounds(x_lb, x_ub)
+
+    # Initial position
+    x0 = [0.5] * (M+1)
+
+    if method == 'trust-constr':
+        # The trust-constr method always finds the decision space linear
+        hess = lambda x: np.zeros((len(x0), len(x0)))
+    else: 
+        hess = None
+
+    res = scimin(_obj_func, 
+                 x0, 
+                 constraints= constr,
+                 bounds=bounds, 
+                 method=method, 
+                 hess=hess)
 
     # package up results
     vf =  lambda P_in: linear_vf(P_in, res.x[0:-1])
@@ -148,9 +180,9 @@ def create_vf_scipy_linear(P, ranks, delta, method="trust-constr"):
 
     return vfResults(vf, params, epsilon)
 
-def create_vf_pymoo_linear(P, ranks, delta, method="ES"): 
+def create_vf_pymoo_linear(P, ranks, delta, eps_max, method="ES"): 
 
-    vf_prob = OptimizeLinearVF(P, ranks, delta, linear_vf)
+    vf_prob = OptimizeLinearVF(P, ranks, delta, eps_max, linear_vf)
 
     if method == "ES":
         algorithm = ES()
@@ -177,7 +209,7 @@ def create_vf_pymoo_linear(P, ranks, delta, method="ES"):
     return vfResults(vf, params, epsilon)
 
 
-def create_vf_pymoo_poly(P, ranks, delta, method="trust-constr"):
+def create_vf_pymoo_poly(P, ranks, delta, eps_max, method="trust-constr"):
 
     vf_prob = OptimizePolyVF(P, ranks, delta, poly_vf)
 
@@ -535,7 +567,7 @@ def vf_comparator(vf, P_rank_2, P):
 
 class OptimizeLinearVF(Problem): 
 
-    def __init__(self, P, ranks, delta, vf):
+    def __init__(self, P, ranks, delta, eps_max, vf):
        
         # One var for each dimension of the object space, plus epsilon 
         n_var_vf = np.size(P, 1) + 1
@@ -548,7 +580,7 @@ class OptimizeLinearVF(Problem):
         
         # upper/lower bound on the epsilon variable is -1000/1000
         xl_vf[-1] = -1000
-        xu_vf[-1] = 1000
+        xu_vf[-1] = eps_max
 
         # TODO start everything at 0.5
 
@@ -596,7 +628,7 @@ def _validate_vf(res):
 
 class OptimizePolyVF(Problem): 
 
-    def __init__(self, P, ranks, delta, vf):
+    def __init__(self, P, ranks, delta, vf, eps_max):
       
         M = P.shape[1]
 
@@ -614,7 +646,7 @@ class OptimizePolyVF(Problem):
         
         # upper/lower bound on the epsilon variable is -1000/1000
         xl_vf[-1] = -1000
-        xu_vf[-1] = 1000
+        xu_vf[-1] = eps_max 
 
         # TODO start everything at 0.5
 

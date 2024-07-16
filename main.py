@@ -197,6 +197,7 @@ if __name__ == "__main__":
         elif method == "pinsga2":
             algorithm = PINSGA2(pop_size=pop_size, 
                               eliminate_duplicates=True,
+                              eps_max=1000,
                               sampling=vssps)
 
             dashboard = Dashboard(plot_eta_F=plot_eta_F, plot_vf=plot_vf)
