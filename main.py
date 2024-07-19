@@ -14,11 +14,27 @@ from datetime import datetime
 import pickle
 from pymoo.visualization.scatter import Scatter
 
-from pico.pinsga2.pinsga2 import PINSGA2
+from pico.pinsga2.pinsga2 import PINSGA2, AutomatedDM
 from pico.pinsga2 import value_functions as mvf
 
+## 
+# Helper classes 
+# 
 
 
+class YieldGreedyDM(AutomatedDM):
+
+    def makeDecision(F):
+
+        size = F.shape[0]
+
+        return (np.array(range(size)) + 1)
+
+
+
+## 
+# Plotting functions 
+#
 def plot_eta_F(context, algorithm):
 
    
@@ -70,6 +86,9 @@ def plot_vf(context, algorithm):
 
 
 
+## 
+# Main code
+#
 
 if __name__ == "__main__":
 
@@ -198,7 +217,8 @@ if __name__ == "__main__":
             algorithm = PINSGA2(pop_size=pop_size, 
                               eliminate_duplicates=True,
                               eps_max=1000,
-                              sampling=vssps)
+                              sampling=vssps, 
+                              automated_dm=YieldGreedyDM)
 
             dashboard = Dashboard(plot_eta_F=plot_eta_F, plot_vf=plot_vf)
 
