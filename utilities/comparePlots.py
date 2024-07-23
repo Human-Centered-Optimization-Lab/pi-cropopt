@@ -22,6 +22,8 @@ labels = []
 dfs = []
 facecolors = ['none', 'green', 'purple', 'orange']
 edgecolors = ['black', 'green', 'purple', 'orange']
+markers = ['s', 'o', 'o', 'o']
+
 
 if output_format == "save": 
     gen = sys.argv[1]    
@@ -51,9 +53,9 @@ for (d, df) in enumerate(dfs):
     # Plot the data (first column is f1, second column is f2) 
     plt.scatter(pf.iloc[:,1], pf.iloc[:,0]*-1,  
                 label=labels[d], 
-                marker='o', 
                 facecolors=facecolors[d], 
-                edgecolors=edgecolors[d])
+                edgecolors=edgecolors[d], 
+                marker=markers[d])
     
 
     
