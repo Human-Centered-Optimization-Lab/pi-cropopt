@@ -3,6 +3,7 @@ import numpy as np
 from pico.cropopt.cropopt import CropOpt
 from pico.cropopt.vssps import VSSPS
 from pico.dash.Dashboard import Dashboard
+from pico.cropopt.VirtualFamers import YieldGreedyDM
 from pymoo.algorithms.moo.nsga3 import NSGA3
 from pymoo.algorithms.moo.nsga2 import NSGA2
 from pymoo.util.ref_dirs import get_reference_directions
@@ -16,22 +17,6 @@ from pymoo.visualization.scatter import Scatter
 
 from pico.pinsga2.pinsga2 import PINSGA2, AutomatedDM
 from pico.pinsga2 import value_functions as mvf
-
-## 
-# Helper classes 
-# 
-
-
-class YieldGreedyDM(AutomatedDM):
-
-    def makeDecision(self, F):
-
-        if F[0,0] < F[1, 0]: 
-            return "a"
-        elif F[0,0] > F[1, 0]: 
-            return "b"
-        else: 
-            return "c"
 
 
 
