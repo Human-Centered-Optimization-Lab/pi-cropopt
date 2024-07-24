@@ -24,11 +24,14 @@ from pico.pinsga2 import value_functions as mvf
 
 class YieldGreedyDM(AutomatedDM):
 
-    def makeDecision(F):
+    def makeDecision(self, F):
 
-        size = F.shape[0]
-
-        return (np.array(range(size)) + 1)
+        if F[0,0] < F[1, 0]: 
+            return "a"
+        elif F[0,0] > F[1, 0]: 
+            return "b"
+        else: 
+            return "c"
 
 
 
@@ -108,7 +111,7 @@ if __name__ == "__main__":
     year = int(sys.argv[1])
     method = sys.argv[2]
 
-    reps = 1
+    reps = 30
     plant_date = 135
 
     total_nitro = 200
@@ -214,11 +217,15 @@ if __name__ == "__main__":
 
             dashboard = Dashboard()
         elif method == "pinsga2":
+
+            greedyDM = YieldGreedyDM()
+
             algorithm = PINSGA2(pop_size=pop_size, 
                               eliminate_duplicates=True,
                               eps_max=1000,
                               sampling=vssps, 
-                              automated_dm=YieldGreedyDM)
+                              ranking_type="pairwise",
+                              automated_dm=greedyDM)
 
             dashboard = Dashboard(plot_eta_F=plot_eta_F, plot_vf=plot_vf)
 
@@ -248,7 +255,7 @@ if __name__ == "__main__":
             objectives = np.array([indiv.F for indiv in gen.pop ])
             x = np.array([indiv.X for indiv in gen.pop ])
 
-            full_output_dir = "%s/year_%s_%s" % (output_dir, str(year), timestamp)
+            full_output_dir = "%s/%s_year_%s_%s" % (method, output_dir, str(year), timestamp)
 
             Path(full_output_dir).mkdir(parents=True, exist_ok=True)
 
