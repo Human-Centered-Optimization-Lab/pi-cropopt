@@ -3,7 +3,7 @@ import numpy as np
 from pico.cropopt.cropopt import CropOpt
 from pico.cropopt.vssps import VSSPS
 from pico.dash.Dashboard import Dashboard
-from pico.cropopt.VirtualFamers import YieldGreedyDM
+from pico.cropopt.VirtualFamers import YieldGreedyDM, RangedVirtualFarmer
 from pymoo.algorithms.moo.nsga3 import NSGA3
 from pymoo.algorithms.moo.nsga2 import NSGA2
 from pymoo.util.ref_dirs import get_reference_directions
@@ -96,7 +96,7 @@ if __name__ == "__main__":
     year = int(sys.argv[1])
     method = sys.argv[2]
 
-    reps = 30
+    reps = 1
     plant_date = 135
 
     total_nitro = 200
@@ -203,7 +203,7 @@ if __name__ == "__main__":
             dashboard = Dashboard()
         elif method == "pinsga2":
 
-            greedyDM = YieldGreedyDM()
+            greedyDM = RangedVirtualFarmer(25, 30)
 
             algorithm = PINSGA2(pop_size=pop_size, 
                               eliminate_duplicates=True,
@@ -240,7 +240,7 @@ if __name__ == "__main__":
             objectives = np.array([indiv.F for indiv in gen.pop ])
             x = np.array([indiv.X for indiv in gen.pop ])
 
-            full_output_dir = "%s/%s_year_%s_%s" % (method, output_dir, str(year), timestamp)
+            full_output_dir = "output/%s_%s_year_%s_%s" % (method, output_dir, str(year), timestamp)
 
             Path(full_output_dir).mkdir(parents=True, exist_ok=True)
 

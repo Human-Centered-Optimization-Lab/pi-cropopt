@@ -407,7 +407,6 @@ def _ineq_constr_1D_poly(x, P, vf, ranks, delta):
 
         if current_rank == next_rank: 
             # Handle ties
-            print("woops")
             G[:,[p + S_constr_len]] = np.abs(current_P_val - next_P_val) - delta*ep
         else: 
             G[:,[p + S_constr_len]] = -(current_P_val - next_P_val) + ep
