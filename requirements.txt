@@ -3,3 +3,5 @@ numpy
 pandas
 XlsxWriter
 feather-format
+jupyter
+nbstripout
