@@ -612,6 +612,7 @@ class OptimizeLinearVF(Problem):
         ## Equality constraint that keeps sum of x under 1
         out["H"] = _eq_constr_linear(x)
 
+
 def _validate_vf(res):
 
     message = "" 
@@ -626,9 +627,13 @@ def _validate_vf(res):
 
 
     elif isinstance(res, scipy.optimize.optimize.OptimizeResult):
-        success = res.success
+        success = res.success and res.constr_violation <= 0
         epsilon = res.x[-1]
-        message = res.message
+
+        if not (res.constr_violation <= 0): 
+            message = "Constraints not met."
+        else:
+            message = res.message
     else: 
         ValueError("Internal error: bad result objective given for validation")
 
@@ -638,7 +643,6 @@ def _validate_vf(res):
         return False
     else:
         return True
-
 
 class OptimizePolyVF(Problem): 
 
