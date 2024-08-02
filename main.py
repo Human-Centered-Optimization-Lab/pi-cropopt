@@ -96,7 +96,7 @@ if __name__ == "__main__":
     year = int(sys.argv[1])
     method = sys.argv[2]
 
-    reps = 1
+    reps = 10
     plant_date = 135
 
     total_nitro = 200
@@ -114,11 +114,12 @@ if __name__ == "__main__":
     # Runtime optimization parameters
     threads = 20
     initial_sparsity = 0.2
-    generations = 200
     if method == "nsga2": 
+        generations = 200
         pop_size = 120
     elif method == "pinsga2": 
-        pop_size = 30
+        generations = 200
+        pop_size = 60 
     else: 
         print("Unrecognized method")
         sys.exit(1)
@@ -240,7 +241,7 @@ if __name__ == "__main__":
             objectives = np.array([indiv.F for indiv in gen.pop ])
             x = np.array([indiv.X for indiv in gen.pop ])
 
-            full_output_dir = "%s/%s_%s_%s" % ( output_dir, method,str(year), timestamp)
+            full_output_dir = "%s/%s_%s_%s_p%d" % ( output_dir, method,str(year), timestamp, pop_size)
 
             Path(full_output_dir).mkdir(parents=True, exist_ok=True)
 
