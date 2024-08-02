@@ -296,7 +296,10 @@ class PINSGA2(GeneticAlgorithm):
                 else: 
                     raise ValueError("Invalid ranking type [%s] given." % self.ranking_type)
 
-            
+    
+            print(self.eta_F)
+            print(dm_ranks)
+
 
             if len(set(rank)) == 0: 
 
@@ -346,6 +349,7 @@ class PINSGA2(GeneticAlgorithm):
                         # If not, reset and use normal domination
                         print("Removing DM preference")
                         self._reset_dm_preference()
+                        break
 
                     else:
 
