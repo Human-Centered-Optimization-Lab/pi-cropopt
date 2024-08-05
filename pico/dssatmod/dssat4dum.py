@@ -530,7 +530,7 @@ if __name__ == "__main__":
         2000134,19,  0, 0, 0; 
         2000137,20,  0, 0, 0; 
         2000141,20,  0, 0, 0; 
-        2000148,15,  0, 0, 0; 
+        2000148,55,  0, 0, 0; 
         2000158,19,  0, 0, 0; 
         2000161, 4,  0, 0, 0; 
         2000162,25,  0, 0, 0; 
@@ -572,10 +572,10 @@ if __name__ == "__main__":
 
     threads = 1
 
-    updates = { 'pdate': 1980136, 'sdate': 1980135, 'icdat': 1980135 }
+    updates = { 'pdate': 2000136, 'sdate': 2000135, 'icdat': 2000135 }
 
 
-    print(runner.run_batch(appsched2, threads, updates=updates))
+    print(runner.run_batch(appsched3, threads, updates=updates))
 
     
     #print(runner.generate_report())
