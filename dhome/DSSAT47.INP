@@ -1,4 +1,4 @@
-*MODEL INPUT FILE            A    32     1    32    32     0
+*MODEL INPUT FILE            A     1     1     1     1     0
 *FILES              
 MODEL          MZCER047
 FILEX          CASS0001.MZX                                                                                 
@@ -9,10 +9,10 @@ ECOTYPE        MZCER047.ECO ./Genotype/
 CULTIVAR       MZCER047.CUL ./Genotype/                                                                     
 PESTS          MZCER047.PST ./Pest/                                                                         
 SOILS          SOIL.SOL     ./Soil/                                                                         
-WEATHERW       CASS.WTH                                                                                     
+WEATHERW       CASS0001.WTH                                                                                 
 OUTPUT         OVERVIEW
 *SIMULATION CONTROL 
-                   1     1     S 2000136  2150 N X IRRIGATION, GAINESVI 
+                   1     1     S 2000135  2150 N X IRRIGATION, GAINESVI 
                    Y     Y     N     N     N     N     N     Y     M
                    M     M     E     R     S     R     R     1     G     R     2     D     0
                    R     R     R     N     M
@@ -26,30 +26,36 @@ OUTPUT         OVERVIEW
 *EXP.DETAILS        
   1CASS0001 MZ CORN FIELD EXPERIMENT                                       
 *TREATMENTS         
- 32 1 0 0 2000a10i5sV14eR2|V6:1.00 
+  1 1 0 0 RAINFED HIGH NITROGEN    
 *CULTIVARS          
-   MZ PC0001 MI              
+   MZ CA0001 CASS MZ         
 *FIELDS             
-   CASS8001 CASS.WTH   0.0    0. DR000    0. 100.0 00000 SL     180. IB00000009
+   CASS8801 CASS0001   0.0    0. DR000    0. 100.0 00000 SL     180. IB00000009
           29.63000       -82.37000     40.00               1.0  100.   1.0   0.0   -99   -99
 *INITIAL CONDITIONS 
-   MZ    1980135   100     0  1.00  1.00   0.0  1000  0.80  0.00  100.   15.
+   MZ    2000135   100     0  1.00  1.00   0.0  1000  0.80  0.00  100.   15.
       5. 0.086 0.500 0.100
      15. 0.086 0.500 0.100
      30. 0.086 0.500 0.100
      45. 0.086 0.500 0.100
      60. 0.086 0.500 0.100
 *PLANTING DETAILS   
-   2000136     -99   7.2   7.2     S     R   61.    0.   7.0  -99.  -99. -99.0 -99.0   0.0
+   2000135     -99   7.2   7.2     S     R   61.    0.   7.0  -99.  -99. -99.0 -99.0   0.0
 *IRRIGATION         
    1.000   30.   75.  -99. GS000 IR001   0.0
-   2000219 IR001  10.0
-   2000224 IR001  10.0
-   2000229 IR001  10.0
-   2000234 IR001  10.0
-   2000239 IR001  10.0
+   2000150 IR001  20.0
+   2000161 IR001  20.0
+   2000171 IR001  20.0
+   2000181 IR001  20.0
+   2000191 IR001  20.0
+   2000201 IR001  20.0
+   2000211 IR001  20.0
+   2000222 IR001  20.0
+   2000232 IR001  20.0
+   2000242 IR001  20.0
 *FERTILIZERS        
-   2000136 FE001 AP002   10.  200.  -99.  -99.  -99.  -99.   -99
+   2000212 FE001 AP001   10.   50.   10.    4.    0.    0.   -99
+   2000136 FE001 AP001   10.  150.    0.    0.    0.    0.   -99
 *RESIDUES           
 *CHEMICALS          
 *TILLAGE            
@@ -77,4 +83,4 @@ OUTPUT         OVERVIEW
    45.-99.00-99.00-99.00-99.00
    60.-99.00-99.00-99.00-99.00
 *CULTIVAR           
-PC0001 MI               IB0001  192.0 0.825 780.0 750.0  8.50 56.59
+CA0001 CASS MZ          IB0001  192.0 0.825 780.0 750.0  8.50 56.59

@@ -45,11 +45,13 @@
 @VAR#  VRNAME.......... EXPNO   ECO#    P1    P2    P5    G2    G3 PHINT
 !                                        1     2     3     4     5     6
 ! Ian Kropp -- commenting this out for the cass coefficients (see bottom of file)
-!PC0001 2500-2600 GDD        . IB0001 160.0 0.750 780.0 750.0  8.50 49.00
+PC0001 2500-2600 GDD        . IB0001 160.0 0.750 780.0 750.0  8.50 49.00
 PC0002 2600-2650 GDD        . IB0001 185.0 0.750 850.0 800.0  8.50 49.00
 PC0003 2650-2700 GDD        . IB0001 212.0 0.750 850.0 800.0  8.50 49.00
 PC0004 2700-2750 GDD        . IB0001 240.0 0.750 850.0 800.0  8.50 49.00
 PC0005 2750-2800 GDD        . IB0001 260.0 0.750 850.0 800.0  8.50 49.00
+! Added by Ian Kropp for CASS county 
+CA0001 CASS MZ              . IB0001 192.0 0.825 780.0 750.0  8.50 56.59
 
 990001 LONG SEASON          . IB0001 320.0 0.520 940.0 620.0  6.00 38.90
 990002 MEDIUM SEASON        . IB0001 200.0 0.300 800.0 700.0  8.50 38.90
@@ -246,5 +248,3 @@ CYMA01 wh403                . IB0001 265.0 0.760 685.0 760.0  7.60 38.90
 EBSL06 BRS1030-SL2009       . IB0001 263.8 0.500 1034  700.0  5.20 44.22 !Single-cross hybrid from Embrapa
 
 
-! Added by Ian Kropp for CASS county 
-PC0001 MI                   . IB0001 192.0 .8250 780.0 750.0  8.50 56.59

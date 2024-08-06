@@ -12,11 +12,11 @@
 @N  SOIL        SFILE        SDIR
   1 SOIL        SOIL.SOL     ./Soil/                                                                         
 @N  WEATHER     WFILE        WDIR
-  1 WEATH       CASS.WTH                                                                                     
+  1 WEATH       CASS0001.WTH                                                                                 
 
 *SIMULATION CONTROL
 @N  GENERAL     NYERS NREPS START   SDATE RSEED SNAME.................... MODEL...
-  1 GE              1     1     S 2000136  2150 N X IRRIGATION, GAINESVI  MZCER047
+  1 GE              1     1     S 2000135  2150 N X IRRIGATION, GAINESVI  MZCER047
 @N  OPTIONS     WATER NITRO SYMBI PHOSP POTAS DISES  CHEM  TILL   CO2
   1 OP              Y     Y     N     N     N     N     N     Y     M
 @N  METHODS     WTHER INCON LIGHT EVAPO INFIL PHOTO HYDRO NSWIT SOMDY MESEV MESOL METMP MEGHG
@@ -40,21 +40,21 @@
 
 *TREATMENTS
 @N   R O C TNAME....................  CU  FL  SA  IC  MP  MI  MF  MR  MC  MT  ME  MH  SM
- 32  1 0 0 2000a10i5sV14eR2|V6:1.00    1   1   0   1   1  32  32   0   0   0   0   0   1
+  1  1 0 0 RAINFED HIGH NITROGEN       1   1   0   1   1   1   1   0   0   0   0   0   1
 
 *CULTIVARS
 @C  CR INGENO CNAME
-  1 MZ PC0001 MI              
+  1 MZ CA0001 CASS MZ         
 
 *FIELDS
 @L  ID_FIELD WSTA....  FLSA  FLOB  FLDT  FLDD  FLDS  FLST SLTX   SLDP ID_SOIL
-  1 CASS8001 CASS.WTH   0.0    0. DR000    0.  100. 00000 SL     180. IB00000009
+  1 CASS8801 CASS0001   0.0    0. DR000    0.  100. 00000 SL     180. IB00000009
 @L             XCRD            YCRD      ELEV              AREA  SLEN  FLWR  SLAS PRMGT
   1        29.63000       -82.37000     40.00               1.0  100.   1.0   0.0   -99   -99
 
 *INITIAL CONDITIONS
 @C  PCR     ICDAT  ICRT  ICND  ICRN  ICRE  ICWD ICRES ICREN ICREP ICRIP ICRID
-  1 MZ    1980135   100     0  1.00  1.00   0.0  1000  0.80  0.00  100.   15.
+  1 MZ    2000135   100     0  1.00  1.00   0.0  1000  0.80  0.00  100.   15.
 @C   ICBL  SH2O  SNH4  SNO3
   1    5. 0.086   0.5   0.1
   1   15. 0.086   0.5   0.1
@@ -64,21 +64,27 @@
 
 *PLANTING DETAILS
 @P    PDATE   EDATE  PPOP  PPOE  PLME  PLDS  PLRS  PLRD  PLDP  PLWT  PAGE  PENV  PLPH  SPRL
-  1 2000136     -99   7.2   7.2     S     R   61.    0.   7.0  -99.  -99. -99.0 -99.0   0.0
+  1 2000135     -99   7.2   7.2     S     R   61.    0.   7.0  -99.  -99. -99.0 -99.0   0.0
 
 *IRRIGATION
 @I   IEFF  IDEP  ITHR  IEPT  IOFF  IAME  IAMT
- 32 1.000   30.   75.  -99. GS000 IR001   0.0
+  1 1.000   30.   75.  -99. GS000 IR001   0.0
 @I    IDATE  IROP IRVAL
- 32 2000219 IR001  10.0
- 32 2000224 IR001  10.0
- 32 2000229 IR001  10.0
- 32 2000234 IR001  10.0
- 32 2000239 IR001  10.0
+  1 2000150 IR001  20.0
+  1 2000161 IR001  20.0
+  1 2000171 IR001  20.0
+  1 2000181 IR001  20.0
+  1 2000191 IR001  20.0
+  1 2000201 IR001  20.0
+  1 2000211 IR001  20.0
+  1 2000222 IR001  20.0
+  1 2000232 IR001  20.0
+  1 2000242 IR001  20.0
 
 *FERTILIZERS
 @F    FDATE  FMCD  FACD  FDEP  FAMN  FAMP  FAMK  FAMC  FAMO  FOCD
- 32 2000136 FE001 AP002   10.  200.  -99.  -99.  -99.  -99.   -99
+  1 2000212 FE001 AP001   10.   50.   10.    4.    0.    0.   -99
+  1 2000136 FE001 AP001   10.  150.    0.    0.    0.    0.   -99
 
 *RESIDUES
 @R    RDATE  RCOD  RAMT  RESN  RESP  RESK  RINP  RDEP  RMET
