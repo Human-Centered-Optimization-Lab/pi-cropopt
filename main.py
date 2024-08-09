@@ -4,6 +4,7 @@ from pico.cropopt.cropopt import CropOpt
 from pico.cropopt.vssps import VSSPS
 from pico.dash.Dashboard import Dashboard
 from pico.cropopt.VirtualFamers import YieldGreedyDM, RangedVirtualFarmer
+from pico.cropopt.blockSampling import BlockSampling
 from pymoo.algorithms.moo.nsga3 import NSGA3
 from pymoo.algorithms.moo.nsga2 import NSGA2
 from pymoo.util.ref_dirs import get_reference_directions
@@ -96,7 +97,7 @@ if __name__ == "__main__":
     year = int(sys.argv[1])
     method = sys.argv[2]
 
-    reps = 10
+    reps = 1
     plant_date = 135
 
     total_nitro = 200
@@ -105,7 +106,7 @@ if __name__ == "__main__":
     home_dir = "/home/ian/"
 
     dssat_home = "%s/Projects/pi-cropopt/dhome" % home_dir
-    dssat_exe  = "%s/Projects/pi-cropopt/dhome/dscsm047-linux" % home_dir
+    dssat_exe  = "%s/Projects/pi-cropopt/dhome/dscsm04758-linux" % home_dir
     dssat_inp  = "%s/Projects/pi-cropopt/dhome/DSSAT47.INP" % home_dir
     output_dir = "%s/Projects/pi-cropopt/output/" % home_dir
 
@@ -145,7 +146,7 @@ if __name__ == "__main__":
     nitro_date_ub += int(year * 1e3)
     plant_date += int(year * 1e3)
 
-    if year % 4 == 0: 
+    if (year % 4 == 0) and (year % 100 != 0): 
         plant_date += 1
         irr_date_lb += 1
         irr_date_ub += 1
@@ -192,7 +193,14 @@ if __name__ == "__main__":
 
         nutrient_inds = [a[1] for a in nutrient_inds]
 
-        vssps = VSSPS(FloatRandomSampling, nz_indices=nutrient_inds)
+        n_var = prob.n_var 
+
+        block_inds = list(set(range(n_var)) - set(nutrient_inds))
+
+        vssps = VSSPS(BlockSampling, 
+                      nz_indices=nutrient_inds, 
+                      block_xu=60,
+                      block_xl=10)
 
         algorithm = None
         dashboard = None
@@ -201,7 +209,7 @@ if __name__ == "__main__":
                               eliminate_duplicates=True,
                               sampling=vssps)
 
-            dashboard = Dashboard()
+            #dashboard = Dashboard()
         elif method == "pinsga2":
 
             greedyDM = RangedVirtualFarmer(20, 30)
@@ -225,7 +233,7 @@ if __name__ == "__main__":
                        algorithm,
                        ('n_gen', generations),
                        seed=seed,
-                       callback=dashboard,
+                       #callback=dashboard,
                        save_history=True,
                        verbose=True)
 

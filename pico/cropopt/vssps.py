@@ -33,12 +33,16 @@ class SNSGA2(NSGA2):
 
 class VSSPS(Sampling):
 
-    def __init__(self, base_sampler_class, sparsity_range = (0.75, 1), nz_indices=[],  **kwargs): 
+    def __init__(self, base_sampler_class, sparsity_range = (0.75, 1), nz_indices=[], block_xu=None, block_xl=None,  **kwargs): 
 
         self.s_lower            = sparsity_range[0]
         self.s_upper            = sparsity_range[1]
         self.base_sampler_class = base_sampler_class 
-        self.nz_indices        = nz_indices  
+        self.nz_indices         = nz_indices  
+
+        self.block_xu = block_xu
+        self.block_xl = block_xl
+
 
         super().__init__(**kwargs)
 
@@ -46,8 +50,9 @@ class VSSPS(Sampling):
     def _do(self, problem, n_samples, **kwargs):
 
         ## Problem initialization
-
-        base_sampler = self.base_sampler_class()
+        base_sampler = self.base_sampler_class(block_xu = self.block_xu, 
+                                               block_xl = self.block_xl, 
+                                               uni_indices=self.nz_indices)
 
         # Initial population sampling 
         X = base_sampler._do(problem, n_samples, **kwargs)
