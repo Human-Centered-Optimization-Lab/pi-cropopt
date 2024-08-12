@@ -122,6 +122,9 @@ def create_vf_scipy_poly(P, ranks, delta, eps_max, method="trust-constr"):
 
 def create_vf_scipy_linear(P, ranks, delta, eps_max, method="trust-constr"): 
 
+    # Gathering basic info
+    M = P.shape[1]
+    
     # Sort P
     P_sorted = _sort_P(P, ranks)
     ranks.sort()
@@ -388,8 +391,6 @@ def _ineq_constr_1D_poly(x, P, vf, ranks, delta):
     G = np.ones((1, S_constr_len + increasing_len))*-99
 
     # Checking to make sure each S term in the polynomial objective function is non-negative
-    current_constr = 0
-
     S = _calc_S(P, x[0:-1]) * -1
 
     G[:, 0:S_constr_len] = S.reshape(1, S_constr_len)
@@ -611,7 +612,6 @@ class OptimizeLinearVF(Problem):
             
         ## Equality constraint that keeps sum of x under 1
         out["H"] = _eq_constr_linear(x)
-
 
 def _validate_vf(res):
 
