@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from pico.cropopt.cropopt import CropOpt
 from pico.cropopt.vssps import VSSPS
+from pico.cropopt.sps import SPS
 from pico.dash.Dashboard import Dashboard
 from pico.cropopt.VirtualFamers import YieldGreedyDM, RangedVirtualFarmer
 from pico.cropopt.blockSampling import BlockSampling
@@ -97,7 +98,7 @@ if __name__ == "__main__":
     year = int(sys.argv[1])
     method = sys.argv[2]
 
-    reps = 1
+    reps = 30
     plant_date = 135
 
     total_nitro = 200
@@ -153,6 +154,10 @@ if __name__ == "__main__":
         nitro_date_lb += 1
         nitro_date_ub += 1
 
+
+    irrigation_min = 0 
+    irrigation_max = 30
+
     #
     # Irrigation type            Nutrient type
     # Col 1: Period begin date   Col 1: Period begin date  
@@ -163,8 +168,8 @@ if __name__ == "__main__":
     # Col 6: 0                   Col 6: Pot amount         
     #
     date_ranges = [
-            [irr_date_lb,   irr_date_ub,    0,                     0, 30, 0], # Irrigation period 
-            [nitro_date_lb, nitro_date_ub,  1, int(total_nitro*0.25),  0, 0]] # 
+            [irr_date_lb,   irr_date_ub,    0, irrigation_min,        irrigation_max, 0], # Irrigation period 
+            [nitro_date_lb, nitro_date_ub,  1, int(total_nitro*0.25),              0, 0]] # 
 
     # Preplant incorporation 
     constant_apps = np.array([[plant_date, 0, int(total_nitro*0.75), 0, 0]])
@@ -174,13 +179,11 @@ if __name__ == "__main__":
     year_updates = { 'pdate': plant_date, 'sdate': plant_date, 'icdat': plant_date }
 
     ## Main 
-
-
     for run in range(reps):
 
-        print("Initializing Run %d" % run)
-
         seed = year + plant_date + run
+
+        print("Initializing Run %d (seed=%d)" % (run, seed))
 
         prob = CropOpt(threads, dssat_home, dssat_exe, dssat_inp,
                                tmp_dir, date_ranges, output_dir, run, seed=0, 
@@ -197,17 +200,17 @@ if __name__ == "__main__":
 
         block_inds = list(set(range(n_var)) - set(nutrient_inds))
 
-        vssps = VSSPS(BlockSampling, 
+        sampling = SPS(0.9, BlockSampling, 
                       nz_indices=nutrient_inds, 
-                      block_xu=60,
-                      block_xl=10)
+                      block_xu=irrigation_max,
+                      block_xl=irrigation_min)
 
         algorithm = None
         dashboard = None
         if method == "nsga2": 
             algorithm = NSGA2(pop_size=pop_size, 
                               eliminate_duplicates=True,
-                              sampling=vssps)
+                              sampling=sampling)
 
             #dashboard = Dashboard()
         elif method == "pinsga2":

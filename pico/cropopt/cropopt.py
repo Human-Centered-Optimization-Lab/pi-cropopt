@@ -204,9 +204,9 @@ class CropOpt(Problem):
     #
     # is transformed into 
     #
-    #  [[2018102,23.2],
-    #   [2018103,3.5],
-    #   [2018110,67]]
+    #  [[2018102, 23.2],
+    #   [2018103, 3.5 ],
+    #   [2018110, 67  ]]
     #
     def _build_applications(self, x, date_ranges): 
 
@@ -252,7 +252,7 @@ class CropOpt(Problem):
             scheds[:, indx, 1]  = 0
 
             if np.sum(np.isnan(date)) != 0:
-                sys.exit("Whoops")
+                sys.exit("Bad date found")
 
             # Fill in nutrient values
             scheds[:, indx, 0]  = date

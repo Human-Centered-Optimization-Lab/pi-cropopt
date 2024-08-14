@@ -159,6 +159,9 @@ class VSSPS(Sampling):
         # Zero out the necessary spots
         X[np.logical_not(mask)] = 0
 
+        assert np.all(X <= problem.xu), "Sampled solutions out of bounds"
+        assert np.all(X >= problem.xl), "Sampled solutions out of bounds"
+
         return X
 
         
