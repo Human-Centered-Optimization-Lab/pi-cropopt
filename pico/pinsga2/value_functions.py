@@ -617,27 +617,40 @@ def _validate_vf(res):
 
     message = "" 
 
+    neg_arg_found = False
+
     if isinstance(res, pymoo.core.result.Result):
         success = np.all(res.G <= 0)
         epsilon = res.X[-1]
+        args = res.X[0:-1]
+        neg_arg_found = np.any(np.array(args) < 0)
+
         if not success: 
             message = "Constraints not met\n"
         if epsilon < 0:
             message = message + "Epsilon negative\n"
+        if neg_arg_found: 
+            message = message + "Negative arguments found\n"
 
 
     elif isinstance(res, scipy.optimize.optimize.OptimizeResult):
         success = res.success and res.constr_violation <= 0
         epsilon = res.x[-1]
+        args = res.x[0:-1]
+        neg_arg_found = np.any(np.array(args) < 0)
 
         if not (res.constr_violation <= 0): 
             message = "Constraints not met."
         else:
-            message = res.message
+            message = message + res.message
+
+        if neg_arg_found: 
+            message = message + "Negative arguments found\n"
+
     else: 
         ValueError("Internal error: bad result objective given for validation")
 
-    if epsilon < 0 or not success: 
+    if epsilon < 0 or not success or neg_arg_found: 
         sys.stderr.write("WARNING: Unable to fit value function\n")    
         sys.stderr.write(message + "\n")    
         return False
