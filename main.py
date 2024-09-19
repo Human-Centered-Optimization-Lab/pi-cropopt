@@ -21,7 +21,6 @@ from pico.pinsga2.pinsga2 import PINSGA2, AutomatedDM
 from pico.pinsga2 import value_functions as mvf
 
 
-
 ## 
 # Plotting functions 
 #
@@ -126,6 +125,7 @@ if __name__ == "__main__":
         print("Unrecognized method")
         sys.exit(1)
 
+    dm_range = [20, 30]
 
 
     ## Derived parameters 
@@ -156,7 +156,8 @@ if __name__ == "__main__":
 
 
     irrigation_min = 0 
-    irrigation_max = 30
+    irrigation_max = 62
+    initial_irrigation = 10
 
     #
     # Irrigation type            Nutrient type
@@ -200,10 +201,17 @@ if __name__ == "__main__":
 
         block_inds = list(set(range(n_var)) - set(nutrient_inds))
 
-        sampling = SPS(0.9, BlockSampling, 
-                      nz_indices=nutrient_inds, 
-                      block_xu=irrigation_max,
-                      block_xl=irrigation_min)
+        #sampling = SPS(0.9, BlockSampling, 
+        #              nz_indices=nutrient_inds, 
+        #              block_xu=irrigation_max,
+        #              block_xl=irrigation_min)
+
+       
+        sampling = VSSPS(BlockSampling,
+                      nz_indices=nutrient_inds,
+                      block_xu=initial_irrigation,
+                      block_xl=initial_irrigation)
+
 
         algorithm = None
         dashboard = None
@@ -211,19 +219,20 @@ if __name__ == "__main__":
             algorithm = NSGA2(pop_size=pop_size, 
                               eliminate_duplicates=True,
                               sampling=sampling)
-
-            #dashboard = Dashboard()
+            dm_label = "None"
+            dashboard = Dashboard()
         elif method == "pinsga2":
 
-            greedyDM = RangedVirtualFarmer(20, 30)
+            greedyDM = RangedVirtualFarmer(dm_range[0], dm_range[1])
 
             algorithm = PINSGA2(pop_size=pop_size, 
                               eliminate_duplicates=True,
                               eps_max=1000,
-                              sampling=vssps, 
+                              sampling=sampling, 
                               ranking_type="pairwise",
                               automated_dm=greedyDM)
-
+            
+            dm_label = "%dto%d" % (dm_range[0],  dm_range[1])
             dashboard = Dashboard(plot_eta_F=plot_eta_F, plot_vf=plot_vf)
 
 
@@ -231,14 +240,20 @@ if __name__ == "__main__":
             print("Unrecognized method")
             sys.exit(1)
 
+        try: 
 
-        res = minimize(prob,
-                       algorithm,
-                       ('n_gen', generations),
-                       seed=seed,
-                       #callback=dashboard,
-                       save_history=True,
-                       verbose=True)
+            res = minimize(prob,
+                           algorithm,
+                           ('n_gen', generations),
+                           seed=seed,
+                           callback=dashboard,
+                           save_history=True,
+                           verbose=True)
+
+        except Exception as e:
+            print("Failure in optimization.")
+            logging.error(traceback.format_exc())
+            break
 
         paretoFront = res.F
         paretoFront[:,1] = paretoFront[:,1]*-1
@@ -252,7 +267,7 @@ if __name__ == "__main__":
             objectives = np.array([indiv.F for indiv in gen.pop ])
             x = np.array([indiv.X for indiv in gen.pop ])
 
-            full_output_dir = "%s/%s_%s_%s_p%d" % ( output_dir, method,str(year), timestamp, pop_size)
+            full_output_dir = "%s/%s_%s_%s_%s_p%d" % ( output_dir, method, dm_label, str(year), timestamp, pop_size)
 
             Path(full_output_dir).mkdir(parents=True, exist_ok=True)
 
