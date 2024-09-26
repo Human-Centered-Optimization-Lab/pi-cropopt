@@ -184,7 +184,6 @@ def estimateApplication(year, application_number = 10, home_dir="/home/ian"):
 
     results.groupby(by="irr_app_size")['yield'].median() 
 
-
     weather = pd.read_fwf(wth_file, skiprows=4)
 
     lb = dateFormatDSSAT(year, irr_date_lb)
@@ -199,8 +198,6 @@ def estimateApplication(year, application_number = 10, home_dir="/home/ian"):
     print(f"Max application amount: %d" % max_app_amount)
 
     result["maxApp"] = int(max_app_amount)
-
-    shutil.rmtree(tmp_dir)
 
     return result
 
