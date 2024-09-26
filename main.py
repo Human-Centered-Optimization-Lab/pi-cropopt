@@ -16,6 +16,7 @@ from pathlib import Path
 from datetime import datetime
 import pickle
 from pymoo.visualization.scatter import Scatter
+from utilities.appEstimator import estimateApplication
 
 from pico.pinsga2.pinsga2 import PINSGA2, AutomatedDM
 from pico.pinsga2 import value_functions as mvf
@@ -95,6 +96,14 @@ if __name__ == "__main__":
         sys.exit(1)
 
     year = int(sys.argv[1])
+
+    estRes = estimateApplication(year)
+
+    irrigation_min = 0
+    irrigation_max = estRes["maxApp"]
+    initial_irrigation = estRes["initialApp"]
+
+
     method = sys.argv[2]
 
     reps = 30
@@ -155,9 +164,6 @@ if __name__ == "__main__":
         nitro_date_ub += 1
 
 
-    irrigation_min = 0 
-    irrigation_max = 62
-    initial_irrigation = 10
 
     #
     # Irrigation type            Nutrient type
@@ -183,6 +189,7 @@ if __name__ == "__main__":
     for run in range(reps):
 
         seed = year + plant_date + run
+    
 
         print("Initializing Run %d (seed=%d)" % (run, seed))
 
