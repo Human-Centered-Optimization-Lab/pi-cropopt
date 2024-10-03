@@ -290,13 +290,16 @@ def plot_vf(P, vf, show=True):
 
     z = vf(np.stack((x,y), axis=2))
 
-    values_at_P = []
+    values_at_P = set()
     for p in range(np.size(P,0)):
-        values_at_P.append(vf(P[p,:]))
+        values_at_P.add(float(vf(P[p,:])))
+
+    values_at_P = list(values_at_P)
 
     values_at_P.sort()
 
     plt.contour(x,y,z, levels=values_at_P)
+        
 
     plt.colorbar()
 

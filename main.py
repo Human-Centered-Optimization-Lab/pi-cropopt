@@ -49,7 +49,6 @@ def plot_eta_F(context, algorithm):
     plot.plot_if_not_done_yet()
 
     return plot.fig
- 
 
 def plot_vf(context, algorithm):
 
@@ -189,7 +188,6 @@ if __name__ == "__main__":
     for run in range(reps):
 
         seed = year + plant_date + run
-    
 
         print("Initializing Run %d (seed=%d)" % (run, seed))
 
@@ -259,7 +257,6 @@ if __name__ == "__main__":
 
         except Exception as e:
             print("Failure in optimization.")
-            logging.error(traceback.format_exc())
             break
 
         paretoFront = res.F
