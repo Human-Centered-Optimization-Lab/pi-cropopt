@@ -5,3 +5,7 @@ XlsxWriter
 feather-format
 jupyter
 nbstripout
+openpyxl
+ffmpeg-python
+pandarallel
+
