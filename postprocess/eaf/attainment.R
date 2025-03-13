@@ -1,9 +1,8 @@
 
 # install.packages("readr")
 # install.packages("arrow")
-# install.packages("feather")
 # install.packages("magrittr")
-
+# install.packages("emoa")
 
 library("eaf");
 library(readr);
@@ -15,17 +14,13 @@ library(dplyr)
 
 
 # Define the years and algorithms
-#years <- 1988:2017
-years <- c(1988)
+years <- 1988:2017
+#years <- c(1988)
+#years <- c(1990)
 
 
 algorithms <- c("pinsga2", "nsga2")
 
-i = 1
-
-min_surfaces = c()
-med_surfaces = c()
-max_surfaces = c()
 
 # Loop through each year
 for (year in years) {
@@ -57,41 +52,19 @@ for (year in years) {
     return(NULL)  # Return NULL if there's an error
   })
   
- 
-  # Combine tables  
-  df1 <- nsga2 %>% 
-  #  rename(V1=irr_total, V2=yield) %>% 
-    mutate(alg = "nsga2")  # Add nsga2 column
-  
-  df2 <- pinsga2 %>% 
-  #  rename(V1=preferred_irr_total, V2=preferred_yield) %>% 
-    mutate(alg = "pinsga2")  # Add source column
- 
-  results <- bind_rows(df1, df2) 
-  
-  #print(ggplot() +
-  #  # Add points for nsga2
-  #  geom_point(data = nsga2, aes(x = V1, y = V2), color = "blue", alpha = 0.6) +
-  #  # Add points for pinsga2
-  #  geom_point(data = pinsga2, aes(x = V1, y = V2), color = "red", alpha = 0.6) +
-  #  # Add labels and title
-  #  labs(x = "Irrigation Total", y = "Yield", 
-  #       title = "Scatter Plot of NSGA2 and PINSGA2") +
-  #  # Optional: Add a theme
-  #  theme_minimal())
-
+  # Determine bounds of the plot 
   xmin <- pinsga2 %>% pull(V1) %>% min()
   xmax <- pinsga2 %>% pull(V1) %>% max()
   ymin <- pinsga2 %>% pull(V2) %>% min()
   ymax <- pinsga2 %>% pull(V2) %>% max()
   
-     
+  # Pull the different ranges of the interactive results 
   pinsga2_10to20 <- pinsga2 %>% filter(DM_range=="10to20") %>% select(V1, V2)
   pinsga2_20to30 <- pinsga2 %>% filter(DM_range=="20to30") %>% select(V1, V2)
   pinsga2_30to40 <- pinsga2 %>% filter(DM_range=="30to40") %>% select(V1, V2)
   interactive_methods = list(pinsga2_10to20, pinsga2_20to30, pinsga2_30to40)
   
-  
+  # Make the plot 
   surface_res = eafplot(nsga2, 
           xlim = c(xmin, xmax),
           ylim = c(ymin, ymax),
@@ -104,12 +77,59 @@ for (year in years) {
   
  
   title(paste("Results for ", year)) 
+ 
+  # Determine how many results went out of the bounds 
+  max_surface = surface_res[1][[1]]
+  med_surface = surface_res[2][[1]]
+  min_surface = surface_res[3][[1]]
+
+  interactive_runs = list(pinsga2_10to20=pinsga2_10to20, 
+                          pinsga2_20to30=pinsga2_20to30, 
+                          pinsga2_30to40=pinsga2_30to40) 
+     
+  for (run_name in names(interactive_runs)) {
+    
+    curr_inter_run = interactive_runs[[run_name]] 
+     
+    total_inbounds = 0
+    total_inter = nrow(curr_inter_run)
+    for (r in 1:total_inter) {
+   
+      current_interactive_runs =  interactive_runs[i]
+         
+      inter_irr_amount = curr_inter_run[r,1]
+      inter_yield = curr_inter_run[r,2]
+       
+      nsga2_min_yield = min_surface[min_surface[,1] == inter_irr_amount, 2]
+      nsga2_max_yield = max_surface[max_surface[,1] == inter_irr_amount, 2]
+     
+      # Check if there's no lower bound
+      if (length(nsga2_min_yield) == 0 && length(nsga2_max_yield) != 0){
+        if(nsga2_max_yield == inter_yield){
+          total_inbounds = total_inbounds + 1
+        }  
+      }
+
+      # Check if there's no lower bound
+      else if (length(nsga2_min_yield) != 0 && length(nsga2_max_yield) == 0){
+        if(nsga2_min_yield == inter_yield){
+          total_inbounds = total_inbounds + 1
+        }  
+      }else if (length(nsga2_min_yield) == 0 && length(nsga2_max_yield) == 0){
+        print(paste(year, " is an unbounded year at irr amount: ", inter_irr_amount)) 
+      }
+      # otherwise, check if its in bounds       
+      else if (inter_yield >= nsga2_min_yield && inter_yield <= nsga2_max_yield)
+        total_inbounds = total_inbounds + 1
+      
+    }
+   
+    percentage_in = total_inbounds / total_inter
+     
+    print(paste("Year: ", year, ", dm_range: ", run_name,  ", perc_in:",  percentage_in)) 
+    
+  }
   
-  min_surfaces[i] = surface_res[1]
-  med_surfaces[i] = surface_res[2]
-  max_surfaces[i] = surface_res[3]
-  
-  i <- i + 1
    
 }
 
