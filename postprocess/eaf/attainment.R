@@ -9,6 +9,7 @@ library(readr);
 library(magrittr)
 library(ggplot2)
 library(dplyr)
+library(emoa)
 
 # Read the CSV file
 
@@ -88,45 +89,50 @@ for (year in years) {
                           pinsga2_30to40=pinsga2_30to40) 
      
   for (run_name in names(interactive_runs)) {
-    
+   
     curr_inter_run = interactive_runs[[run_name]] 
-     
-    total_inbounds = 0
-    total_inter = nrow(curr_inter_run)
-    for (r in 1:total_inter) {
-   
-      current_interactive_runs =  interactive_runs[i]
-         
-      inter_irr_amount = curr_inter_run[r,1]
-      inter_yield = curr_inter_run[r,2]
-       
-      nsga2_min_yield = min_surface[min_surface[,1] == inter_irr_amount, 2]
-      nsga2_max_yield = max_surface[max_surface[,1] == inter_irr_amount, 2]
-     
-      # Check if there's no lower bound
-      if (length(nsga2_min_yield) == 0 && length(nsga2_max_yield) != 0){
-        if(nsga2_max_yield == inter_yield){
-          total_inbounds = total_inbounds + 1
-        }  
-      }
+    
+    inter_run_cutoff = nrow(curr_inter_run)
+    
+    min_surf_len = nrow(min_surface)
+    
+    all_points = rbind(curr_inter_run, min_surface)
+    
+    # reversing yield to a minimization problem
+    all_points[,2] = all_points[,2]*-1
 
-      # Check if there's no lower bound
-      else if (length(nsga2_min_yield) != 0 && length(nsga2_max_yield) == 0){
-        if(nsga2_min_yield == inter_yield){
-          total_inbounds = total_inbounds + 1
-        }  
-      }else if (length(nsga2_min_yield) == 0 && length(nsga2_max_yield) == 0){
-        print(paste(year, " is an unbounded year at irr amount: ", inter_irr_amount)) 
-      }
-      # otherwise, check if its in bounds       
-      else if (inter_yield >= nsga2_min_yield && inter_yield <= nsga2_max_yield)
-        total_inbounds = total_inbounds + 1
+    dom_mat =  dominance_matrix(t(as.matrix(all_points)))
+    
+    foo = dom_mat[(inter_run_cutoff+1):(inter_run_cutoff+min_surf_len),0:inter_run_cutoff] 
+    
+    dominated_by_min =  colSums(foo)
+    
+    total_dominated = length(which(dominated_by_min != 0))
       
-    }
+    better_than_min_rate = 1 - total_dominated/inter_run_cutoff
+    
+    # Try to find how many of curr_inter_run is dominated 
+    # by the minimum attainment surface.
+    
+    # Try 1: We know that the minimum attainment surface will not be 
+    # dominated by itself, so if we count how many points the minimum
+    # surface is dominating, then that will be the number of 
+    # curr_inter_run dominated by the minimum attainment surface
    
-    percentage_in = total_inbounds / total_inter
+    # Try 2: If we cound 
      
-    print(paste("Year: ", year, ", dm_range: ", run_name,  ", perc_in:",  percentage_in)) 
+    
+    
+    
+    
+    
+     
+    #total_inbounds = 0
+    #total_inter = nrow(curr_inter_run)
+   
+    #percentage_in = total_inbounds / total_inter
+    # 
+    #print(paste("Year: ", year, ", dm_range: ", run_name,  ", perc_in:",  percentage_in)) 
     
   }
   
