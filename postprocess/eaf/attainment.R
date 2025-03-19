@@ -15,13 +15,16 @@ library(emoa)
 
 
 # Define the years and algorithms
-years <- 1988:2017
+#years <- 1988:2017
+#years <- 1991:2017
+
 #years <- c(1988)
-#years <- c(1990)
+years <- c(1990)
 
 
 algorithms <- c("pinsga2", "nsga2")
 
+results_table = data.frame()
 
 # Loop through each year
 for (year in years) {
@@ -88,12 +91,15 @@ for (year in years) {
                           pinsga2_20to30=pinsga2_20to30, 
                           pinsga2_30to40=pinsga2_30to40) 
      
+   
+  
   for (run_name in names(interactive_runs)) {
    
     curr_inter_run = interactive_runs[[run_name]] 
     
     inter_run_cutoff = nrow(curr_inter_run)
-    
+   
+    ## -------- Calculate % that are not dominated by min surface -------------  
     min_surf_len = nrow(min_surface)
     
     all_points = rbind(curr_inter_run, min_surface)
@@ -101,38 +107,28 @@ for (year in years) {
     # reversing yield to a minimization problem
     all_points[,2] = all_points[,2]*-1
 
+    # Make a dominance matrix of the minimal points and the interactive points
     dom_mat =  dominance_matrix(t(as.matrix(all_points)))
     
-    foo = dom_mat[(inter_run_cutoff+1):(inter_run_cutoff+min_surf_len),0:inter_run_cutoff] 
+    # Examine whether each interactive points are being dominated by the minimum attainment surface 
+    inter_dom_by_min = dom_mat[(inter_run_cutoff+1):(inter_run_cutoff+min_surf_len),0:inter_run_cutoff] 
+   
+    # Sum the total dominated points
+    dominated_by_min =  colSums(inter_dom_by_min)
     
-    dominated_by_min =  colSums(foo)
-    
+    # Count the total that are dominated at all 
     total_dominated = length(which(dominated_by_min != 0))
-      
+     
+    # Invert this figure to determine the number points that are are as good or better than the min   
     better_than_min_rate = 1 - total_dominated/inter_run_cutoff
     
-    # Try to find how many of curr_inter_run is dominated 
-    # by the minimum attainment surface.
+    next_row = data.frame(
+      year = year, 
+      dm_range = run_name, 
+      perc_better_than_min = better_than_min_rate
+    )
     
-    # Try 1: We know that the minimum attainment surface will not be 
-    # dominated by itself, so if we count how many points the minimum
-    # surface is dominating, then that will be the number of 
-    # curr_inter_run dominated by the minimum attainment surface
-   
-    # Try 2: If we cound 
-     
-    
-    
-    
-    
-    
-     
-    #total_inbounds = 0
-    #total_inter = nrow(curr_inter_run)
-   
-    #percentage_in = total_inbounds / total_inter
-    # 
-    #print(paste("Year: ", year, ", dm_range: ", run_name,  ", perc_in:",  percentage_in)) 
+    results_table = rbind(results_table, next_row)
     
   }
   
