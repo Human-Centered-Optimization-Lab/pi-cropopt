@@ -15,12 +15,7 @@ library(emoa)
 
 
 # Define the years and algorithms
-#years <- 1988:2017
-#years <- 1991:2017
-
-#years <- c(1988)
-years <- c(1990)
-
+years <- 1988:2017
 
 algorithms <- c("pinsga2", "nsga2")
 
@@ -75,6 +70,7 @@ for (year in years) {
           percentiles = c(0, 50, 100), 
           maximise=c(FALSE, TRUE), 
           extra.points = interactive_methods, 
+          extra.legend = c("10 to 20 mm DM", "20 to 30mm DM", "30 to 40mm DM"),
           extra.col = c("orange", "red", "blue"),
           extra.pch = c(15, 16, 17),
           legend.pos="bottomright") 
@@ -111,7 +107,7 @@ for (year in years) {
     dom_mat =  dominance_matrix(t(as.matrix(all_points)))
     
     # Examine whether each interactive points are being dominated by the minimum attainment surface 
-    inter_dom_by_min = dom_mat[(inter_run_cutoff+1):(inter_run_cutoff+min_surf_len),0:inter_run_cutoff] 
+    inter_dom_by_min = dom_mat[(inter_run_cutoff+1):(inter_run_cutoff+min_surf_len),0:inter_run_cutoff, drop=FALSE] 
    
     # Sum the total dominated points
     dominated_by_min =  colSums(inter_dom_by_min)
@@ -121,7 +117,9 @@ for (year in years) {
      
     # Invert this figure to determine the number points that are are as good or better than the min   
     better_than_min_rate = 1 - total_dominated/inter_run_cutoff
-    
+   
+    ## -------- Calculate % that dominate the max surface -------------  
+     
     next_row = data.frame(
       year = year, 
       dm_range = run_name, 
