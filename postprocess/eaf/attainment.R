@@ -119,11 +119,36 @@ for (year in years) {
     better_than_min_rate = 1 - total_dominated/inter_run_cutoff
    
     ## -------- Calculate % that dominate the max surface -------------  
+   
+    max_surf_len = nrow(max_surface)
+    
+    all_points = rbind(curr_inter_run, max_surface)
+    
+    # reversing yield to a minimization problem
+    all_points[,2] = all_points[,2]*-1
+    
+    # Make a dominance matrix of the minimal points and the interactive points
+    dom_mat =  dominance_matrix(t(as.matrix(all_points)))
+    
+    # Examine whether each interactive points are being dominated by the minimum attainment surface 
+    inter_dom_by_max = dom_mat[(inter_run_cutoff+1):(inter_run_cutoff+max_surf_len),0:inter_run_cutoff, drop=FALSE] 
+    
+    # Sum the total dominated points
+    dominated_by_max = colSums(inter_dom_by_max)
+    
+    # Count the total that are dominated at all 
+    total_dominated = length(which(dominated_by_max != 0))
+    
+    # Invert this figure to determine the number points that are are as good or better than the min   
+    better_than_max_rate = 1 - total_dominated/inter_run_cutoff 
+     
+    ## -------- Record the results in a dataframe -------------  
      
     next_row = data.frame(
       year = year, 
       dm_range = run_name, 
-      perc_better_than_min = better_than_min_rate
+      perc_better_than_min = better_than_min_rate,
+      perc_better_than_max = better_than_max_rate
     )
     
     results_table = rbind(results_table, next_row)
