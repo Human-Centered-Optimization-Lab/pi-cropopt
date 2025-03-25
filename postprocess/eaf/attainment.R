@@ -15,8 +15,7 @@ library(emoa)
 
 
 # Define the years and algorithms
-#years <- 1988:2017
-years <- c(1990)
+years <- 1988:2017
 
 legend_pos = c("bottomright", # 1988
                "bottomright", # 1989
@@ -188,16 +187,17 @@ for (year in years) {
     dom_mat =  dominance_matrix(t(as.matrix(all_points)))
     
     # Examine whether each interactive points are being dominated by the minimum attainment surface 
-    inter_dom_by_max = dom_mat[(inter_run_cutoff+1):(inter_run_cutoff+max_surf_len),0:inter_run_cutoff, drop=FALSE] 
+    max_dom_by_inter = dom_mat[0:inter_run_cutoff,(inter_run_cutoff+1):(inter_run_cutoff+max_surf_len), drop=FALSE] 
     
     # Sum the total dominated points
-    dominated_by_max = colSums(inter_dom_by_max)
+    dominating_max = rowSums(max_dom_by_inter)
     
     # Count the total that are dominated at all 
-    total_dominated = length(which(dominated_by_max != 0))
+    total_dominating = length(which(dominating_max != 0))
     
     # Invert this figure to determine the number points that are are as good or better than the min   
-    better_than_max_rate = 1 - total_dominated/inter_run_cutoff 
+    better_than_max_rate = total_dominating/inter_run_cutoff 
+    
      
     ## -------- Record the results in a dataframe -------------  
      
