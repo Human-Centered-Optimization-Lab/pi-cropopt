@@ -17,6 +17,8 @@ from datetime import datetime
 import pickle
 from pymoo.visualization.scatter import Scatter
 from utilities.appEstimator import estimateApplication
+import traceback
+import time
 
 from pico.pinsga2.pinsga2 import PINSGA2, AutomatedDM
 from pico.pinsga2 import value_functions as mvf
@@ -97,11 +99,9 @@ if __name__ == "__main__":
     year = int(sys.argv[1])
 
     estRes = estimateApplication(year)
-
     irrigation_min = 0
     irrigation_max = estRes["maxApp"]
     initial_irrigation = estRes["initialApp"]
-
 
     method = sys.argv[2]
 
@@ -184,8 +184,11 @@ if __name__ == "__main__":
 
     year_updates = { 'pdate': plant_date, 'sdate': plant_date, 'icdat': plant_date }
 
+    times = []
+
     ## Main 
     for run in range(reps):
+
 
         seed = year + plant_date + run
 
@@ -245,19 +248,19 @@ if __name__ == "__main__":
             print("Unrecognized method")
             sys.exit(1)
 
-        try: 
+        start = time.time() 
 
-            res = minimize(prob,
-                           algorithm,
-                           ('n_gen', generations),
-                           seed=seed,
-                           callback=dashboard,
-                           save_history=True,
-                           verbose=True)
+        res = minimize(prob,
+                       algorithm,
+                       ('n_gen', generations),
+                       seed=seed,
+                       callback=dashboard,
+                       save_history=True,
+                       verbose=True)
 
-        except Exception as e:
-            print("Failure in optimization.")
-            break
+        end = time.time()
+
+        times.append(end - start)
 
         paretoFront = res.F
         paretoFront[:,1] = paretoFront[:,1]*-1
@@ -281,6 +284,7 @@ if __name__ == "__main__":
 
             np.savetxt("%s/run%04d_finalgen.csv" % (full_output_dir, run), paretoFront, delimiter=",")
 
+        
 
     # metadata on the genome structure
     statement = {
@@ -289,7 +293,8 @@ if __name__ == "__main__":
                 'constant_apps': constant_apps.tolist()
             }
 
-
+    print("Times:")
+    print(times)
 
     with open("%s/genome_structure.py" % full_output_dir, 'w') as f:f.write(repr(statement))
 
@@ -299,6 +304,7 @@ if __name__ == "__main__":
     pickle.dump(report, output)
 
 
+    
 
     #print("Copy the following statement into the script")
 
