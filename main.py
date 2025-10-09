@@ -91,12 +91,13 @@ if __name__ == "__main__":
     # Agricultural parameters
     app_man_csv = "management_dates.csv"
     app_man = pd.read_csv(app_man_csv)
-
-    if len(sys.argv) != 3: 
-        print("Usage: %s YEAR [nsga2|pinsga2]" % sys.argv[0])
+    
+    if len(sys.argv) < 4: 
+        print("Usage: %s YEAR METHOD POPULATION [ETA] [TAU]" % sys.argv[0])
         sys.exit(1)
 
     year = int(sys.argv[1])
+    pop_size = int(sys.argv[3])
 
     estRes = estimateApplication(year)
     irrigation_min = 0
@@ -104,6 +105,18 @@ if __name__ == "__main__":
     initial_irrigation = estRes["initialApp"]
 
     method = sys.argv[2]
+
+    if method == "pinsga2" and len(sys.argv) >= 5: 
+        eta = int(sys.argv[4])
+        print(f'eta={eta}')        
+    else: 
+        eta = None
+        
+    if method == "pinsga2" and len(sys.argv) == 6: 
+        tau = int(sys.argv[5])
+        print(f'tau={tau}')        
+    else: 
+        tau = None
 
     reps = 30
     plant_date = 135
@@ -123,15 +136,7 @@ if __name__ == "__main__":
     # Runtime optimization parameters
     threads = 20
     initial_sparsity = 0.2
-    if method == "nsga2": 
-        generations = 200
-        pop_size = 120
-    elif method == "pinsga2": 
-        generations = 200
-        pop_size = 60 
-    else: 
-        print("Unrecognized method")
-        sys.exit(1)
+    generations = 200
 
     dm_range = [20, 30]
 
@@ -235,6 +240,8 @@ if __name__ == "__main__":
 
             algorithm = PINSGA2(pop_size=pop_size, 
                               eliminate_duplicates=True,
+                              tau=tau,
+                              eta=eta,
                               eps_max=1000,
                               sampling=sampling, 
                               ranking_type="pairwise",
