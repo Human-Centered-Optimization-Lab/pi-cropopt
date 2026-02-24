@@ -17,6 +17,8 @@ from datetime import datetime
 import pickle
 from pymoo.visualization.scatter import Scatter
 from utilities.appEstimator import estimateApplication
+import traceback
+import time
 
 from pico.pinsga2.pinsga2 import PINSGA2, AutomatedDM
 from pico.pinsga2 import value_functions as mvf
@@ -89,21 +91,32 @@ if __name__ == "__main__":
     # Agricultural parameters
     app_man_csv = "management_dates.csv"
     app_man = pd.read_csv(app_man_csv)
-
-    if len(sys.argv) != 3: 
-        print("Usage: %s YEAR [nsga2|pinsga2]" % sys.argv[0])
+    
+    if len(sys.argv) < 4: 
+        print("Usage: %s YEAR METHOD POPULATION [ETA] [TAU]" % sys.argv[0])
         sys.exit(1)
 
     year = int(sys.argv[1])
+    pop_size = int(sys.argv[3])
 
     estRes = estimateApplication(year)
-
     irrigation_min = 0
     irrigation_max = estRes["maxApp"]
     initial_irrigation = estRes["initialApp"]
 
-
     method = sys.argv[2]
+
+    if method == "pinsga2" and len(sys.argv) >= 5: 
+        eta = int(sys.argv[4])
+        print(f'eta={eta}')        
+    else: 
+        eta = None
+        
+    if method == "pinsga2" and len(sys.argv) == 6: 
+        tau = int(sys.argv[5])
+        print(f'tau={tau}')        
+    else: 
+        tau = None
 
     reps = 30
     plant_date = 135
@@ -123,15 +136,7 @@ if __name__ == "__main__":
     # Runtime optimization parameters
     threads = 20
     initial_sparsity = 0.2
-    if method == "nsga2": 
-        generations = 200
-        pop_size = 120
-    elif method == "pinsga2": 
-        generations = 200
-        pop_size = 60 
-    else: 
-        print("Unrecognized method")
-        sys.exit(1)
+    generations = 200
 
     dm_range = [20, 30]
 
@@ -184,8 +189,11 @@ if __name__ == "__main__":
 
     year_updates = { 'pdate': plant_date, 'sdate': plant_date, 'icdat': plant_date }
 
+    times = []
+
     ## Main 
     for run in range(reps):
+
 
         seed = year + plant_date + run
 
@@ -232,6 +240,8 @@ if __name__ == "__main__":
 
             algorithm = PINSGA2(pop_size=pop_size, 
                               eliminate_duplicates=True,
+                              tau=tau,
+                              eta=eta,
                               eps_max=1000,
                               sampling=sampling, 
                               ranking_type="pairwise",
@@ -245,19 +255,19 @@ if __name__ == "__main__":
             print("Unrecognized method")
             sys.exit(1)
 
-        try: 
+        start = time.time() 
 
-            res = minimize(prob,
-                           algorithm,
-                           ('n_gen', generations),
-                           seed=seed,
-                           callback=dashboard,
-                           save_history=True,
-                           verbose=True)
+        res = minimize(prob,
+                       algorithm,
+                       ('n_gen', generations),
+                       seed=seed,
+                       callback=dashboard,
+                       save_history=True,
+                       verbose=True)
 
-        except Exception as e:
-            print("Failure in optimization.")
-            break
+        end = time.time()
+
+        times.append(end - start)
 
         paretoFront = res.F
         paretoFront[:,1] = paretoFront[:,1]*-1
@@ -281,6 +291,7 @@ if __name__ == "__main__":
 
             np.savetxt("%s/run%04d_finalgen.csv" % (full_output_dir, run), paretoFront, delimiter=",")
 
+        
 
     # metadata on the genome structure
     statement = {
@@ -289,7 +300,8 @@ if __name__ == "__main__":
                 'constant_apps': constant_apps.tolist()
             }
 
-
+    print("Times:")
+    print(times)
 
     with open("%s/genome_structure.py" % full_output_dir, 'w') as f:f.write(repr(statement))
 
@@ -299,6 +311,7 @@ if __name__ == "__main__":
     pickle.dump(report, output)
 
 
+    
 
     #print("Copy the following statement into the script")
 

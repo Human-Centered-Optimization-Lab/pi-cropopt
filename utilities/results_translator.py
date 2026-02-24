@@ -60,12 +60,6 @@ nutrient_dates = date_ranges[date_ranges[:,2] == 1,:]
 
 print("Nutrients:")
 
-# For each nutrient period
-for (period_i, period) in enumerate(nutrient_periods):
-    dates_meta = nutrient_dates[period_i, :]
-    value = round(dates_meta[3])
-    date = round(genome[period[1]])
-    print("%d %d" % (date, value))
 
 # For each constant nutrient application
 for constant_app in constant_apps:
@@ -73,10 +67,28 @@ for constant_app in constant_apps:
     date =  round(constant_app[0])
     print("%d %d" % (date, value))
 
+# For each nutrient period
+for (period_i, period) in enumerate(nutrient_periods):
+    dates_meta = nutrient_dates[period_i, :]
+    value = round(dates_meta[3])
+    date = round(genome[period[1]])
+    print("%d %d" % (date, value))
 
-print("Objectives")
-print("Yield: %d, Leaching: %d, total irr: %d" % (-obj[0], obj[1], obj[2]))
 
-if obj[2] != total_irrigation: 
+if obj.shape[0] == 2:
+    print("Objectives")
+    print("Yield: %d, total irr: %d" % (-obj[0], obj[1]))
+elif obj.shape[0] == 3:
+    print("Objectives")
+    print("Yield: %d, Leaching: %d, total irr: %d" % (-obj[0], obj[1], obj[2]))
+else: 
+    print(f"Number of objectives incorrect in {obj_results_path}")
+    sys.exit(1)
+
+
+
+
+if obj[-1] != total_irrigation: 
     print("WARNING: objective irrigation doesn't match genome")
+
 

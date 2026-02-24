@@ -31,12 +31,19 @@ def estimateApplication(year, application_number = 10, home_dir="/home/ian"):
     first_nitro_app_amount = 70
     second_nitro_app_amount = 150
 
+    # Determine irrigation periods 
+    # Agricultural parameters
+    app_man_csv = "%s/Projects/pi-cropopt/management_dates.csv" % home_dir
+    app_man = pd.read_csv(app_man_csv)
+
+    irr_date_lb = min(app_man[app_man.Year < 2010].V8)
+    irr_date_ub = max(app_man[app_man.Year < 2010].R2)
+
+    # Account for leap years
     if (year % 4 == 0) and (year % 100 != 0): 
         plant_date += 1
         irr_date_lb += 1
         irr_date_ub += 1
-        nitro_date_lb += 1
-        nitro_date_ub += 1 
 
         first_nitro_app_date += 1
         second_nitro_app_date += 1
@@ -69,13 +76,6 @@ def estimateApplication(year, application_number = 10, home_dir="/home/ian"):
     irr_amounts = np.linspace(min_irr_trial, max_irr_trial, num=steps)
     irr_amounts = np.expand_dims(irr_amounts, axis=1)
 
-    # Determine irrigation periods 
-    # Agricultural parameters
-    app_man_csv = "%s/Projects/pi-cropopt/management_dates.csv" % home_dir
-    app_man = pd.read_csv(app_man_csv)
-
-    irr_date_lb = min(app_man[app_man.Year < 2010].V8)
-    irr_date_ub = max(app_man[app_man.Year < 2010].R2)
 
     def build_random_application(irr_amount):
 
@@ -207,5 +207,5 @@ def estimateApplication(year, application_number = 10, home_dir="/home/ian"):
 
 if __name__ == "__main__": 
 
-    estimateApplication(2000)
+    estimateApplication(1992)
 
