@@ -49,12 +49,38 @@ legend_pos = c("bottomright", # 1988
                "topleft")     # 2017 
 
 
+getAttainmentVal = function(surface, irr_val){
+
+  distances_to_target <- abs(surface[,1] - irr_val)
+  min_distance <- min(distances_to_target)
+  to_pull = which(min_distance == distances_to_target)
+ 
+  if(length(to_pull) == 1) {
+    # If we either have a direct match or we're off in the margins
+    return(surface[to_pull, ])
+  }else if(length(to_pull) == 2){
+    # If we're in between two points, interpolate
+    a_yield <- surface[to_pull[1], 2]
+    b_yield <- surface[to_pull[2], 2]
+    
+    a_irr <- surface[to_pull[1], 1]
+    b_irr <- surface[to_pull[2], 1]
+   
+    return(c((a_irr + b_irr)/2.0, (a_yield + b_yield)/2.0))
+     
+  }else{
+    stop("Uhhh...") 
+  }
+  
+}
 
 
 
 algorithms <- c("pinsga2", "nsga2")
 
 results_table = data.frame()
+
+summary_table = data.frame()
 
 y <- 1
 
@@ -87,6 +113,8 @@ for (year in years) {
     message(paste("Error reading file:", filename, " - ", e$message))
     return(NULL)  # Return NULL if there's an error
   })
+  
+  ## --------------- Plot the data ------------------------------- 
   
   # Determine bounds of the plot 
   xmin <- pinsga2 %>% pull(V1) %>% min()
@@ -126,18 +154,103 @@ for (year in years) {
           legend.pos=legend_pos[y],
           legend.txt = c("NSGA-II Best", "NSGA-II Median", "NSGA-II Worst")) 
   
- 
+  
   title(paste("PI-NSGA-II vs NSGA-II Trials (", year, ")", sep="")) 
- 
+
+  y <- y + 1
+  next
+  
+  
+  ## --------- Find the min, median, and max point for the most preferred point   
   # Determine how many results went out of the bounds 
   max_surface = surface_res[1][[1]]
   med_surface = surface_res[2][[1]]
   min_surface = surface_res[3][[1]]
+ 
+  
+  
+   
+  #next_row = data.frame(
+  #  year = year, 
+  #  preferred_10to20_min = getAttainmentVal(min_surface, 20), 
+  #  preferred_10to20_med = getAttainmentVal(med_surface, 20), 
+  #  preferred_10to20_max = getAttainmentVal(max_surface, 20), 
+  #  preferred_20to30_min = getAttainmentVal(min_surface, 30), 
+  #  preferred_20to30_med = getAttainmentVal(med_surface, 30), 
+  #  preferred_20to30_max = getAttainmentVal(max_surface, 30), 
+  #  preferred_30to40_min = getAttainmentVal(min_surface, 40), 
+  #  preferred_30to40_med = getAttainmentVal(med_surface, 40), 
+  #  preferred_30to40_max = getAttainmentVal(max_surface, 40) 
+  #)
+  
+  z_10to20_max <- getAttainmentVal(max_surface, 20) 
+  z_20to30_max <- getAttainmentVal(max_surface, 30) 
+  z_31to40_max <- getAttainmentVal(max_surface, 40) 
+
+  # Calculate distances from interactive points to max NSGA-II points    
+  dist_to_z_10to20 <- pinsga2_10to20 %>% 
+                      mutate(
+                        dist_yield = abs(V2 - z_10to20_max[2]), 
+                        dist_irr =   abs(V1 - z_10to20_max[1])
+                      ) 
+ 
+  dist_to_z_20to30 <- pinsga2_20to30 %>% 
+                      mutate(
+                        dist_yield = abs(V2 - z_20to30_max[2]), 
+                        dist_irr =   abs(V1 - z_20to30_max[1])
+                      ) 
+   
+  dist_to_z_30to40 <- pinsga2_30to40 %>% 
+                      mutate(
+                        dist_yield = abs(V2 - z_30to40_max[2]), 
+                        dist_irr =   abs(V1 - z_30to40_max[1])
+                      ) 
+  
+  
+  next_row = data.frame(
+    year = year, 
+    median_yield_10to20 = median( pinsga2_10to20[,2] ),
+    median_yield_20to30 = median( pinsga2_20to30[,2] ),
+    median_yield_30to40 = median( pinsga2_30to40[,2] ),
+    min_yield_10to20    = min(    pinsga2_10to20[,2] ),
+    min_yield_20to30    = min(    pinsga2_20to30[,2] ),
+    min_yield_30to40    = min(    pinsga2_30to40[,2] ),
+    max_yield_10to20    = max(    pinsga2_10to20[,2] ),
+    max_yield_20to30   = max(    pinsga2_20to30[,2] ),
+    max_yield_30to40    = max(    pinsga2_30to40[,2] ),
+    median_irr_10to20   = median( pinsga2_10to20[,1] ),
+    median_irr_20to30   = median( pinsga2_20to30[,1] ),
+    median_irr_30to40   = median( pinsga2_30to40[,1] ),
+    min_irr_10to20      = min(    pinsga2_10to20[,1] ),
+    min_irr_20to30      = min(    pinsga2_20to30[,1] ),
+    min_irr_30to40      = min(    pinsga2_30to40[,1] ),
+    max_irr_10to20      = max(    pinsga2_10to20[,1] ),
+    max_irr_20to30      = max(    pinsga2_20to30[,1] ),
+    max_irr_30to40      = max(    pinsga2_30to40[,1] ),
+    z_10to20_max_yield  = z_10to20_max[2],
+    z_20to30_max_yield  = z_20to30_max[2],  
+    z_30to40_max_yield  = z_30to40_max[2],  
+    z_10to20_max_irr    = z_10to20_max[1],
+    z_20to30_max_irr    = z_20to30_max[1],  
+    z_30to40_max_irr    = z_30to40_max[1]   
+  ) 
+  summary_table = rbind(summary_table, next_row)
+  
+  
+  # Calculate 
+   
+  
+  
+  
+  ## --------------- Boundary analysis --------------------------
+  
 
   interactive_runs = list(pinsga2_10to20=pinsga2_10to20, 
                           pinsga2_20to30=pinsga2_20to30, 
                           pinsga2_30to40=pinsga2_30to40) 
-     
+ 
+    
+  
    
   
   for (run_name in names(interactive_runs)) {
@@ -242,6 +355,11 @@ runs_30to40 <- results_table %>%
 pretty_tab <- runs_10to20 %>% 
                 full_join(runs_20to30, by=join_by(year)) %>%
                 full_join(runs_30to40, by=join_by(year))
+
+
+## --------- Calculate distances to preferred points ------
+
+
 
 
 

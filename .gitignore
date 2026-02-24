@@ -28,5 +28,6 @@ output
 
 *.feather
 
-.ipynb_checkpoints/
+.ipynb_checkpoints
 
+.Rproj.user
